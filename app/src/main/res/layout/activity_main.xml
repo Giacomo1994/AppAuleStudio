@@ -18,11 +18,47 @@
         android:textSize="24sp"
         app:fontFamily="@font/marko_one" />
 
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Studente" />
+
+        <RadioButton
+            android:id="@+id/radioButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Docente" />
+    </RadioGroup>
+
     <TableLayout
         android:id="@+id/log_table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="10dp">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Seleziona universita:" />
+
+            <Spinner
+                android:id="@+id/log_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
@@ -39,8 +75,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="matricola"
-                android:inputType="textPersonName"
-                android:importantForAutofill="no" />
+                android:importantForAutofill="no"
+                android:inputType="textPersonName" />
         </TableRow>
 
         <TableRow
@@ -59,8 +95,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="password"
-                android:inputType="textPassword"
-                android:importantForAutofill="no" />
+                android:importantForAutofill="no"
+                android:inputType="textPassword" />
         </TableRow>
 
     </TableLayout>
@@ -70,6 +106,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
         android:text="Accedi" />
 
     <TextView

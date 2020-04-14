@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -42,6 +43,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
     EditText txt_cognome;
     EditText txt_email;
     EditText txt_password;
+    RadioButton radioStudente;
+    RadioButton radioDocente;
 
 
     Universita universita=null;
@@ -63,6 +66,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_cognome=this.findViewById(R.id.reg_cognome);
         txt_email=this.findViewById(R.id.reg_email);
         txt_password=this.findViewById(R.id.reg_password);
+        radioStudente=findViewById(R.id.radioButton5);
+        radioDocente=findViewById(R.id.radioButton6);
 
         //riempio spinner con universita
         new riempiUniversita().execute();
@@ -103,7 +108,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 }
 
                 //registrazione utente
-                new registraUtente().execute();
+                if(radioStudente.isChecked()) new registraUtente().execute();
             }
         });
     }
@@ -149,7 +154,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Universita[] array_universita) {
-            output.setText("" + array_universita.length);
             adapter = new ArrayAdapter(RegistrazioneActivity.this, android.R.layout.simple_list_item_1, array_universita);
             spinner.setAdapter(adapter);
 
@@ -157,7 +161,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     universita = (Universita) parent.getItemAtPosition(position);
-                    output.setText(universita.toString());
                 }
 
                 @Override
