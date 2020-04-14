@@ -29,6 +29,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegistrazioneActivity extends AppCompatActivity {
     Spinner spinner;
@@ -72,10 +74,25 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 email=txt_email.getText().toString().trim();
                 password=txt_password.getText().toString().trim();
 
+
                 if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
                     output.setText("Devi inserire tutti i campi!");
                     return;
                 }
+
+                String regex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+                        "[a-zA-Z0-9_+&*-]+)*@" +
+                        "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                        "A-Z]{2,7}$";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(email);
+                boolean isValidMail=matcher.matches();
+                if(isValidMail==false){
+                    output.setText("Formato email non valido!");
+                    return;
+                }
+
+
                 new registraUtente().execute();
             }
         });
