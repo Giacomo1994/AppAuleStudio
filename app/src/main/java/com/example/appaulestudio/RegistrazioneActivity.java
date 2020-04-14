@@ -92,7 +92,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     return;
                 }
 
-
                 new registraUtente().execute();
             }
         });
