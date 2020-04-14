@@ -64,7 +64,10 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_email=this.findViewById(R.id.reg_email);
         txt_password=this.findViewById(R.id.reg_password);
 
+        //riempio spinner con universita
+        new riempiUniversita().execute();
 
+        //funzione di registrazione
         btn_registrazione.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,12 +77,13 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 email=txt_email.getText().toString().trim();
                 password=txt_password.getText().toString().trim();
 
-
+                //controllo campi non vuoti
                 if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
                     output.setText("Devi inserire tutti i campi!");
                     return;
                 }
 
+                //controllo formato mail
                 String regex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
                         "[a-zA-Z0-9_+&*-]+)*@" +
                         "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
@@ -92,14 +96,17 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     return;
                 }
 
+                //controllo lunghezza password
+                if(password.length()<8){
+                    output.setText("Password troppo corta!");
+                    return;
+                }
+
+                //registrazione utente
                 new registraUtente().execute();
             }
         });
-
-        new riempiUniversita().execute();
-
     }
-
 
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
@@ -160,7 +167,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         }
     }
 
-        private class registraUtente extends AsyncTask<Void, Void, String> {
+    private class registraUtente extends AsyncTask<Void, Void, String> {
             @Override
             protected String doInBackground(Void... strings) {
                 try {
@@ -200,5 +207,5 @@ public class RegistrazioneActivity extends AppCompatActivity {
             protected void onPostExecute(String result) {
                 output.setText(result);
             }
-        }
+    }
 }
