@@ -39,7 +39,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="matricola"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:importantForAutofill="no" />
         </TableRow>
 
         <TableRow
@@ -58,7 +59,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="password"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:importantForAutofill="no" />
         </TableRow>
 
     </TableLayout>
