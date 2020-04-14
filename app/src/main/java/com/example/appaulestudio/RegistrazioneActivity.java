@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -19,18 +21,33 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class RegistrazioneActivity extends AppCompatActivity {
     Spinner spinner;
-    //ArrayList<Universita> lista_universita;
     ArrayAdapter<Universita> adapter;
-    Universita universita=null;
     TextView output;
+    Button btn_registrazione;
+    EditText txt_matricola;
+    EditText txt_nome;
+    EditText txt_cognome;
+    EditText txt_email;
+    EditText txt_password;
+
+
+    Universita universita=null;
+    String matricola;
+    String nome;
+    String cognome;
+    String email;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,26 +55,33 @@ public class RegistrazioneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
         output=findViewById(R.id.output);
+        btn_registrazione=findViewById(R.id.btn_registrazione);
+        txt_matricola=this.findViewById(R.id.reg_matricola);
+        txt_nome=this.findViewById(R.id.reg_nome);
+        txt_cognome=this.findViewById(R.id.reg_cognome);
+        txt_email=this.findViewById(R.id.reg_email);
+        txt_password=this.findViewById(R.id.reg_password);
+
+
+        btn_registrazione.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                matricola=txt_matricola.getText().toString().trim();
+                nome=txt_nome.getText().toString().trim();
+                cognome=txt_cognome.getText().toString().trim();
+                email=txt_email.getText().toString().trim();
+                password=txt_password.getText().toString().trim();
+
+                if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
+                    output.setText("Devi inserire tutti i campi!");
+                    return;
+                }
+                new registraUtente().execute();
+            }
+        });
+
         new riempiUniversita().execute();
 
-
-        /*lista_universita=new ArrayList<Universita>();
-        lista_universita.add(new Universita("polito", "politecnico"));
-        lista_universita.add(new Universita("economia", "economia"));
-
-        adapter =new ArrayAdapter(this,android.R.layout.simple_list_item_1,lista_universita);
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                universita= (Universita) parent.getItemAtPosition(position);
-                output.setText(universita.toString());
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });*/
     }
 
 
@@ -70,16 +94,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
-                //urlConnection.setRequestMethod("POST");
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
-
-                /*urlConnection.setRequestMethod("POST"); //metodo Post
-                String parametri = "nome=" + URLEncoder.encode("inter", "UTF-8");
-                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();*/
 
                 urlConnection.connect();
                 InputStream is = urlConnection.getInputStream();
@@ -99,7 +115,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    array_universita[i]=new Universita(json_data.getString("codice"),json_data.getString("nome"));
+                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -110,16 +126,17 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Universita[] array_universita) {
-            output.setText(""+array_universita.length);
-            adapter =new ArrayAdapter(RegistrazioneActivity.this,android.R.layout.simple_list_item_1,array_universita);
+            output.setText("" + array_universita.length);
+            adapter = new ArrayAdapter(RegistrazioneActivity.this, android.R.layout.simple_list_item_1, array_universita);
             spinner.setAdapter(adapter);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    universita= (Universita) parent.getItemAtPosition(position);
+                    universita = (Universita) parent.getItemAtPosition(position);
                     output.setText(universita.toString());
                 }
+
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
@@ -127,5 +144,45 @@ public class RegistrazioneActivity extends AppCompatActivity {
         }
     }
 
+        private class registraUtente extends AsyncTask<Void, Void, String> {
+            @Override
+            protected String doInBackground(Void... strings) {
+                try {
+                    URL url = new URL("http://pmsc9.altervista.org/progetto/registrazione_utente.php");
 
+                    //Passo parametri al file php
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setDoOutput(true); //manda dei dati al file php
+                    urlConnection.setRequestMethod("POST"); //metodo Post
+                    //posso passare solo stringhe --> su PHP se è intero non metto il parametro tra apici
+                    String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&nome=" + URLEncoder.encode(nome, "UTF-8") + "&cognome=" + URLEncoder.encode(cognome, "UTF-8") + "&mail=" + URLEncoder.encode(email, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
+                    DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                    dos.writeBytes(parametri); //passo parametri
+                    dos.flush();
+                    dos.close();
+
+                    //leggo stringa di ritorno da file php
+                    urlConnection.connect();
+                    InputStream input = urlConnection.getInputStream();  //leggo input mandato dal file php in formato InputStream
+                    byte[] buffer = new byte[1024]; //parsifico InputStram
+                    int numRead = 0;
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    while ((numRead = input.read(buffer)) != -1) {
+                        baos.write(buffer, 0, numRead);
+                    }
+                    input.close();
+                    String stringaRicevuta = new String(baos.toByteArray()); //converto InputStram in stringa
+                    return stringaRicevuta; //ritorno stringa
+                } catch (Exception e) {
+                    Log.e("SimpleHttpURLConnection", e.getMessage());
+                    return "" + e.getMessage();
+                } finally {
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                output.setText(result);
+            }
+        }
 }
