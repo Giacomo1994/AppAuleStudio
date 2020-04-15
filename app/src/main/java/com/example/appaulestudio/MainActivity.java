@@ -187,9 +187,9 @@ public class MainActivity extends AppCompatActivity {
                 //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setDoOutput(true); //manda dei dati al file php
                 urlConnection.setRequestMethod("POST"); //metodo Post
-                //posso passare solo stringhe --> su PHP se è intero non metto il parametro tra apici
+                urlConnection.setDoOutput(true); //manda dei dati al file php
+                urlConnection.setDoInput(true);
                 String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri); //passo parametri

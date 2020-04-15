@@ -27,7 +27,7 @@ public class Home extends AppCompatActivity {
         String strStudente=""+settings.getBoolean("studente", false);
         String strLogged=""+settings.getBoolean("logged", false);
 
-        Toast.makeText(getApplicationContext(),""+strUniversita+strMatricola+strPassword+strStudente+strLogged,Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),""+strUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
 
     }
 
