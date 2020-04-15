@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //controllo campi vuoti
                 if(matricola.equals("")||password.equals("")){
-                    Toast.makeText(getApplicationContext(),"Devi inserire tutti i campi!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -133,10 +134,9 @@ public class MainActivity extends AppCompatActivity {
                 urlConnection.setConnectTimeout(1500);
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
-
                 urlConnection.connect();
-                InputStream is = urlConnection.getInputStream();
 
+                InputStream is = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line = null;
@@ -146,9 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 is.close();
 
                 String result = sb.toString();
-
                 JSONArray jArray = new JSONArray(result);
-
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
@@ -185,21 +183,21 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url = new URL("http://pmsc9.altervista.org/progetto/login_utente.php");
                 //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
-
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST"); //metodo Post
-                urlConnection.setDoOutput(true); //manda dei dati al file php
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri); //passo parametri
+                dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
 
                 //leggo stringa di ritorno da file php
                 urlConnection.connect();
                 InputStream is = urlConnection.getInputStream();
-
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line = null;
@@ -209,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
                 is.close();
 
                 String result = sb.toString();
-
                 JSONArray jArray = new JSONArray(result);
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
@@ -226,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user==null) {
-                Toast.makeText(getApplicationContext(),"Impossibile effettuare login!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile effettuare login! Nome utente o password errati." + "</b></font>"),Toast.LENGTH_LONG).show();
                 return;
             }
             else{
@@ -254,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
             if(resultCode== Activity.RESULT_OK){
                 txtMatricola.setText(data.getStringExtra("matricola"));
                 txtPassword.setText(data.getStringExtra("password"));
-                Toast.makeText(getApplicationContext(),"Registrazione avvenuta con successo!",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#0cb339' ><b>" + "Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale." + "</b></font>"),Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,7 +88,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
                 //controllo campi non vuoti
                 if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
-                    Toast.makeText(getApplicationContext(),"Devi inserire tutti i campi!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -100,13 +101,13 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 Matcher matcher = pattern.matcher(email);
                 boolean isValidMail=matcher.matches();
                 if(isValidMail==false){
-                    Toast.makeText(getApplicationContext(),"Formato email non valido!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Formato email non valido!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 //controllo lunghezza password
                 if(password.length()<8){
-                    Toast.makeText(getApplicationContext(),"Password troppo corta",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Password troppo corta!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -128,10 +129,9 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 urlConnection.setConnectTimeout(1500);
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
-
                 urlConnection.connect();
-                InputStream is = urlConnection.getInputStream();
 
+                InputStream is = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line = null;
@@ -141,9 +141,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 is.close();
 
                 String result = sb.toString();
-
                 JSONArray jArray = new JSONArray(result);
-
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
@@ -180,29 +178,29 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 try {
                     URL url = new URL("http://pmsc9.altervista.org/progetto/registrazione_utente.php");
                     //URL url = new URL("http://10.0.2.2/progetto/registrazione_utente.php");
-                    //Passo parametri al file php
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setDoOutput(true); //manda dei dati al file php
-                    urlConnection.setRequestMethod("POST"); //metodo Post
-                    //posso passare solo stringhe --> su PHP se è intero non metto il parametro tra apici
+                    urlConnection.setReadTimeout(1000);
+                    urlConnection.setConnectTimeout(1500);
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.setDoOutput(true);
+                    urlConnection.setDoInput(true);
                     String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&nome=" + URLEncoder.encode(nome, "UTF-8") + "&cognome=" + URLEncoder.encode(cognome, "UTF-8") + "&mail=" + URLEncoder.encode(email, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                    dos.writeBytes(parametri); //passo parametri
+                    dos.writeBytes(parametri);
                     dos.flush();
                     dos.close();
-
                     //leggo stringa di ritorno da file php
                     urlConnection.connect();
-                    InputStream input = urlConnection.getInputStream();  //leggo input mandato dal file php in formato InputStream
-                    byte[] buffer = new byte[1024]; //parsifico InputStram
+                    InputStream input = urlConnection.getInputStream();
+                    byte[] buffer = new byte[1024];
                     int numRead = 0;
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     while ((numRead = input.read(buffer)) != -1) {
                         baos.write(buffer, 0, numRead);
                     }
                     input.close();
-                    String stringaRicevuta = new String(baos.toByteArray()); //converto InputStram in stringa
-                    return stringaRicevuta; //ritorno stringa
+                    String stringaRicevuta = new String(baos.toByteArray());
+                    return stringaRicevuta;
                 } catch (Exception e) {
                     Log.e("SimpleHttpURLConnection", e.getMessage());
                     return "" + e.getMessage();
@@ -213,7 +211,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String result) {
                 if(result.equals("Utente registrato")==false){
-                    Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>" + result + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
                 else{
