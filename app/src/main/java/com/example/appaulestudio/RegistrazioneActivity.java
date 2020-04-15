@@ -118,6 +118,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         protected Universita[] doInBackground(Void... strings) {
             try {
                 URL url = new URL("http://pmsc9.altervista.org/progetto/listaUniversita.php");
+                //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
@@ -175,7 +176,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
             protected String doInBackground(Void... strings) {
                 try {
                     URL url = new URL("http://pmsc9.altervista.org/progetto/registrazione_utente.php");
-
+                    //URL url = new URL("http://10.0.2.2/progetto/registrazione_utente.php");
                     //Passo parametri al file php
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setDoOutput(true); //manda dei dati al file php
