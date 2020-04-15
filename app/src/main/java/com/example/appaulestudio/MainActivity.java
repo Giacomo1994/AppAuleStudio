@@ -254,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
             if(resultCode== Activity.RESULT_OK){
                 txtMatricola.setText(data.getStringExtra("matricola"));
                 txtPassword.setText(data.getStringExtra("password"));
+                Toast.makeText(getApplicationContext(),"Registrazione avvenuta con successo!",Toast.LENGTH_LONG).show();
             }
         }
     }
