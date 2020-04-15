@@ -2,6 +2,7 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +38,6 @@ import java.util.regex.Pattern;
 public class RegistrazioneActivity extends AppCompatActivity {
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
-    TextView output;
     Button btn_registrazione;
     EditText txt_matricola;
     EditText txt_nome;
@@ -45,6 +46,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
     EditText txt_password;
     RadioButton radioStudente;
     RadioButton radioDocente;
+    Intent intent;
 
 
     Universita universita=null;
@@ -59,7 +61,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
-        output=findViewById(R.id.output);
         btn_registrazione=findViewById(R.id.btn_registrazione);
         txt_matricola=this.findViewById(R.id.reg_matricola);
         txt_nome=this.findViewById(R.id.reg_nome);
@@ -68,6 +69,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_password=this.findViewById(R.id.reg_password);
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
+        intent=getIntent();
+
 
         //riempio spinner con universita
         new riempiUniversita().execute();
@@ -84,7 +87,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
                 //controllo campi non vuoti
                 if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
-                    output.setText("Devi inserire tutti i campi!");
+                    Toast.makeText(getApplicationContext(),"Devi inserire tutti i campi!",Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -97,13 +100,13 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 Matcher matcher = pattern.matcher(email);
                 boolean isValidMail=matcher.matches();
                 if(isValidMail==false){
-                    output.setText("Formato email non valido!");
+                    Toast.makeText(getApplicationContext(),"Formato email non valido!",Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 //controllo lunghezza password
                 if(password.length()<8){
-                    output.setText("Password troppo corta!");
+                    Toast.makeText(getApplicationContext(),"Password troppo corta",Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -209,7 +212,16 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(String result) {
-                output.setText(result);
+                if(result.equals("Utente registrato")==false){
+                    Toast.makeText(getApplicationContext(),result,Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else{
+                    intent.putExtra("matricola", matricola);
+                    intent.putExtra("password", password);
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                }
             }
     }
 }

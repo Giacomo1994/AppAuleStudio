@@ -167,8 +167,4 @@
         android:layout_marginTop="10dp"
         android:text="Registrati" />
 
-    <TextView
-        android:id="@+id/output"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>
