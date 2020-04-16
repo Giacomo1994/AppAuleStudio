@@ -21,13 +21,14 @@ public class Home extends AppCompatActivity {
         TextView txt=findViewById(R.id.txtHome);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        String strUniversita=settings.getString("universita", "No result");
-        String strMatricola=settings.getString("matricola", "No result");
-        String strPassword=settings.getString("password", "No result");
+        String strUniversita=settings.getString("universita", null);
+        String strNomeUniversita=settings.getString("nome_universita", null);
+        String strMatricola=settings.getString("matricola", null);
+        String strPassword=settings.getString("password", null);
         String strStudente=""+settings.getBoolean("studente", false);
         String strLogged=""+settings.getBoolean("logged", false);
 
-        Toast.makeText(getApplicationContext(),""+strUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),""+strNomeUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
 
     }
 
@@ -42,9 +43,10 @@ public class Home extends AppCompatActivity {
         if(item.getItemId()==1){
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("universita","No result");
-            editor.putString("matricola","No result");
-            editor.putString("password","No result");
+            editor.putString("universita",null);
+            editor.putString("nome_universita",null);
+            editor.putString("matricola",null);
+            editor.putString("password",null);
             editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);
             editor.commit();
