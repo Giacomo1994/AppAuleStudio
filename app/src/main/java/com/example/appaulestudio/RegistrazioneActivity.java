@@ -40,22 +40,15 @@ public class RegistrazioneActivity extends AppCompatActivity {
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
     Button btn_registrazione;
-    EditText txt_matricola;
-    EditText txt_nome;
-    EditText txt_cognome;
-    EditText txt_email;
-    EditText txt_password;
-    RadioButton radioStudente;
-    RadioButton radioDocente;
+    EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password;
+    RadioButton radioStudente,radioDocente;
     Intent intent;
 
-
     Universita universita=null;
-    String matricola;
-    String nome;
-    String cognome;
-    String email;
-    String password;
+    String matricola,nome,cognome,email, password;
+
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
+    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione_utente.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +114,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         @Override
         protected Universita[] doInBackground(Void... strings) {
             try {
-                URL url = new URL("http://pmsc9.altervista.org/progetto/listaUniversita.php");
+                URL url = new URL(URL_UNIVERSITA);
                 //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -176,7 +169,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
             @Override
             protected String doInBackground(Void... strings) {
                 try {
-                    URL url = new URL("http://pmsc9.altervista.org/progetto/registrazione_utente.php");
+                    URL url = new URL(URL_REGISTRAZIONE);
                     //URL url = new URL("http://10.0.2.2/progetto/registrazione_utente.php");
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(1000);

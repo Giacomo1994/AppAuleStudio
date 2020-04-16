@@ -40,14 +40,15 @@ public class MainActivity extends AppCompatActivity {
     TextView txt_toRegistrazione;
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
-    EditText txtMatricola;
-    EditText txtPassword;
+    EditText txtMatricola, txtPassword;
     Button btn_login;
     RadioButton radioStudente;
 
     Universita universita=null;
-    String matricola;
-    String password;
+    String matricola, password;
+
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
+    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_utente.php";
 
 
 
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Universita[] doInBackground(Void... strings) {
             try {
-                URL url = new URL("http://pmsc9.altervista.org/progetto/listaUniversita.php");
+                URL url = new URL(URL_UNIVERSITA);
                 //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -181,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected User doInBackground(Void... strings) {
             try {
-                URL url = new URL("http://pmsc9.altervista.org/progetto/login_utente.php");
+                URL url = new URL(URL_LOGIN);
                 //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
