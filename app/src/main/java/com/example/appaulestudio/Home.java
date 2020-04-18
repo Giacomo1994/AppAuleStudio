@@ -45,9 +45,9 @@ public class Home extends AppCompatActivity {
     protected void initUI(){
         final FrameLayout fl= findViewById(R.id.fl);
         ListView elencoAule = findViewById(R.id.elencoAule);
-        TextView nomeAula_home= findViewById(R.id.nomeAula_home);
+        /*TextView nomeAula_home= findViewById(R.id.nomeAula_home);
         TextView luogoAula_home=findViewById(R.id.luogoAula_home);
-        TextView postiLiberi_home = findViewById(R.id.postiLiberi_home);
+        TextView postiLiberi_home = findViewById(R.id.postiLiberi_home);*/
 
 
         //doppio frame
@@ -156,8 +156,8 @@ public class Home extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            adapter = new ArrayAdapter(Home.this,R.layout array_aula);
-            if(array_aula==null){
+            //adapter = new ArrayAdapter<Aula>(Home.this,R.layout, 100, array_aula);
+            /*if(array_aula==null){
                 Toast.makeText().show;
             }
             spinner.setAdapter(adapter);
@@ -171,7 +171,7 @@ public class Home extends AppCompatActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
-            });
+            });*/
         }
     }
 
