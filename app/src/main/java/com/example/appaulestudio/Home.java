@@ -38,6 +38,8 @@ import java.net.URLEncoder;
 import java.util.prefs.Preferences;
 
 public class Home extends AppCompatActivity {
+    //controllare se l'utente è ancora iscritto all'universita --> Se non è più iscritto cancello le preferenze e lancio intento sulla pagina di login
+    //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
     ArrayAdapter adapter;
     String strUniversita;
@@ -65,6 +67,7 @@ protected void initUI(){
     Button mappa= findViewById(R.id.mappa);
     Button lista = findViewById(R.id.lista);
     frameLista.setVisibility(fl.VISIBLE);
+    frameMappa.setVisibility(fl.GONE);
 
     //passo da lista a mappa
     mappa.setOnClickListener(new View.OnClickListener() {
@@ -83,6 +86,7 @@ protected void initUI(){
         public void onClick(View v) {
             frameMappa.setVisibility(fl.GONE);
             frameLista.setVisibility(fl.VISIBLE);
+            new listaAule().execute();
         }
 
     });
