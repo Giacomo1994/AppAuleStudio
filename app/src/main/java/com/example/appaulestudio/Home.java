@@ -47,10 +47,16 @@ public class Home extends AppCompatActivity {
     String strLogged;
     SharedPreferences settings;
     ListView elencoAule;
+    TextView txt;
+    TextView nomeAula_home;
+    TextView luogoAula_home;
+    TextView postiLiberi_home;
+    TextView flagGruppi_home;
 
     protected void initUI(){
         final FrameLayout fl= findViewById(R.id.fl);
          elencoAule= findViewById(R.id.elencoAule);
+
 
 
 
@@ -166,35 +172,41 @@ public class Home extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            if(array_aula==null){
-                Toast.makeText(getApplicationContext(), "Non ci sono aule per te",Toast.LENGTH_LONG).show();
+            if (array_aula == null) {
+                Toast.makeText(getApplicationContext(), "Non ci sono aule per te", Toast.LENGTH_LONG).show();
                 return;
             }
-            else{
-                Toast.makeText(getApplicationContext(), array_aula[0].stampaAula(),Toast.LENGTH_LONG).show();
-                return;
-            }
-            /*adapter = new ArrayAdapter<Aula>(Home.this,R.layout.row_layout_home,100, array_aula){
 
-                @Override
-                public View getView(int position,  View convertView,  ViewGroup parent) {
+                adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
+
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
                         Aula item = getItem(position);
-                        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);View rowView = inflater.inflate(R.layout.row_layout_home, null);
-                    TextView nomeAula_home= findViewById(R.id.nomeAula_home);
-                    TextView luogoAula_home=findViewById(R.id.luogoAula_home);
-                    TextView postiLiberi_home = findViewById(R.id.postiLiberi_home);
-
+                        //LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        //View rowView = inflater.inflate(R.layout.row_layout_home, null);
+                        convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
+                        nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
+                        luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
+                        postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
+                        flagGruppi_home = convertView.findViewById(R.id.flagGruppi_home);
                         nomeAula_home.setText(item.nome);
                         luogoAula_home.setText(item.luogo);
-                        postiLiberi_home.setText(""+item.posti_liberi);
-
-                        return rowView;
+                        postiLiberi_home.setText("Numero posti liberi: " + item.posti_liberi);
+                        if(item.gruppi==0) {
+                            flagGruppi_home.setText("Disponibile per i gruppi");
+                        }
+                        else{
+                            flagGruppi_home.setText("Non è disponibile per i gruppi");
+                        }
+                        return convertView;
 
                     }
-            };
+                };
 
 
-            elencoAule.setAdapter(adapter);
+                elencoAule.setAdapter(adapter);
+            }
+
 
             /*spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -207,7 +219,7 @@ public class Home extends AppCompatActivity {
                 }
             });*/
         }
-    }
+
 
 
 

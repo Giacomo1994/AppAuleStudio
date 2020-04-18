@@ -10,33 +10,34 @@
     <LinearLayout
         android:id="@+id/frameLista"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/mappa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/Mostra_mappa_aule" />
+            android:text="vai a mappa aule" />
 
         <ListView
             android:id="@+id/elencoAule"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/frameMappa"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/lista"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/Mostra_elenco_aule" />
+            android:text="Vai a elenco aule" />
 
     </LinearLayout>
+
 </FrameLayout>
