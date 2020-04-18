@@ -1,5 +1,7 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -8,9 +10,11 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -42,12 +46,12 @@ public class Home extends AppCompatActivity {
     String strStudente;
     String strLogged;
     SharedPreferences settings;
+    ListView elencoAule;
+
     protected void initUI(){
         final FrameLayout fl= findViewById(R.id.fl);
-        ListView elencoAule = findViewById(R.id.elencoAule);
-        /*TextView nomeAula_home= findViewById(R.id.nomeAula_home);
-        TextView luogoAula_home=findViewById(R.id.luogoAula_home);
-        TextView postiLiberi_home = findViewById(R.id.postiLiberi_home);*/
+         elencoAule= findViewById(R.id.elencoAule);
+
 
 
         //doppio frame
@@ -55,6 +59,7 @@ public class Home extends AppCompatActivity {
         final LinearLayout frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
         Button mappa= findViewById(R.id.mappa);
         Button lista = findViewById(R.id.lista);
+        frameLista.setVisibility(fl.VISIBLE);
 
         //passo da lista a mappa
         mappa.setOnClickListener(new View.OnClickListener() {
@@ -95,14 +100,18 @@ public class Home extends AppCompatActivity {
 
 
 
-        Toast.makeText(getApplicationContext(),""+strNomeUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
-
+        //Toast.makeText(getApplicationContext(),""+strNomeUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
+        new listaAule().execute();
     }
 
-     @Override protected void onStart(){
+     /*@Override protected void onStart(){
         super.onStart();
 
 
+     }*/
+     protected void onRestart(){
+        super.onRestart();
+         //new listaAule().execute();
      }
 
     //richiedi info aule al database
@@ -144,7 +153,7 @@ public class Home extends AppCompatActivity {
                     JSONObject json_data = jArray.getJSONObject(i);
                     array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
                             json_data.getString("luogo"), json_data.getDouble("latitudine"),
-                            json_data.getDouble("longitudine"), json_data.getBoolean("gruppi"),
+                            json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
                             json_data.getInt("posti_liberi"));
                 }
                 return array_aula;
@@ -152,17 +161,42 @@ public class Home extends AppCompatActivity {
                 Log.e("log_tag", "Error " + e.toString());
                 return null;
             }
+
         }
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            adapter = new ArrayAdapter<Aula>(Home.this,R.layout.row_layout_home, 100, array_aula);
-            /*if(array_aula==null){
-                Toast.makeText().show;
+            if(array_aula==null){
+                Toast.makeText(getApplicationContext(), "Non ci sono aule per te",Toast.LENGTH_LONG).show();
+                return;
             }
-            spinner.setAdapter(adapter);
+            else{
+                Toast.makeText(getApplicationContext(), array_aula[0].stampaAula(),Toast.LENGTH_LONG).show();
+                return;
+            }
+            /*adapter = new ArrayAdapter<Aula>(Home.this,R.layout.row_layout_home,100, array_aula){
 
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public View getView(int position,  View convertView,  ViewGroup parent) {
+                        Aula item = getItem(position);
+                        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);View rowView = inflater.inflate(R.layout.row_layout_home, null);
+                    TextView nomeAula_home= findViewById(R.id.nomeAula_home);
+                    TextView luogoAula_home=findViewById(R.id.luogoAula_home);
+                    TextView postiLiberi_home = findViewById(R.id.postiLiberi_home);
+
+                        nomeAula_home.setText(item.nome);
+                        luogoAula_home.setText(item.luogo);
+                        postiLiberi_home.setText(""+item.posti_liberi);
+
+                        return rowView;
+
+                    }
+            };
+
+
+            elencoAule.setAdapter(adapter);
+
+            /*spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     universita = (Universita) parent.getItemAtPosition(position);

@@ -10,11 +10,11 @@ public class Aula implements Parcelable {
      String luogo;
      double latitudine;
      double longitudine;
-     boolean gruppi;
+     int gruppi;
      int posti_liberi;
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
-                double longitudine, boolean gruppi, int posti_liberi){
+                double longitudine, int gruppi, int posti_liberi){
         this.idAula=idAula;
 
         this.nome=nome;
@@ -25,9 +25,9 @@ public class Aula implements Parcelable {
         this.posti_liberi=posti_liberi;
     }
 
-    public String stampaAula(Aula a){
-        String s=""+a.nome+" - "+"/n"+a.luogo;
-        if(a.gruppi==true){
+    public String stampaAula(){
+        String s=""+this.nome+" - "+"/n"+this.luogo;
+        if(this.gruppi==0){
             s+="/nAula disponibile alla prenotazione per gruppi";
         }
         return s;
@@ -39,7 +39,7 @@ public class Aula implements Parcelable {
         luogo = in.readString();
         latitudine = in.readDouble();
         longitudine = in.readDouble();
-        gruppi = in.readByte() != 0;
+        gruppi = in.readInt();
         posti_liberi = in.readInt();
     }
 
@@ -50,7 +50,7 @@ public class Aula implements Parcelable {
         dest.writeString(luogo);
         dest.writeDouble(latitudine);
         dest.writeDouble(longitudine);
-        dest.writeByte((byte) (gruppi ? 1 : 0));
+        dest.writeInt(gruppi);
         dest.writeInt(posti_liberi);
     }
 
