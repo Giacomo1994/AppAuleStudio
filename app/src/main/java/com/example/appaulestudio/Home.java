@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -52,73 +53,57 @@ public class Home extends AppCompatActivity {
     TextView luogoAula_home;
     TextView postiLiberi_home;
     TextView flagGruppi_home;
+    ImageView immagine_home;
 
-    protected void initUI(){
-        final FrameLayout fl= findViewById(R.id.fl);
-         elencoAule= findViewById(R.id.elencoAule);
+protected void initUI(){
+    final FrameLayout fl= findViewById(R.id.fl);
+     elencoAule= findViewById(R.id.elencoAule);
 
+    //doppio frame
+    final LinearLayout frameLista = (LinearLayout)findViewById(R.id.frameLista);
+    final LinearLayout frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
+    Button mappa= findViewById(R.id.mappa);
+    Button lista = findViewById(R.id.lista);
+    frameLista.setVisibility(fl.VISIBLE);
 
+    //passo da lista a mappa
+    mappa.setOnClickListener(new View.OnClickListener() {
 
-
-        //doppio frame
-        final LinearLayout frameLista = (LinearLayout)findViewById(R.id.frameLista);
-        final LinearLayout frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
-        Button mappa= findViewById(R.id.mappa);
-        Button lista = findViewById(R.id.lista);
-        frameLista.setVisibility(fl.VISIBLE);
-
-        //passo da lista a mappa
-        mappa.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                frameLista.setVisibility(fl.GONE);
-                frameMappa.setVisibility(fl.VISIBLE);
+        public void onClick(View v) {
+            frameLista.setVisibility(fl.GONE);
+            frameMappa.setVisibility(fl.VISIBLE);
 
 
-            }
+        }
 
-        });
-        //passo da mappa a lista
-        lista.setOnClickListener(new View.OnClickListener() {
+    });
+    //passo da mappa a lista
+    lista.setOnClickListener(new View.OnClickListener() {
 
-            public void onClick(View v) {
-                frameMappa.setVisibility(fl.GONE);
-                frameLista.setVisibility(fl.VISIBLE);
-            }
+        public void onClick(View v) {
+            frameMappa.setVisibility(fl.GONE);
+            frameLista.setVisibility(fl.VISIBLE);
+        }
 
-        });
-         settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-         strUniversita=settings.getString("universita", null);
-         strNomeUniversita=settings.getString("nome_universita", null);
-         strMatricola=settings.getString("matricola", null);
-         strPassword=settings.getString("password", null);
-         strStudente=""+settings.getBoolean("studente", false);
-         strLogged=""+settings.getBoolean("logged", false);
-    }
+    });
+     settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+     strUniversita=settings.getString("universita", null);
+     strNomeUniversita=settings.getString("nome_universita", null);
+     strMatricola=settings.getString("matricola", null);
+     strPassword=settings.getString("password", null);
+     strStudente=""+settings.getBoolean("studente", false);
+     strLogged=""+settings.getBoolean("logged", false);
+}
 
         @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        //inizializzo variabili
         initUI();
-        //TextView txt=findViewById(R.id.txtHome);
-
-
-
-        //Toast.makeText(getApplicationContext(),""+strNomeUniversita+" "+strMatricola+" "+strPassword+" "+strStudente+" "+strLogged,Toast.LENGTH_LONG).show();
+        //aggiorno lista
         new listaAule().execute();
     }
-
-     /*@Override protected void onStart(){
-        super.onStart();
-
-
-     }*/
-     protected void onRestart(){
-        super.onRestart();
-         //new listaAule().execute();
-     }
 
     //richiedi info aule al database
     private class listaAule extends AsyncTask<Void, Void, Aula[]> {
@@ -176,7 +161,6 @@ public class Home extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Non ci sono aule per te", Toast.LENGTH_LONG).show();
                 return;
             }
-
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
 
                     @Override
@@ -189,24 +173,24 @@ public class Home extends AppCompatActivity {
                         luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
                         postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
                         flagGruppi_home = convertView.findViewById(R.id.flagGruppi_home);
+                        immagine_home=convertView.findViewById(R.id.row_image_home);
                         nomeAula_home.setText(item.nome);
                         luogoAula_home.setText(item.luogo);
                         postiLiberi_home.setText("Numero posti liberi: " + item.posti_liberi);
                         if(item.gruppi==0) {
                             flagGruppi_home.setText("Disponibile per i gruppi");
+                            immagine_home.setImageResource(R.drawable.group);
                         }
                         else{
                             flagGruppi_home.setText("Non è disponibile per i gruppi");
+                            immagine_home.setImageResource(R.drawable.singolo);
                         }
                         return convertView;
 
                     }
                 };
-
-
                 elencoAule.setAdapter(adapter);
             }
-
 
             /*spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -225,6 +209,10 @@ public class Home extends AppCompatActivity {
 
 
 
+    protected void onRestart(){
+        super.onRestart();
+        //new listaAule().execute();
+    }
 
     @Override //creazione menu in alto
     public boolean onCreateOptionsMenu(Menu menu) {

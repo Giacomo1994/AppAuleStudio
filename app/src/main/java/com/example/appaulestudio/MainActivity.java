@@ -142,6 +142,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Universita[] array_universita) {
+            if(array_universita==null){
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                return;
+            }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
             spinner.setAdapter(adapter);
 
