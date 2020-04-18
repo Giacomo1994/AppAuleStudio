@@ -8,17 +8,52 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class Home extends AppCompatActivity {
+    protected void initUI(){
+        final FrameLayout fl= findViewById(R.id.fl);
 
-    @Override
+        //doppio frame
+        final LinearLayout frameLista = (LinearLayout)findViewById(R.id.frameLista);
+        final LinearLayout frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
+        Button mappa= findViewById(R.id.mappa);
+        Button lista = findViewById(R.id.lista);
+
+        //passo da lista a mappa
+        mappa.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                frameLista.setVisibility(fl.GONE);
+                frameMappa.setVisibility(fl.VISIBLE);
+
+
+            }
+
+        });
+        //passo da mappa a lista
+        lista.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                frameMappa.setVisibility(fl.GONE);
+                frameLista.setVisibility(fl.VISIBLE);
+            }
+
+        });
+    }
+
+        @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        TextView txt=findViewById(R.id.txtHome);
+        initUI();
+        //TextView txt=findViewById(R.id.txtHome);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         String strUniversita=settings.getString("universita", null);
@@ -32,11 +67,13 @@ public class Home extends AppCompatActivity {
 
     }
 
-    @Override //creazione menu in alto
+
+
+    /*@Override //creazione menu in alto
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
         return true;
-    }
+    }*/
 
     @Override //se premo "Inserisci componente mi porta alla seconda activity"
     public boolean onOptionsItemSelected(MenuItem item) {
