@@ -156,7 +156,7 @@ public class Home extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            //adapter = new ArrayAdapter<Aula>(Home.this,R.layout, 100, array_aula);
+            adapter = new ArrayAdapter<Aula>(Home.this,R.layout.row_layout_home, 100, array_aula);
             /*if(array_aula==null){
                 Toast.makeText().show;
             }
