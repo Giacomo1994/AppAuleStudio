@@ -41,12 +41,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
     Button btn_registrazione;
-    EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password;
+    EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password, txt_password2;
     RadioButton radioStudente,radioDocente;
     Intent intent;
 
     Universita universita=null;
-    String matricola,nome,cognome,email, password;
+    String matricola,nome,cognome,email, password, password2;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
     static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione_utente.php";
@@ -62,6 +62,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_cognome=this.findViewById(R.id.reg_cognome);
         txt_email=this.findViewById(R.id.reg_email);
         txt_password=this.findViewById(R.id.reg_password);
+        txt_password2=this.findViewById(R.id.reg_password2);
+
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
         intent=getIntent();
@@ -79,9 +81,10 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 cognome=txt_cognome.getText().toString().trim();
                 email=txt_email.getText().toString().trim();
                 password=txt_password.getText().toString().trim();
+                password2=txt_password2.getText().toString().trim();
 
                 //controllo campi non vuoti
-                if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")){
+                if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")||password2.equals("")){
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -96,6 +99,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 boolean isValidMail=matcher.matches();
                 if(isValidMail==false){
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Formato email non valido!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                //controllo password uguali
+                if(password.equals(password2)==false){
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Le password devono essere uguali" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
 

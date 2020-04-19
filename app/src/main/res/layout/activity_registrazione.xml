@@ -52,9 +52,9 @@
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="Seleziona università:"
-                android:layout_marginEnd="10dp" />
+                android:text="Seleziona università:" />
 
             <Spinner
                 android:id="@+id/reg_universita"
@@ -151,6 +151,25 @@
 
             <EditText
                 android:id="@+id/reg_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="password"
+                android:inputType="textPassword" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Conferma password" />
+
+            <EditText
+                android:id="@+id/reg_password2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
