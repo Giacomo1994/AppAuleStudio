@@ -107,6 +107,18 @@ protected void initUI(){
         initUI();
         //aggiorno lista
         new listaAule().execute();
+        //click listener
+            elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Aula a = (Aula) parent.getItemAtPosition(position);
+                    Intent intent=new Intent(Home.this,InfoAula.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putParcelable("aula",a);
+                    intent.putExtra("bundle_aula", bundle);
+                    startActivityForResult(intent, 3);
+                }
+            });
     }
 
     //richiedi info aule al database
@@ -195,27 +207,11 @@ protected void initUI(){
                 };
                 elencoAule.setAdapter(adapter);
             }
-
-            /*spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    universita = (Universita) parent.getItemAtPosition(position);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                }
-            });*/
         }
-
-
-
-
-
 
     protected void onRestart(){
         super.onRestart();
-        //new listaAule().execute();
+        new listaAule().execute();
     }
 
     @Override //creazione menu in alto
