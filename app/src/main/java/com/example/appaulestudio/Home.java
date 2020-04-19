@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,31 +42,28 @@ public class Home extends AppCompatActivity {
     //controllare se l'utente è ancora iscritto all'universita --> Se non è più iscritto cancello le preferenze e lancio intento sulla pagina di login
     //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
+    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
+
+    LinearLayout frameLista, frameMappa;
     ArrayAdapter adapter;
-    String strUniversita;
-    String strNomeUniversita;
-    String strMatricola;
-    String strPassword;
-    String strStudente;
-    String strLogged;
-    SharedPreferences settings;
     ListView elencoAule;
-    TextView txt;
-    TextView nomeAula_home;
-    TextView luogoAula_home;
-    TextView postiLiberi_home;
-    TextView flagGruppi_home;
+    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home;
     ImageView immagine_home;
+    Button mappa,lista;
+    Intent intent;
+    String strUniversita, strMatricola, strPassword;
+
+
 
 protected void initUI(){
     final FrameLayout fl= findViewById(R.id.fl);
      elencoAule= findViewById(R.id.elencoAule);
 
     //doppio frame
-    final LinearLayout frameLista = (LinearLayout)findViewById(R.id.frameLista);
-    final LinearLayout frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
-    Button mappa= findViewById(R.id.mappa);
-    Button lista = findViewById(R.id.lista);
+    frameLista = (LinearLayout)findViewById(R.id.frameLista);
+    frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
+    mappa= findViewById(R.id.mappa);
+    lista = findViewById(R.id.lista);
     frameLista.setVisibility(fl.VISIBLE);
     frameMappa.setVisibility(fl.GONE);
 
@@ -75,8 +73,6 @@ protected void initUI(){
         public void onClick(View v) {
             frameLista.setVisibility(fl.GONE);
             frameMappa.setVisibility(fl.VISIBLE);
-
-
         }
 
     });
@@ -90,13 +86,10 @@ protected void initUI(){
         }
 
     });
-     settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
      strUniversita=settings.getString("universita", null);
-     strNomeUniversita=settings.getString("nome_universita", null);
      strMatricola=settings.getString("matricola", null);
      strPassword=settings.getString("password", null);
-     strStudente=""+settings.getBoolean("studente", false);
-     strLogged=""+settings.getBoolean("logged", false);
 }
 
         @Override
@@ -105,7 +98,11 @@ protected void initUI(){
         setContentView(R.layout.activity_home);
         //inizializzo variabili
         initUI();
-        //aggiorno lista
+        //controllo se utente esiste ancora
+            intent=getIntent();
+            boolean b=intent.getBooleanExtra("from_login",false);
+            if(b==false) new checkUtente().execute();
+            //aggiorno lista
         new listaAule().execute();
         //click listener
             elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -208,6 +205,62 @@ protected void initUI(){
                 elencoAule.setAdapter(adapter);
             }
         }
+
+    //TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA'
+    private class checkUtente extends AsyncTask<Void, Void, User> {
+        @Override
+        protected User doInBackground(Void... strings) {
+            try {
+                URL url = new URL(URL_LOGIN);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "universita=" + URLEncoder.encode(strUniversita, "UTF-8") + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") + "&password=" + URLEncoder.encode(strPassword, "UTF-8"); //imposto parametri da passare
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+
+                //leggo stringa di ritorno da file php
+                urlConnection.connect();
+                InputStream is = urlConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+
+                String result = sb.toString();
+                JSONArray jArray = new JSONArray(result);
+                User user=null;
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject json_data = jArray.getJSONObject(i);
+                    user = new User(json_data.getString("matricola"),json_data.getString("codice_universita"), json_data.getString("password"),true );
+                }
+                return user;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error " + e.toString());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(User user) {
+            if(user==null) {
+                SharedPreferences sets=getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sets.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Home.this.finish();
+            }
+
+        }
+    }
 
     protected void onRestart(){
         super.onRestart();

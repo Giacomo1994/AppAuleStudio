@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     String matricola, password;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
-    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_utente.php";
+    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
 
 
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(logged==true){
             Intent i=new Intent(MainActivity.this, Home.class);
+            i.putExtra("from_login",false);
             startActivityForResult(i,2);
         }
 
@@ -101,8 +102,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-
+    //TASK ASINCRONO PER LOGIN UTENTE
     private class checkUtente extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... strings) {
@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 Intent i=new Intent(MainActivity.this, Home.class);
+                i.putExtra("from_login",true);
                 startActivityForResult(i,2);
                 finish();
             }

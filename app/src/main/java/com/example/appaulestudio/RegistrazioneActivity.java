@@ -49,7 +49,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
     String matricola,nome,cognome,email, password, password2;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
-    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione_utente.php";
+    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
