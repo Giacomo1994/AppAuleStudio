@@ -161,6 +161,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                spinner.setEnabled(false);
                 return;
             }
             adapter = new ArrayAdapter(RegistrazioneActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -210,7 +211,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     return stringaRicevuta;
                 } catch (Exception e) {
                     Log.e("SimpleHttpURLConnection", e.getMessage());
-                    return "" + e.getMessage();
+                    return "Impossibile connettersi";
                 } finally {
                 }
             }
