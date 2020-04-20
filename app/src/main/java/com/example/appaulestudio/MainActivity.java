@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
             Intent i=new Intent(MainActivity.this, Home.class);
             i.putExtra("from_login",false);
             startActivityForResult(i,2);
+            return;
         }
 
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);

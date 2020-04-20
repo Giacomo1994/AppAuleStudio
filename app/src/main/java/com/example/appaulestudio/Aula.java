@@ -12,17 +12,20 @@ public class Aula implements Parcelable {
      double longitudine;
      int gruppi;
      int posti_liberi;
+     String apertura;
+     String chiusura;
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
-                double longitudine, int gruppi, int posti_liberi){
+                double longitudine, int gruppi, int posti_liberi, String apertura, String chiusura){
         this.idAula=idAula;
-
         this.nome=nome;
         this.luogo=luogo;
         this.latitudine=latitudione;
         this.longitudine=longitudine;
         this.gruppi=gruppi;
         this.posti_liberi=posti_liberi;
+        this.apertura=apertura;
+        this.chiusura=chiusura;
     }
 
     public String stampaAula(){

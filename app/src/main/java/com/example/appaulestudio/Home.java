@@ -2,12 +2,14 @@ package com.example.appaulestudio;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -36,6 +38,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 public class Home extends AppCompatActivity {
@@ -48,7 +59,7 @@ public class Home extends AppCompatActivity {
     LinearLayout frameLista, frameMappa;
     ArrayAdapter adapter;
     ListView elencoAule;
-    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home;
+    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
     ImageView immagine_home;
     Button mappa,lista;
     Intent intent;
@@ -161,7 +172,7 @@ protected void initUI(){
                     array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
                             json_data.getString("luogo"), json_data.getDouble("latitudine"),
                             json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
-                            json_data.getInt("posti_liberi"));
+                            json_data.getInt("posti_liberi"), json_data.getString("apertura"),json_data.getString("chiusura"));
                 }
                 return array_aula;
             } catch (Exception e) {
@@ -177,7 +188,6 @@ protected void initUI(){
                 return;
             }
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
-
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Aula item = getItem(position);
@@ -189,9 +199,12 @@ protected void initUI(){
                         postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
                         flagGruppi_home = convertView.findViewById(R.id.flagGruppi_home);
                         immagine_home=convertView.findViewById(R.id.row_image_home);
+                        statoAula_home=convertView.findViewById(R.id.statoAula_home);
+
                         nomeAula_home.setText(item.nome);
                         luogoAula_home.setText(item.luogo);
                         postiLiberi_home.setText("Numero posti liberi: " + item.posti_liberi);
+                        statoAula_home.setText(item.apertura);
                         if(item.gruppi==0) {
                             flagGruppi_home.setText("Disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.group);
@@ -200,6 +213,16 @@ protected void initUI(){
                             flagGruppi_home.setText("Non è disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.singolo);
                         }
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                            LocalTime apertura = LocalTime.parse(item.apertura, formatter);
+                            LocalTime chiusura = LocalTime.parse(item.chiusura, formatter);
+                            LocalTime adesso = LocalTime.now();
+                            if (adesso.isAfter(apertura) && adesso.isBefore(chiusura)) statoAula_home.setText("Attualmente Aperta");
+                            else statoAula_home.setText("Attualmente Chiusa");
+                        }
+                        else statoAula_home.setText("Orario odierno: "+ item.apertura+" - "+item.chiusura);
+
                         return convertView;
 
                     }
@@ -261,6 +284,9 @@ protected void initUI(){
                 editor.putBoolean("logged", false);
                 editor.commit();
                 finish();
+            }
+            if(user==2){
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile connettersi alla rete</b></font>"),Toast.LENGTH_LONG).show();
             }
         }
     }

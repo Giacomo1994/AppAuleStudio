@@ -14,7 +14,7 @@
             android:id="@+id/row_image_home"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="25dp"
             app:srcCompat="@android:drawable/star_big_on" />
     </LinearLayout>
 
@@ -37,6 +37,12 @@
 
         <TextView
             android:id="@+id/postiLiberi_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/statoAula_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="TextView" />
