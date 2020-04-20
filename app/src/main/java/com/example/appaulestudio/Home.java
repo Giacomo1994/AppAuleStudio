@@ -174,7 +174,6 @@ protected void initUI(){
         @Override
         protected void onPostExecute(Aula[] array_aula) {
             if (array_aula == null) {
-                Toast.makeText(getApplicationContext(), "Non ci sono aule per te", Toast.LENGTH_LONG).show();
                 return;
             }
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
@@ -210,9 +209,9 @@ protected void initUI(){
         }
 
     //TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA'
-    private class checkUtente extends AsyncTask<Void, Void, User> {
+    private class checkUtente extends AsyncTask<Void, Void, Integer> {
         @Override
-        protected User doInBackground(Void... strings) {
+        protected Integer doInBackground(Void... strings) {
             try {
                 URL url = new URL(URL_LOGIN);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -244,17 +243,18 @@ protected void initUI(){
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
                     user = new User(json_data.getString("matricola"), json_data.getString("codice_universita"),json_data.getString("mail"), json_data.getString("password"),true, json_data.getString("mail_calendar") );
+                    return 0;
                 }
-                return user;
+                return 1;
             } catch (Exception e) {
                 Log.e("log_tag", "Error " + e.toString());
-                return null;
+                return 2;
             }
         }
 
         @Override
-        protected void onPostExecute(User user) {
-            if(user==null){
+        protected void onPostExecute(Integer user) {
+            if(user==1){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato a vedere le informazioni: riapri l'applicazione per fare login</b></font>"),Toast.LENGTH_LONG).show();
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
