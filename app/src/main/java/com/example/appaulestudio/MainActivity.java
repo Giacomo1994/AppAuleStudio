@@ -97,9 +97,8 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         boolean logged=settings.getBoolean("logged", false);
 
-        if(logged==true){
-            finish();
-        }
+        if(logged==true) finish();
+
     }
 
     //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
@@ -196,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    user = new User(json_data.getString("matricola"),json_data.getString("codice_universita"), json_data.getString("password"),true );
+                    user = new User(json_data.getString("matricola"),json_data.getString("codice_universita"),json_data.getString("mail"), json_data.getString("password"),true, json_data.getString("mail_calendar") );
                 }
                 return user;
             } catch (Exception e) {
@@ -216,12 +215,15 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.codice);
                 editor.putString("nome_universita",universita.nome);
-                editor.putString("matricola",matricola);
-                editor.putString("password",password);
+                editor.putString("email",user.email);
+                editor.putString("email_calendar",user.email_calendar);
+                editor.putString("matricola",user.matricola);
+                editor.putString("password",user.password);
                 editor.putBoolean("studente", true);
                 editor.putBoolean("logged", true);
                 editor.commit();
 
+                //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + user.email_calendar + "</b></font>"),Toast.LENGTH_LONG).show();
 
                 Intent i=new Intent(MainActivity.this, Home.class);
                 i.putExtra("from_login",true);

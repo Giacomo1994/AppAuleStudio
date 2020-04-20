@@ -44,6 +44,7 @@ public class Home extends AppCompatActivity {
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
+    FrameLayout fl;
     LinearLayout frameLista, frameMappa;
     ArrayAdapter adapter;
     ListView elencoAule;
@@ -52,13 +53,14 @@ public class Home extends AppCompatActivity {
     Button mappa,lista;
     Intent intent;
     String strUniversita, strMatricola, strPassword;
+    boolean utente_non_piu_registrato;
 
 
 
 protected void initUI(){
-    final FrameLayout fl= findViewById(R.id.fl);
+     fl= findViewById(R.id.fl);
      elencoAule= findViewById(R.id.elencoAule);
-
+    utente_non_piu_registrato=false;
     //doppio frame
     frameLista = (LinearLayout)findViewById(R.id.frameLista);
     frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
@@ -103,7 +105,8 @@ protected void initUI(){
             boolean b=intent.getBooleanExtra("from_login",false);
             if(b==false) new checkUtente().execute();
             //aggiorno lista
-        new listaAule().execute();
+            new listaAule().execute();
+
         //click listener
             elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -240,7 +243,7 @@ protected void initUI(){
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    user = new User(json_data.getString("matricola"),json_data.getString("codice_universita"), json_data.getString("password"),true );
+                    user = new User(json_data.getString("matricola"), json_data.getString("codice_universita"),json_data.getString("mail"), json_data.getString("password"),true, json_data.getString("mail_calendar") );
                 }
                 return user;
             } catch (Exception e) {
@@ -251,14 +254,14 @@ protected void initUI(){
 
         @Override
         protected void onPostExecute(User user) {
-            if(user==null) {
-                SharedPreferences sets=getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sets.edit();
+            if(user==null){
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato a vedere le informazioni: riapri l'applicazione per fare login</b></font>"),Toast.LENGTH_LONG).show();
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("logged", false);
                 editor.commit();
-                Home.this.finish();
+                finish();
             }
-
         }
     }
 
@@ -281,6 +284,8 @@ protected void initUI(){
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("universita",null);
             editor.putString("nome_universita",null);
+            editor.putString("email",null);
+            editor.putString("email_calendar",null);
             editor.putString("matricola",null);
             editor.putString("password",null);
             editor.putBoolean("studente", true);
