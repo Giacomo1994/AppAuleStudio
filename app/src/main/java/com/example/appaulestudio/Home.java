@@ -230,6 +230,15 @@ protected void initUI(){
                     }
                 };
                 elencoAule.setAdapter(adapter);
+                //salvo i dati della listview nel database locale SQLite
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            for(Aula a : array_aula) {
+            String sql = "INSERT INTO infobase_aule (id, nome, luogo, latitudine, longitudine, posti_liberi, gruppi) " +
+                         "VALUES ('"+a.idAula+"', '"+a.nome+"', '"+a.luogo+"', '"+a.latitudine+"','"+a.longitudine+"','"+a.posti_liberi+"','"+a.gruppi+"')";
+
+                db.execSQL(sql);
+            }
+
             }
         }
 
@@ -337,7 +346,10 @@ protected void initUI(){
 
             String sql = "CREATE TABLE \"infobase_aule\" (\n" +
                     "\t\"id\"\tTEXT NOT NULL,\n" +
+                    "\t\"nome\"\tTEXT NOT NULL,\n" +
                     "\t\"luogo\"\tTEXT NOT NULL,\n" +
+                    "\t\"latitudine\"\tNUMERIC NOT NULL,\n" +
+                    "\t\"longitudine\"\tNUMERIC NOT NULL,\n" +
                     "\t\"posti_liberi\"\tINTEGER NOT NULL,\n" +
                     "\t\"gruppi\"\tINTEGER NOT NULL,\n" +
                     "\tPRIMARY KEY(\"id\")\n" +
