@@ -3,6 +3,11 @@ package com.example.appaulestudio;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 public class Aula implements Parcelable {
 
      String idAula;
@@ -12,11 +17,11 @@ public class Aula implements Parcelable {
      double longitudine;
      int gruppi;
      int posti_liberi;
-     String apertura;
-     String chiusura;
+     Map<Integer,Orario_Speciale> orari;
+     Orario_Speciale orario_speciale;
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
-                double longitudine, int gruppi, int posti_liberi, String apertura, String chiusura){
+                double longitudine, int gruppi, int posti_liberi){
         this.idAula=idAula;
         this.nome=nome;
         this.luogo=luogo;
@@ -24,8 +29,29 @@ public class Aula implements Parcelable {
         this.longitudine=longitudine;
         this.gruppi=gruppi;
         this.posti_liberi=posti_liberi;
-        this.apertura=apertura;
-        this.chiusura=chiusura;
+        orari=new HashMap<Integer, Orario_Speciale>();
+        orario_speciale=null;
+    }
+
+    public void addOrario(int day, Orario_Speciale orario){
+        orari.put(day,orario);
+    }
+
+    public void setOrario_speciale(Orario_Speciale orario){
+        orario_speciale=orario;
+    }
+//"yyyy-MM-dd HH:mm:ss"
+    public boolean isAperta(int day, String currentTime){
+        //controllo orari default
+        String orarioAttuale=currentTime.substring(11,19);
+        String aperturaDefault=orari.get(day).apertura;
+        String chiusuraDefault=orari.get(day).chiusura;
+        if(orarioAttuale.compareTo(aperturaDefault)<0||orarioAttuale.compareTo(chiusuraDefault)>0) return false;
+        //controllo orari speciali
+
+       if(orario_speciale!=null) return false;
+
+        return true;
     }
 
     public String stampaAula(){

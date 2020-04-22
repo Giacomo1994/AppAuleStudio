@@ -41,6 +41,7 @@ import java.net.URLEncoder;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -53,6 +54,8 @@ public class Home extends AppCompatActivity {
     //controllare se l'utente è ancora iscritto all'universita --> Se non è più iscritto cancello le preferenze e lancio intento sulla pagina di login
     //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
+    static final String URL_ORARIDEFAULT="http://pmsc9.altervista.org/progetto/richiedi_orari_default.php";
+    static final String URL_ORARISPECIALI="http://pmsc9.altervista.org/progetto/richiedi_orari_speciali.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
     FrameLayout fl;
@@ -65,6 +68,7 @@ public class Home extends AppCompatActivity {
     Intent intent;
     String strUniversita, strMatricola, strPassword;
     boolean utente_non_piu_registrato;
+
 
 
 
@@ -137,42 +141,119 @@ protected void initUI(){
         @Override
         protected Aula[] doInBackground(Void... strings) {
             try {
-                URL url = new URL(URL_RICHIEDIAULE);
-                //URL url = new URL("http://10.0.2.2/progetto/richiedi_aule.php");
+                URL url;
+                HttpURLConnection urlConnection;
+                String parametri;
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayAule;
+                JSONArray jArrayOrariDefault;
+                JSONArray jArrayOrariSpeciali;
 
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                url = new URL(URL_RICHIEDIAULE);
+                urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
-
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                String parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
-                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
-
                 urlConnection.connect();
-
-                InputStream is = urlConnection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line = null;
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
                 while ((line = reader.readLine()) != null) {
                     sb.append(line + "\n");
                 }
                 is.close();
+                result = sb.toString();
+                jArrayAule = new JSONArray(result);
 
-                String result = sb.toString();
-                JSONArray jArray = new JSONArray(result);
-                Aula[] array_aula = new Aula[jArray.length()];
-                for (int i = 0; i < jArray.length(); i++) {
-                    JSONObject json_data = jArray.getJSONObject(i);
+                url = new URL(URL_ORARIDEFAULT);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayOrariDefault = new JSONArray(result);
+
+                url = new URL(URL_ORARISPECIALI);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayOrariSpeciali = new JSONArray(result);
+
+                Aula[] array_aula = new Aula[jArrayAule.length()];
+                for (int i = 0; i < jArrayAule.length(); i++) {
+                    JSONObject json_data = jArrayAule.getJSONObject(i);
                     array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
                             json_data.getString("luogo"), json_data.getDouble("latitudine"),
                             json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
-                            json_data.getInt("posti_liberi"), json_data.getString("apertura"),json_data.getString("chiusura"));
+                            json_data.getInt("posti_liberi"));
+                }
+
+                for (int i = 0; i < jArrayOrariDefault.length(); i++) {
+                    JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
+                    String id=json_data.getString("id_aula");
+                    int day=json_data.getInt("giorno");
+                    String apertura=json_data.getString("apertura");
+                    String chiusura=json_data.getString("chiusura");
+                    for(Aula a:array_aula){
+                        if(a.idAula.equals(id)) a.addOrario(day, new Orario_Speciale(apertura,chiusura));
+                    }
+                }
+
+                for (int i = 0; i < jArrayOrariSpeciali.length(); i++) {
+                    JSONObject json_data = jArrayOrariSpeciali.getJSONObject(i);
+                    String id=json_data.getString("id_aula");
+                    String apertura=json_data.getString("riapertura");
+                    String chiusura=json_data.getString("chiusura");
+                    for(Aula a:array_aula){
+                        if(a.idAula.equals(id)) a.setOrario_speciale(new Orario_Speciale(apertura,chiusura));
+                    }
                 }
                 return array_aula;
             } catch (Exception e) {
@@ -187,12 +268,11 @@ protected void initUI(){
             if (array_aula == null) {
                 return;
             }
-                adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
+
+            adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Aula item = getItem(position);
-                        //LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        //View rowView = inflater.inflate(R.layout.row_layout_home, null);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
                         nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
                         luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
@@ -204,7 +284,8 @@ protected void initUI(){
                         nomeAula_home.setText(item.nome);
                         luogoAula_home.setText(item.luogo);
                         postiLiberi_home.setText("Numero posti liberi: " + item.posti_liberi);
-                        statoAula_home.setText(item.apertura);
+
+                        //per gruppi o no
                         if(item.gruppi==0) {
                             flagGruppi_home.setText("Disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.group);
@@ -213,15 +294,15 @@ protected void initUI(){
                             flagGruppi_home.setText("Non è disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.singolo);
                         }
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                            LocalTime apertura = LocalTime.parse(item.apertura, formatter);
-                            LocalTime chiusura = LocalTime.parse(item.chiusura, formatter);
-                            LocalTime adesso = LocalTime.now();
-                            if (adesso.isAfter(apertura) && adesso.isBefore(chiusura)) statoAula_home.setText("Attualmente Aperta");
-                            else statoAula_home.setText("Attualmente Chiusa");
-                        }
-                        else statoAula_home.setText("Orario odierno: "+ item.apertura+" - "+item.chiusura);
+                        //chiusa-aperta
+                        Calendar calendar = Calendar.getInstance();
+                        int today = calendar.get(Calendar.DAY_OF_WEEK)-1;
+                        if(today==0) today=7;
+                        SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String orarioAttuale=format.format(calendar.getTime());
+                        boolean isAperta=item.isAperta(today,orarioAttuale);
+                        if(isAperta==true) statoAula_home.setText("Attualmente Aperta");
+                        else statoAula_home.setText("Attualmente Chiusa");
 
                         return convertView;
 
@@ -236,32 +317,40 @@ protected void initUI(){
         @Override
         protected Integer doInBackground(Void... strings) {
             try {
-                URL url = new URL(URL_LOGIN);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                URL url;
+                HttpURLConnection urlConnection;
+                String parametri;
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArray;
+                url = new URL(URL_LOGIN);
+                urlConnection= (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                String parametri = "universita=" + URLEncoder.encode(strUniversita, "UTF-8") + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") + "&password=" + URLEncoder.encode(strPassword, "UTF-8"); //imposto parametri da passare
-                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                parametri = "universita=" + URLEncoder.encode(strUniversita, "UTF-8") + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") + "&password=" + URLEncoder.encode(strPassword, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
-
-                //leggo stringa di ritorno da file php
                 urlConnection.connect();
-                InputStream is = urlConnection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line = null;
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
                 while ((line = reader.readLine()) != null) {
                     sb.append(line + "\n");
                 }
                 is.close();
+                result = sb.toString();
+                jArray = new JSONArray(result);
 
-                String result = sb.toString();
-                JSONArray jArray = new JSONArray(result);
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
