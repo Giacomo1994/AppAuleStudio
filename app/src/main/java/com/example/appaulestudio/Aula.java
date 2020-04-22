@@ -16,19 +16,23 @@ public class Aula implements Parcelable {
      double latitudine;
      double longitudine;
      int gruppi;
+     int posti_totali;
      int posti_liberi;
+     String servizi;
      Map<Integer,Orario_Speciale> orari;
      Orario_Speciale orario_speciale;
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
-                double longitudine, int gruppi, int posti_liberi){
+                double longitudine, int gruppi, int posti_totali, int posti_liberi, String servizi){
         this.idAula=idAula;
         this.nome=nome;
         this.luogo=luogo;
         this.latitudine=latitudione;
         this.longitudine=longitudine;
         this.gruppi=gruppi;
+        this.posti_totali=posti_totali;
         this.posti_liberi=posti_liberi;
+        this.servizi=servizi;
         orari=new HashMap<Integer, Orario_Speciale>();
         orario_speciale=null;
     }

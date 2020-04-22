@@ -234,7 +234,7 @@ protected void initUI(){
                     array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
                             json_data.getString("luogo"), json_data.getDouble("latitudine"),
                             json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
-                            json_data.getInt("posti_liberi"));
+                            json_data.getInt("posti_totali"), json_data.getInt("posti_liberi"), json_data.getString("servizi"));
                 }
 
                 for (int i = 0; i < jArrayOrariDefault.length(); i++) {
@@ -285,7 +285,7 @@ protected void initUI(){
 
                         nomeAula_home.setText(item.nome);
                         luogoAula_home.setText(item.luogo);
-                        postiLiberi_home.setText("Numero posti liberi: " + item.posti_liberi);
+                        postiLiberi_home.setText("Posti liberi: " + item.posti_liberi +" su "+ item.posti_totali);
 
                         //per gruppi o no
                         if(item.gruppi==0) {
