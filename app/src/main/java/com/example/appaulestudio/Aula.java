@@ -35,7 +35,7 @@ public class Aula implements Parcelable {
         this.posti_liberi=posti_liberi;
         this.servizi=servizi;
         orari=new HashMap<Integer, Orario>();
-        aperta=true;
+        aperta=false;
         orario=null;
     }
 

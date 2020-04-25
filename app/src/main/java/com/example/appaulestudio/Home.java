@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -55,16 +57,15 @@ public class Home extends AppCompatActivity {
     //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
     static final String URL_ORARIDEFAULT="http://pmsc9.altervista.org/progetto/richiedi_orari_default.php";
-    static final String URL_ORARIDEFAULT2="http://pmsc9.altervista.org/progetto/richiedi_orari_default2.php";
-    static final String URL_ORARISPECIALI="http://pmsc9.altervista.org/progetto/richiedi_orari_speciali.php";
     static final String URL_CHECKCONNECTION="http://pmsc9.altervista.org/progetto/check_connection.php";
+    static final String URL_CHECKAULAPERTA="http://pmsc9.altervista.org/progetto/check_aula_aperta.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
     FrameLayout fl;
     LinearLayout frameLista, frameMappa;
     ArrayAdapter adapter;
     ListView elencoAule;
-    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home,txt;
+    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
     ImageView immagine_home;
     Button mappa,lista;
     ProgressBar bar;
@@ -151,7 +152,6 @@ protected void initUI(){
         RequestQueue queue = Volley.newRequestQueue(this);
         String url =URL_CHECKCONNECTION;
 
-// Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -167,11 +167,10 @@ protected void initUI(){
             }
         });
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(2000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-// Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
 
+//se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
         db = dbHelper.getReadableDatabase();
         String sql = "SELECT * FROM info_aule_offline";
@@ -195,7 +194,6 @@ protected void initUI(){
             Aula a=new Aula(id,nome,luogo,latitudine,longitudine,flag_gruppi,posti_totali,posti_liberi,servizi);
             aule.add(a);
         }
-
         sql = "SELECT * FROM orari_offline";
         cursor = db.rawQuery(sql, null);  //creazione cursore
         if(cursor==null ||cursor.getCount()==0){
@@ -239,11 +237,9 @@ protected void initUI(){
                 }
                 //orario
                 Calendar calendar = Calendar.getInstance();
-                int today = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-                if (today == 0) today = 7;
+                int today = calendar.get(Calendar.DAY_OF_WEEK);
                 statoAula_home.setText(""+item.orari.get(today).apertura+" - "+item.orari.get(today).chiusura);
                 return convertView;
-
             }
         };
         elencoAule.setAdapter(adapter);
@@ -382,8 +378,7 @@ protected void initUI(){
                 String line;
                 String result;
                 JSONArray jArrayAule;
-                JSONArray jArrayOrariDefault;
-                JSONArray jArrayOrariSpeciali;
+                JSONArray jArrayAuleAperte;
 
                 url = new URL(URL_RICHIEDIAULE);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -410,7 +405,7 @@ protected void initUI(){
                 jArrayAule = new JSONArray(result);
 
 
-                url = new URL(URL_ORARIDEFAULT2);
+                url = new URL(URL_CHECKAULAPERTA);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
@@ -432,31 +427,8 @@ protected void initUI(){
                 }
                 is.close();
                 result = sb.toString();
-                jArrayOrariDefault = new JSONArray(result);
+                jArrayAuleAperte = new JSONArray(result);
 
-                url = new URL(URL_ORARISPECIALI);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
-                dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();
-                urlConnection.connect();
-                is = urlConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                is.close();
-                result = sb.toString();
-                jArrayOrariSpeciali = new JSONArray(result);
 
                 Aula[] array_aula = new Aula[jArrayAule.length()];
                 for (int i = 0; i < jArrayAule.length(); i++) {
@@ -467,21 +439,11 @@ protected void initUI(){
                             json_data.getInt("posti_totali"), json_data.getInt("posti_liberi"), json_data.getString("servizi"));
                 }
 
-                for (int i = 0; i < jArrayOrariDefault.length(); i++) {
-                    JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
-                    String id = json_data.getString("id_aula");
-                    String apertura = json_data.getString("apertura");
-                    String chiusura = json_data.getString("chiusura");
-                    for (Aula a : array_aula) {
-                        if (a.idAula.equals(id)) a.orario=new Orario(apertura,chiusura);
-                    }
-                }
-
-                for (int i = 0; i < jArrayOrariSpeciali.length(); i++) {
-                    JSONObject json_data = jArrayOrariSpeciali.getJSONObject(i);
+                for (int i = 0; i < jArrayAuleAperte.length(); i++) {
+                    JSONObject json_data = jArrayAuleAperte.getJSONObject(i);
                     String id = json_data.getString("id_aula");
                     for (Aula a : array_aula) {
-                        if (a.idAula.equals(id)) a.aperta=false;
+                        if (a.idAula.equals(id)) a.aperta=true;
                     }
                 }
                 return array_aula;
@@ -523,14 +485,14 @@ protected void initUI(){
                         immagine_home.setImageResource(R.drawable.singolo);
                     }
                     //chiusa-aperta
-                    Calendar calendar = Calendar.getInstance();
-                    int today = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-                    if (today == 0) today = 7;
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String orarioAttuale = format.format(calendar.getTime());
-                    boolean isAperta = item.isAperta(orarioAttuale);
-                    if (isAperta == true) statoAula_home.setText("Attualmente Aperta");
-                    else statoAula_home.setText("Attualmente Chiusa");
+                    if (item.aperta == true){
+                        statoAula_home.setTextColor(Color.argb(255, 12, 138, 17));
+                        statoAula_home.setText("Attualmente Aperta");
+                    }
+                    else{
+                        statoAula_home.setTextColor(Color.RED);
+                        statoAula_home.setText("Attualmente Chiusa");
+                    }
 
                     return convertView;
                 }
@@ -594,11 +556,19 @@ protected void initUI(){
             @Override
             protected void onPostExecute(Integer user) {
                 if (user == 1) {
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato a vedere le informazioni: riapri l'applicazione per fare login</b></font>"), Toast.LENGTH_LONG).show();
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
+                    editor.putString("universita", null);
+                    editor.putString("nome_universita", null);
+                    editor.putString("email", null);
+                    editor.putString("email_calendar", null);
+                    editor.putString("matricola", null);
+                    editor.putString("password", null);
+                    editor.putBoolean("studente", true);
                     editor.putBoolean("logged", false);
                     editor.commit();
+                    Intent i = new Intent(Home.this, MainActivity.class);
+                    startActivityForResult(i, 100);
                     finish();
                 }
             }
@@ -642,11 +612,10 @@ protected void initUI(){
                 startActivityForResult(i, 100);
                 finish();
             }
-
             return true;
         }
 
-        //creo dbhelper e tabella sqlite
+//tabella sqlite
         private final SQLiteOpenHelper dbHelper = new SQLiteOpenHelper(Home.this, "info_aule_offline", null, 1) {
             @Override
             public void onCreate(SQLiteDatabase db) {
