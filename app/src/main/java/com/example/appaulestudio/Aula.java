@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Aula implements Parcelable {
-
      String idAula;
      String nome;
      String luogo;
@@ -17,8 +16,12 @@ public class Aula implements Parcelable {
      int posti_totali;
      int posti_liberi;
      String servizi;
+
      Map<Integer, Orario> orari;
-     Orario orario_;
+     Orario orario;
+
+     boolean aperta;
+
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
                 double longitudine, int gruppi, int posti_totali, int posti_liberi, String servizi){
@@ -32,36 +35,20 @@ public class Aula implements Parcelable {
         this.posti_liberi=posti_liberi;
         this.servizi=servizi;
         orari=new HashMap<Integer, Orario>();
-        orario_ =null;
+        aperta=true;
+        orario=null;
     }
 
-    public void addOrario(int day, Orario orario){
-        orari.put(day,orario);
-    }
-
-    public void setOrario_(Orario orario){
-        orario_ =orario;
-    }
-//"yyyy-MM-dd HH:mm:ss"
-    public boolean isAperta(int day, String currentTime){
+    //"yyyy-MM-dd HH:mm:ss"
+    public boolean isAperta(String currentTime){
+        //controllo orari speciali
+        if(aperta==false) return false;
         //controllo orari default
         String orarioAttuale=currentTime.substring(11,19);
-        String aperturaDefault=orari.get(day).apertura;
-        String chiusuraDefault=orari.get(day).chiusura;
+        String aperturaDefault=orario.apertura;
+        String chiusuraDefault=orario.chiusura;
         if(orarioAttuale.compareTo(aperturaDefault)<0||orarioAttuale.compareTo(chiusuraDefault)>0) return false;
-        //controllo orari speciali
-
-       if(orario_ !=null) return false;
-
         return true;
-    }
-
-    public String stampaAula(){
-        String s=""+this.nome+" - "+"/n"+this.luogo;
-        if(this.gruppi==0){
-            s+="/nAula disponibile alla prenotazione per gruppi";
-        }
-        return s;
     }
 
     protected Aula(Parcel in) {
@@ -71,7 +58,9 @@ public class Aula implements Parcelable {
         latitudine = in.readDouble();
         longitudine = in.readDouble();
         gruppi = in.readInt();
+        posti_totali = in.readInt();
         posti_liberi = in.readInt();
+        servizi = in.readString();
     }
 
     @Override
@@ -82,7 +71,9 @@ public class Aula implements Parcelable {
         dest.writeDouble(latitudine);
         dest.writeDouble(longitudine);
         dest.writeInt(gruppi);
+        dest.writeInt(posti_totali);
         dest.writeInt(posti_liberi);
+        dest.writeString(servizi);
     }
 
     @Override

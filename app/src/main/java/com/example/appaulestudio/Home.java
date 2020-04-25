@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -23,8 +24,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,11 +43,11 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class Home extends AppCompatActivity {
@@ -45,35 +55,38 @@ public class Home extends AppCompatActivity {
     //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
     static final String URL_ORARIDEFAULT="http://pmsc9.altervista.org/progetto/richiedi_orari_default.php";
+    static final String URL_ORARIDEFAULT2="http://pmsc9.altervista.org/progetto/richiedi_orari_default2.php";
     static final String URL_ORARISPECIALI="http://pmsc9.altervista.org/progetto/richiedi_orari_speciali.php";
+    static final String URL_CHECKCONNECTION="http://pmsc9.altervista.org/progetto/check_connection.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
     FrameLayout fl;
     LinearLayout frameLista, frameMappa;
     ArrayAdapter adapter;
     ListView elencoAule;
-    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
+    TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home,txt;
     ImageView immagine_home;
     Button mappa,lista;
+    ProgressBar bar;
+
     Intent intent;
     String strUniversita, strMatricola, strPassword;
     boolean utente_non_piu_registrato;
     SQLiteDatabase db;
-
-
+    private Cursor cursor;
 
 
 protected void initUI(){
      fl= findViewById(R.id.fl);
      elencoAule= findViewById(R.id.elencoAule);
-    utente_non_piu_registrato=false;
-    //doppio frame
-    frameLista = (LinearLayout)findViewById(R.id.frameLista);
-    frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
-    mappa= findViewById(R.id.mappa);
-    lista = findViewById(R.id.lista);
-    frameLista.setVisibility(fl.VISIBLE);
-    frameMappa.setVisibility(fl.GONE);
+     utente_non_piu_registrato=false;
+     frameLista = (LinearLayout)findViewById(R.id.frameLista);
+     frameMappa = (LinearLayout)findViewById(R.id.frameMappa);
+     mappa= findViewById(R.id.mappa);
+     lista = findViewById(R.id.lista);
+     bar=findViewById(R.id.bar);
+     frameLista.setVisibility(fl.VISIBLE);
+     frameMappa.setVisibility(fl.GONE);
 
     //passo da lista a mappa
     mappa.setOnClickListener(new View.OnClickListener() {
@@ -90,45 +103,271 @@ protected void initUI(){
         public void onClick(View v) {
             frameMappa.setVisibility(fl.GONE);
             frameLista.setVisibility(fl.VISIBLE);
-            new listaAule().execute();
+            checkConnection();
         }
 
     });
+
+     //prendo preferenze
      SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
      strUniversita=settings.getString("universita", null);
      strMatricola=settings.getString("matricola", null);
      strPassword=settings.getString("password", null);
+     setTitle(strMatricola);
+
 }
 
         @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         //inizializzo variabili
         initUI();
-        //controllo se utente esiste ancora
-            intent=getIntent();
-            boolean b=intent.getBooleanExtra("from_login",false);
-            if(b==false) new checkUtente().execute();
-            //aggiorno lista
-            new listaAule().execute();
+        intent=getIntent();
+        boolean b=intent.getBooleanExtra("from_login",false);
 
-        //click listener
-            elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Aula a = (Aula) parent.getItemAtPosition(position);
-                    Intent intent=new Intent(Home.this,InfoAula.class);
-                    Bundle bundle=new Bundle();
-                    bundle.putParcelable("aula",a);
-                    intent.putExtra("bundle_aula", bundle);
-                    startActivityForResult(intent, 3);
+        //task asincroni
+        if(b==false) new checkUtente().execute();
+        checkConnection();
+
+        //listview listener
+        elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Aula a = (Aula) parent.getItemAtPosition(position);
+                Intent intent=new Intent(Home.this,InfoAulaActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("aula",a);
+                bundle.putParcelable("orario",a.orario);
+                intent.putExtra("bundle", bundle);
+                startActivityForResult(intent, 3);
+            }
+        });
+    }
+
+//check connection
+    public void checkConnection(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url =URL_CHECKCONNECTION;
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        new listaAule().execute();
+                        new aggiornaSQLITE().execute();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                bar.setVisibility(View.GONE);
+                mostraOffline();
+            }
+        });
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(2000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
+    public void mostraOffline(){
+        db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM info_aule_offline";
+        cursor = db.rawQuery(sql, null);
+        ArrayList<Aula> aule=new ArrayList<Aula>();
+        if(cursor==null ||cursor.getCount()==0){
+            return;
+        }
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            String id=cursor.getString(cursor.getColumnIndex("id"));
+            String nome=cursor.getString(cursor.getColumnIndex("nome"));
+            String luogo=cursor.getString(cursor.getColumnIndex("luogo"));
+            double latitudine=cursor.getDouble(cursor.getColumnIndex("latitudine"));
+            double longitudine=cursor.getDouble(cursor.getColumnIndex("longitudine"));
+            int flag_gruppi=cursor.getInt(cursor.getColumnIndex("flag_gruppi"));
+            int posti_totali=cursor.getInt(cursor.getColumnIndex("posti_totali"));
+            int posti_liberi=-1;
+            //int posti_liberi=cursor.getInt(cursor.getColumnIndex("posti_liberi"));
+            String servizi=cursor.getString(cursor.getColumnIndex("servizi"));
+            Aula a=new Aula(id,nome,luogo,latitudine,longitudine,flag_gruppi,posti_totali,posti_liberi,servizi);
+            aule.add(a);
+        }
+
+        sql = "SELECT * FROM orari_offline";
+        cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0){
+            return;
+        }
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            String id=cursor.getString(cursor.getColumnIndex("id_aula"));
+            int giorno=cursor.getInt(cursor.getColumnIndex("giorno"));
+            String apertura=cursor.getString(cursor.getColumnIndex("apertura"));
+            String chiusura=cursor.getString(cursor.getColumnIndex("chiusura"));
+            for(Aula a: aule){
+                if(a.idAula.equals(id)){
+                    a.orari.put(giorno,new Orario(apertura,chiusura));
                 }
-            });
+            }
+        }
+        adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                Aula item = getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
+                nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
+                luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
+                postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
+                flagGruppi_home = convertView.findViewById(R.id.flagGruppi_home);
+                immagine_home = convertView.findViewById(R.id.row_image_home);
+                statoAula_home = convertView.findViewById(R.id.statoAula_home);
+
+                nomeAula_home.setText(item.nome);
+                luogoAula_home.setText(item.luogo);
+                postiLiberi_home.setText("Posti totali: " + item.posti_totali);
+
+                //per gruppi o no
+                if (item.gruppi == 0) {
+                    flagGruppi_home.setText("Disponibile per i gruppi");
+                    immagine_home.setImageResource(R.drawable.group);
+                } else {
+                    flagGruppi_home.setText("Non è disponibile per i gruppi");
+                    immagine_home.setImageResource(R.drawable.singolo);
+                }
+                //orario
+                Calendar calendar = Calendar.getInstance();
+                int today = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+                if (today == 0) today = 7;
+                statoAula_home.setText(""+item.orari.get(today).apertura+" - "+item.orari.get(today).chiusura);
+                return convertView;
+
+            }
+        };
+        elencoAule.setAdapter(adapter);
+        return;
+
+
 
     }
 
-    //richiedi info aule al database
+// aggiorno i dati statici delle aule + orari default su SQLITE alla creazione dell'activity
+    //quando mi serviranno questi dati nel resto dell'app li prendo da SQLITE
+    private class aggiornaSQLITE extends AsyncTask<Void, Void, Aula[]> {
+        @Override
+        protected Aula[] doInBackground(Void... voids) {
+            try {
+                URL url;
+                HttpURLConnection urlConnection;
+                String parametri;
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayAule;
+                JSONArray jArrayOrariDefault;
+
+                url = new URL(URL_RICHIEDIAULE);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayAule = new JSONArray(result);
+
+                url = new URL(URL_ORARIDEFAULT);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayOrariDefault = new JSONArray(result);
+
+                Aula[] array_aula = new Aula[jArrayAule.length()];
+                for (int i = 0; i < jArrayAule.length(); i++) {
+                    JSONObject json_data = jArrayAule.getJSONObject(i);
+                    array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
+                            json_data.getString("luogo"), json_data.getDouble("latitudine"),
+                            json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
+                            json_data.getInt("posti_totali"), json_data.getInt("posti_liberi"), json_data.getString("servizi"));
+                }
+                for (int i = 0; i < jArrayOrariDefault.length(); i++) {
+                    JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
+                    String id = json_data.getString("id_aula");
+                    int day=json_data.getInt("giorno");
+                    String apertura = json_data.getString("apertura");
+                    String chiusura = json_data.getString("chiusura");
+                    for (Aula a : array_aula) {
+                        if (a.idAula.equals(id)) a.orari.put(day,new Orario(apertura,chiusura));
+                    }
+                }
+                return array_aula;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(Aula[] array_aula) {
+            db=dbHelper.getWritableDatabase();
+            if(array_aula==null) {
+                return;
+            }
+            String sql1 = "DELETE FROM info_aule_offline";
+            String sql2="DELETE FROM orari_offline";
+            db.execSQL(sql2);
+            db.execSQL(sql1);
+                for (Aula a : array_aula) {
+                    String sql =
+                            "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali,posti_liberi, flag_gruppi, servizi) " +
+                                    "VALUES ('" + a.idAula + "', '" + a.nome + "', '" + a.luogo + "', " + a.latitudine + "," + a.longitudine + "," + a.posti_totali + "," + a.posti_liberi + "," + a.gruppi + ",'" + a.servizi + "')";
+                    db.execSQL(sql);
+                }
+                for(Aula a : array_aula){
+                    for(int i = 1; i<=7; i++) {
+                        String sql = "INSERT INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
+                                "VALUES('" + a.idAula + "', " + i + ", '" + a.orari.get(i).apertura + "','" + a.orari.get(i).chiusura + "')";
+                        db.execSQL(sql);
+                    }
+                }
+        }
+    }
+
+//RIEMPIO LISTVIEW CON I DATI CHE MI SERVONO, PRENDENDOLI DA REMOTO SE C'E' CONNESSIONE OPPURE DA SQLITE
     private class listaAule extends AsyncTask<Void, Void, Aula[]> {
         @Override
         protected Aula[] doInBackground(Void... strings) {
@@ -170,7 +409,8 @@ protected void initUI(){
                 result = sb.toString();
                 jArrayAule = new JSONArray(result);
 
-                url = new URL(URL_ORARIDEFAULT);
+
+                url = new URL(URL_ORARIDEFAULT2);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
@@ -230,23 +470,18 @@ protected void initUI(){
                 for (int i = 0; i < jArrayOrariDefault.length(); i++) {
                     JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
                     String id = json_data.getString("id_aula");
-                    int day = json_data.getInt("giorno");
                     String apertura = json_data.getString("apertura");
                     String chiusura = json_data.getString("chiusura");
                     for (Aula a : array_aula) {
-                        if (a.idAula.equals(id))
-                            a.addOrario(day, new Orario(apertura, chiusura));
+                        if (a.idAula.equals(id)) a.orario=new Orario(apertura,chiusura);
                     }
                 }
 
                 for (int i = 0; i < jArrayOrariSpeciali.length(); i++) {
                     JSONObject json_data = jArrayOrariSpeciali.getJSONObject(i);
                     String id = json_data.getString("id_aula");
-                    String apertura = json_data.getString("riapertura");
-                    String chiusura = json_data.getString("chiusura");
                     for (Aula a : array_aula) {
-                        if (a.idAula.equals(id))
-                            a.setOrario_(new Orario(apertura, chiusura));
+                        if (a.idAula.equals(id)) a.aperta=false;
                     }
                 }
                 return array_aula;
@@ -254,21 +489,15 @@ protected void initUI(){
                 Log.e("log_tag", "Error " + e.toString());
                 return null;
             }
-
         }
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            db = dbHelper.getWritableDatabase();
-            if (array_aula == null) {
-                //prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                
-
-
-
+            bar.setVisibility(ProgressBar.GONE);
+            if (array_aula == null) { //prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
-
             adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -299,42 +528,18 @@ protected void initUI(){
                     if (today == 0) today = 7;
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String orarioAttuale = format.format(calendar.getTime());
-                    boolean isAperta = item.isAperta(today, orarioAttuale);
+                    boolean isAperta = item.isAperta(orarioAttuale);
                     if (isAperta == true) statoAula_home.setText("Attualmente Aperta");
                     else statoAula_home.setText("Attualmente Chiusa");
 
                     return convertView;
-
                 }
             };
             elencoAule.setAdapter(adapter);
-
-            String sql1 = "DELETE FROM info_aule_offline";
-            String sql2="DELETE FROM orari_offline";
-            db.execSQL(sql2);
-            db.execSQL(sql1);
-            //salvo i dati della listview nel database locale SQLite
-            for (Aula a : array_aula) {
-
-                String sql =
-                        "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali,posti_liberi, flag_gruppi, servizi ) " +
-                                "VALUES ('" + a.idAula + "', '" + a.nome + "', '" + a.luogo + "', " + a.latitudine + "," + a.longitudine + "," + a.posti_totali + "," + a.posti_liberi + "," + a.gruppi + ",'" + a.servizi + "')";
-
-                db.execSQL(sql);
-            }
-
-            for(Aula a : array_aula){
-
-                for(int i = 1; i<=7; i++) {
-                    String sql = "INSERT INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
-                            "VALUES('" + a.idAula + "', " + i + ", '" + a.orari.get(i).apertura + "','" + a.orari.get(i).chiusura + "')";
-                    db.execSQL(sql);
-                }
-            }
         }
     }
 
-        //TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA'
+//TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA'
         private class checkUtente extends AsyncTask<Void, Void, Integer> {
             @Override
             protected Integer doInBackground(Void... strings) {
@@ -396,25 +601,25 @@ protected void initUI(){
                     editor.commit();
                     finish();
                 }
-                if (user == 2) {
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile connettersi alla rete</b></font>"), Toast.LENGTH_LONG).show();
-                }
             }
         }
 
+//ON RESTART
         protected void onRestart() {
             super.onRestart();
-            new listaAule().execute();
+            bar.setVisibility(ProgressBar.VISIBLE);
+            checkConnection();
         }
 
-        @Override //creazione menu in alto
+//CREAZIONE MENU IN ALTO
+        @Override
         public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
             menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
             return true;
         }
 
-        @Override //se premo "Inserisci componente mi porta alla seconda activity"
+        @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             if (item.getItemId() == 1) {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -428,10 +633,16 @@ protected void initUI(){
                 editor.putBoolean("studente", true);
                 editor.putBoolean("logged", false);
                 editor.commit();
+                Intent i = new Intent(this, MainActivity.class);
+                startActivityForResult(i, 100);
+                finish();
             }
-            Intent i = new Intent(this, MainActivity.class);
-            startActivityForResult(i, 100);
-            finish();
+            if (item.getItemId() == 2) {
+                Intent i = new Intent(this, Home.class);
+                startActivityForResult(i, 100);
+                finish();
+            }
+
             return true;
         }
 
@@ -469,5 +680,6 @@ protected void initUI(){
 
             }
         };
+
 
 }

@@ -30,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         boolean logged=settings.getBoolean("logged", false);
 
         if(logged==true) finish();
+        else new riempiUniversita().execute();
 
     }
 
@@ -144,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
-                spinner.setEnabled(false);
+                //spinner.setEnabled(false);
                 return;
             }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -209,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user==null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile effettuare login! Nome utente o password errati." + "</b></font>"),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile effettuare login!</b></font>"),Toast.LENGTH_LONG).show();
                 return;
             }
             else{
