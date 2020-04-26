@@ -46,6 +46,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
     Intent intent;
     Universita universita=null;
     String matricola,nome,cognome, email, password, password2;
+    boolean isStudente;
+    boolean isNotStudente;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
     static final String URL_REGISTRAZIONE_STUDENTE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
@@ -117,7 +119,10 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     return;
                 }
 
-
+                if(radioStudente.isChecked()){
+                    isStudente=true;
+                }
+                else isStudente=false;
 
                 //inserisco il vincolo sul radiobutton nel metodo registraUtente
                 //registrazione utente
@@ -196,7 +201,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 try {
                     URL url;
                     //vincoli sul radiobutton per chiamare registrazione studente vs docente
-                    if(radioStudente.isChecked()) {
+                    if(isStudente==true) {
                          url = new URL(URL_REGISTRAZIONE_STUDENTE);
                         //URL url = new URL("http://10.0.2.2/progetto/registrazione_studente.php");
                     }
@@ -248,6 +253,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 else{
                     intent.putExtra("matricola", matricola);
                     intent.putExtra("password", password);
+                    //if(isStudente==true) {
+                        intent.putExtra("isStudente", isStudente);
+
+
+                    //}
+                    //else intent.putExtra("isStudente", "falso");
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                 }

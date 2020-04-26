@@ -23,18 +23,17 @@ public class MainActivity extends AppCompatActivity {
     EditText txtMatricola, txtPassword;
     Button btn_login;
     RadioButton radioStudente;
-
+    RadioButton radioDocente;
     Universita universita=null;
     String matricola, password;
+    boolean isStudente;
+    boolean studentePassato;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
-    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
+    static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
+    static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+    private void initUI(){
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         boolean logged=settings.getBoolean("logged", false);
 
@@ -51,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         txtPassword=findViewById(R.id.log_password);
         btn_login=findViewById(R.id.btn_login);
         radioStudente=findViewById(R.id.radioButton);
+        radioDocente=findViewById(R.id.radioDocente);
 
         //link a registrazione
         String stringa="Oppure registrati";
@@ -84,11 +84,24 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
-
+                if(radioStudente.isChecked()){
+                    isStudente=true;
+                }
+                else isStudente=false;
+                //sposto tutto nella funzione
                 //chiamo asyc task
-                if(radioStudente.isChecked()) new checkUtente().execute();
+                //if(radioStudente.isChecked()) new checkUtente().execute();
+                new checkUtente().execute();
             }
         });
+
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initUI();
+
     }
 
     protected void onResume() {
@@ -166,8 +179,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected User doInBackground(Void... strings) {
             try {
-                URL url = new URL(URL_LOGIN);
-                //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
+                URL url;
+                if(isStudente==true) {
+                     url = new URL(URL_LOGIN_STUDENTE);
+                    //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
+                }
+                else{
+                    url=new URL(URL_LOGIN_DOCENTE);
+                }
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
@@ -196,7 +215,19 @@ public class MainActivity extends AppCompatActivity {
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    user = new User(json_data.getString("matricola"),json_data.getString("codice_universita"),json_data.getString("mail"), json_data.getString("password"),true, json_data.getString("mail_calendar") );
+                    if(isStudente==true) {
+
+                        user = new User(json_data.getString("matricola"),
+                                json_data.getString("codice_universita"), json_data.getString("mail"),
+                                json_data.getString("password"), true,
+                                json_data.getString("mail_calendar"));
+                    }
+                    else{
+                        user = new User(json_data.getString("matricola"),
+                                json_data.getString("codice_universita"), json_data.getString("mail"),
+                                json_data.getString("password"), false,
+                                json_data.getString("mail_calendar"));
+                    }
                 }
                 return user;
             } catch (Exception e) {
@@ -220,7 +251,12 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("email_calendar",user.email_calendar);
                 editor.putString("matricola",user.matricola);
                 editor.putString("password",user.password);
-                editor.putBoolean("studente", true);
+                if(user.studente==true) {
+                    editor.putBoolean("studente", true);
+                }
+                else{
+                    editor.putBoolean("studente", false);
+                }
                 editor.putBoolean("logged", true);
                 editor.commit();
 
@@ -239,8 +275,19 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==1){
             if(resultCode== Activity.RESULT_OK){
+                studentePassato= (data.getBooleanExtra("isStudente", true));
                 txtMatricola.setText(data.getStringExtra("matricola"));
                 txtPassword.setText(data.getStringExtra("password"));
+
+                if(studentePassato==true){
+                    radioStudente.setChecked(true);
+                    radioDocente.setChecked(false);
+                }
+                else{
+                    radioDocente.setChecked(true);
+                    radioStudente.setChecked(false);
+                }
+
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#0cb339' ><b>" + "Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale." + "</b></font>"),Toast.LENGTH_LONG).show();
             }
         }
