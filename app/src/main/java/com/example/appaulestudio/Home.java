@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -133,19 +134,33 @@ protected void initUI(){
         if(b==false) new checkUtente().execute();
         checkConnection("create");
 
-        //listview listener
-        elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Aula a = (Aula) parent.getItemAtPosition(position);
-                Intent intent=new Intent(Home.this,InfoAulaActivity.class);
-                Bundle bundle=new Bundle();
-                bundle.putParcelable("aula",a);
-                bundle.putParcelable("orario",a.orario);
-                intent.putExtra("bundle", bundle);
-                startActivityForResult(intent, 3);
-            }
-        });
+        registerForContextMenu(elencoAule);
+    }
+
+//MENU CONTESTUALE
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
+        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza info aula");
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota posto");
+        if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per gruppo");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if(item.getItemId()==0){
+            Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
+            Intent intent=new Intent(Home.this,InfoAulaActivity.class);
+            Bundle bundle=new Bundle();
+            bundle.putParcelable("aula",a);
+            bundle.putParcelable("orario",a.orario);
+            intent.putExtra("bundle", bundle);
+            startActivityForResult(intent, 3);
+        }
+
+        return true;
     }
 
 //check connection
