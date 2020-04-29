@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     boolean isStudente;
     boolean studentePassato;
 
+
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
     static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
     static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
@@ -36,11 +37,17 @@ public class MainActivity extends AppCompatActivity {
     private void initUI(){
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         boolean logged=settings.getBoolean("logged", false);
-
-        if(logged==true){
+        boolean is_studente = settings.getBoolean("studente", false);
+        if(logged==true&&is_studente==true){
             Intent i=new Intent(MainActivity.this, Home.class);
             i.putExtra("from_login",false);
             startActivityForResult(i,2);
+            return;
+        }
+        if(logged==true&&is_studente==false){
+            Intent i=new Intent(MainActivity.this, HomeDocente.class);
+            i.putExtra("from_login",false);
+            startActivityForResult(i,23);
             return;
         }
 
@@ -218,12 +225,16 @@ public class MainActivity extends AppCompatActivity {
                     if(isStudente==true) {
 
                         user = new User(json_data.getString("matricola"),
+                                json_data.getString("nome"),
+                                json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
                                 json_data.getString("password"), true,
                                 json_data.getString("mail_calendar"));
                     }
                     else{
                         user = new User(json_data.getString("matricola"),
+                                json_data.getString("nome"),
+                                json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
                                 json_data.getString("password"), false,
                                 json_data.getString("mail_calendar"));
@@ -251,6 +262,8 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("email_calendar",user.email_calendar);
                 editor.putString("matricola",user.matricola);
                 editor.putString("password",user.password);
+                editor.putString("nome", user.nome);
+                editor.putString("cognome", user.cognome);
                 if(user.studente==true) {
                     editor.putBoolean("studente", true);
                     Intent i=new Intent(MainActivity.this, Home.class);
