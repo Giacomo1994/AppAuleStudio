@@ -253,19 +253,27 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("password",user.password);
                 if(user.studente==true) {
                     editor.putBoolean("studente", true);
+                    Intent i=new Intent(MainActivity.this, Home.class);
+                    i.putExtra("from_login",true);
+                    startActivityForResult(i,2);
+                    finish();
                 }
                 else{
                     editor.putBoolean("studente", false);
+                    Intent i=new Intent(MainActivity.this, HomeDocente.class);
+                    i.putExtra("from_login",true);
+                    startActivityForResult(i,3);
+                    finish();
                 }
                 editor.putBoolean("logged", true);
                 editor.commit();
 
                 //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + user.email_calendar + "</b></font>"),Toast.LENGTH_LONG).show();
 
-                Intent i=new Intent(MainActivity.this, Home.class);
+               /* Intent i=new Intent(MainActivity.this, Home.class);
                 i.putExtra("from_login",true);
                 startActivityForResult(i,2);
-                finish();
+                finish();*/
             }
 
         }
