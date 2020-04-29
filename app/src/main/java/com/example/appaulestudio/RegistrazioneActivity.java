@@ -44,16 +44,16 @@ public class RegistrazioneActivity extends AppCompatActivity {
     EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password, txt_password2;
     RadioButton radioStudente,radioDocente;
     Intent intent;
-
     Universita universita=null;
-    String matricola,nome,cognome,email, password, password2;
+    String matricola,nome,cognome, email, password, password2;
+    boolean isStudente;
+    boolean isNotStudente;
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
-    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    static final String URL_REGISTRAZIONE_STUDENTE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
+    static final String URL_REGISTRAZIONE_DOCENTE="http://pmsc9.altervista.org/progetto/registrazione_docente.php";
+    //inizializziamo l'intefaccia utente
+    private void initUI(){
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
         btn_registrazione=findViewById(R.id.btn_registrazione);
@@ -67,7 +67,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
         intent=getIntent();
+    }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initUI();
 
         //riempio spinner con universita
         new riempiUniversita().execute();
@@ -114,12 +119,22 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     return;
                 }
 
+                if(radioStudente.isChecked()){
+                    isStudente=true;
+                }
+                else isStudente=false;
+
+                //inserisco il vincolo sul radiobutton nel metodo registraUtente
                 //registrazione utente
-                if(radioStudente.isChecked()) new registraUtente().execute();
+                //if(radioStudente.isChecked()) new registraUtente().execute();
+
+                //else if(radioDocente.isChecked()) new registraDocente.execute();
+                new registraUtente().execute();
             }
         });
     }
 
+    //riempie lo spinner delle univeristà
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -179,20 +194,33 @@ public class RegistrazioneActivity extends AppCompatActivity {
             });
         }
     }
-
+    //registra nella tabella utente il nuovo utente
     private class registraUtente extends AsyncTask<Void, Void, String> {
             @Override
             protected String doInBackground(Void... strings) {
                 try {
-                    URL url = new URL(URL_REGISTRAZIONE);
-                    //URL url = new URL("http://10.0.2.2/progetto/registrazione_utente.php");
+                    URL url;
+                    //vincoli sul radiobutton per chiamare registrazione studente vs docente
+                    if(isStudente==true) {
+                         url = new URL(URL_REGISTRAZIONE_STUDENTE);
+                        //URL url = new URL("http://10.0.2.2/progetto/registrazione_studente.php");
+                    }
+                    else {
+                        url= new URL(URL_REGISTRAZIONE_DOCENTE);
+                        //URL url = new URL("http://10.0.2.2/progetto/registrazione_docente.php");
+                    }
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(1000);
                     urlConnection.setConnectTimeout(1500);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);
-                    String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&nome=" + URLEncoder.encode(nome, "UTF-8") + "&cognome=" + URLEncoder.encode(cognome, "UTF-8") + "&mail=" + URLEncoder.encode(email, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
+                    String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" +
+                            URLEncoder.encode(matricola, "UTF-8") + "&nome=" +
+                            URLEncoder.encode(nome, "UTF-8") + "&cognome=" +
+                            URLEncoder.encode(cognome, "UTF-8") + "&mail=" +
+                            URLEncoder.encode(email, "UTF-8") + "&password=" +
+                            URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri);
                     dos.flush();
@@ -225,6 +253,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 else{
                     intent.putExtra("matricola", matricola);
                     intent.putExtra("password", password);
+                    //if(isStudente==true) {
+                        intent.putExtra("isStudente", isStudente);
+
+
+                    //}
+                    //else intent.putExtra("isStudente", "falso");
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                 }
