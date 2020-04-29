@@ -16,6 +16,7 @@ public class Aula implements Parcelable {
      int posti_totali;
      int posti_liberi;
      String servizi;
+     //String last_update;
 
      Map<Integer, Orario> orari;
      Orario orario;
@@ -34,9 +35,10 @@ public class Aula implements Parcelable {
         this.posti_totali=posti_totali;
         this.posti_liberi=posti_liberi;
         this.servizi=servizi;
-        orari=new HashMap<Integer, Orario>();
-        aperta=false;
-        orario=null;
+        this.orari=new HashMap<Integer, Orario>();
+        this.aperta=false;
+        this.orario=null;
+        //this.last_update=null;
     }
 
     //"yyyy-MM-dd HH:mm:ss"

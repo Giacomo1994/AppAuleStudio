@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,7 +53,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity{
     //controllare se l'utente è ancora iscritto all'universita --> Se non è più iscritto cancello le preferenze e lancio intento sulla pagina di login
     //controllare la connessione alla rete: se c'è prendo i dati dal server, li mostro e li copio in tabella locale, se non c'è li prendo dalla tabella locale
     static final String URL_RICHIEDIAULE="http://pmsc9.altervista.org/progetto/richiedi_aule.php";
@@ -60,6 +61,7 @@ public class Home extends AppCompatActivity {
     static final String URL_CHECKCONNECTION="http://pmsc9.altervista.org/progetto/check_connection.php";
     static final String URL_CHECKAULAPERTA="http://pmsc9.altervista.org/progetto/check_aula_aperta.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
+    static final String URL_LAST_UPDATE="http://pmsc9.altervista.org/progetto/home_lastUpdate.php";
 
     FrameLayout fl;
     LinearLayout frameLista, frameMappa;
@@ -104,7 +106,7 @@ protected void initUI(){
         public void onClick(View v) {
             frameMappa.setVisibility(fl.GONE);
             frameLista.setVisibility(fl.VISIBLE);
-            checkConnection();
+            checkConnection("restart");
         }
 
     });
@@ -130,25 +132,39 @@ protected void initUI(){
 
         //task asincroni
         if(b==false) new checkUtente().execute();
-        checkConnection();
+        checkConnection("create");
 
-        //listview listener
-        elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Aula a = (Aula) parent.getItemAtPosition(position);
-                Intent intent=new Intent(Home.this,InfoAulaActivity.class);
-                Bundle bundle=new Bundle();
-                bundle.putParcelable("aula",a);
-                bundle.putParcelable("orario",a.orario);
-                intent.putExtra("bundle", bundle);
-                startActivityForResult(intent, 3);
-            }
-        });
+        registerForContextMenu(elencoAule);
+    }
+
+//MENU CONTESTUALE
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
+        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza info aula");
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota posto");
+        if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per gruppo");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if(item.getItemId()==0){
+            Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
+            Intent intent=new Intent(Home.this,InfoAulaActivity.class);
+            Bundle bundle=new Bundle();
+            bundle.putParcelable("aula",a);
+            bundle.putParcelable("orario",a.orario);
+            intent.putExtra("bundle", bundle);
+            startActivityForResult(intent, 3);
+        }
+
+        return true;
     }
 
 //check connection
-    public void checkConnection(){
+    public void checkConnection(final String metodo){
         RequestQueue queue = Volley.newRequestQueue(this);
         String url =URL_CHECKCONNECTION;
 
@@ -156,7 +172,7 @@ protected void initUI(){
                     @Override
                     public void onResponse(String response) {
                         new listaAule().execute();
-                        new aggiornaSQLITE().execute();
+                        if(metodo.equals("create")) new check_last_update().execute();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -245,15 +261,72 @@ protected void initUI(){
         elencoAule.setAdapter(adapter);
         return;
 
+    }
+//controllo ultimo aggiornamento aule --> Se è il caso allora aggiorno i dati su SQLITE (task asincrono successivo)
+    private class check_last_update extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voide) {
+            try {
+                URL url;
+                HttpURLConnection urlConnection;
+                String parametri;
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayLastUpdate;
 
-
+                url = new URL(URL_LAST_UPDATE);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayLastUpdate = new JSONArray(result);
+                JSONObject data = jArrayLastUpdate.getJSONObject(0);
+                String last_update=data.getString("last_update");
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                String last_update_prefs=settings.getString("last_update", null);
+                if(last_update_prefs!=null && last_update_prefs.equals(last_update)) return null;
+                return last_update;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(String result) {
+            if(result==null) return;
+            else {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("last_update", result);
+                editor.commit();
+                new aggiornaSQLITE().execute();
+            }
+        }
     }
 
 // aggiorno i dati statici delle aule + orari default su SQLITE alla creazione dell'activity
-    //quando mi serviranno questi dati nel resto dell'app li prendo da SQLITE
     private class aggiornaSQLITE extends AsyncTask<Void, Void, Aula[]> {
         @Override
-        protected Aula[] doInBackground(Void... voids) {
+        protected Aula[] doInBackground(Void... voide) {
             try {
                 URL url;
                 HttpURLConnection urlConnection;
@@ -339,10 +412,8 @@ protected void initUI(){
             }
         }
         protected void onPostExecute(Aula[] array_aula) {
+            if(array_aula==null) return;
             db=dbHelper.getWritableDatabase();
-            if(array_aula==null) {
-                return;
-            }
             String sql1 = "DELETE FROM info_aule_offline";
             String sql2="DELETE FROM orari_offline";
             db.execSQL(sql2);
@@ -382,8 +453,8 @@ protected void initUI(){
 
                 url = new URL(URL_RICHIEDIAULE);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -407,8 +478,8 @@ protected void initUI(){
 
                 url = new URL(URL_CHECKAULAPERTA);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -501,7 +572,7 @@ protected void initUI(){
         }
     }
 
-//TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA'
+//TASK ASINCRONO PER VERIFICARE SE L'UTENTE ESISTE ANCORA ED E' ISCRITTO AD UNIVERSITA' --> SE NON LO E' PIU' VIENE PORTATO A PAGINA LOGIN
         private class checkUtente extends AsyncTask<Void, Void, Integer> {
             @Override
             protected Integer doInBackground(Void... strings) {
@@ -578,7 +649,7 @@ protected void initUI(){
         protected void onRestart() {
             super.onRestart();
             bar.setVisibility(ProgressBar.VISIBLE);
-            checkConnection();
+            checkConnection("restart");
         }
 
 //CREAZIONE MENU IN ALTO
@@ -602,6 +673,7 @@ protected void initUI(){
                 editor.putString("password", null);
                 editor.putBoolean("studente", true);
                 editor.putBoolean("logged", false);
+                editor.putString("last_update", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);
                 startActivityForResult(i, 100);
@@ -615,7 +687,7 @@ protected void initUI(){
             return true;
         }
 
-//tabella sqlite
+//DATABASE SQLITE
         private final SQLiteOpenHelper dbHelper = new SQLiteOpenHelper(Home.this, "info_aule_offline", null, 1) {
             @Override
             public void onCreate(SQLiteDatabase db) {
