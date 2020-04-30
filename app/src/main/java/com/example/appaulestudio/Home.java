@@ -145,7 +145,7 @@ protected void initUI(){
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza Informazioni Aula");
+        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza  Informazioni Aula");
         if(a.posti_liberi>0 && a.aperta==true) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
         if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per Gruppo");
         if(a.posti_liberi==0 && a.aperta==true) menu.add(Menu.FIRST, 3, Menu.FIRST+3,"Avvisami quando si libera un posto");
