@@ -3,14 +3,18 @@ package com.example.appaulestudio;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
@@ -35,6 +39,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -64,11 +69,11 @@ public class InfoAulaActivity extends AppCompatActivity {
     Intent intent;
     Bundle bundle;
     Aula aula;
-    SQLiteDatabase db;
-    Cursor cursor;
     HashMap<Integer, Orario> orari_default;
     LinkedList<Orario_Speciale> orari_speciali;
     ProgressBar bar;
+
+    SqliteManager database;
 
 
 //ON CREATE
@@ -95,8 +100,42 @@ public class InfoAulaActivity extends AppCompatActivity {
         String strMatricola=settings.getString("matricola", null);
         setTitle(strMatricola);
 
+        database=new SqliteManager(InfoAulaActivity.this);
         new check_posti().execute();
         new mostra_orari().execute();
+        riempiServizi();
+    }
+
+// riempi servizi
+    public  void riempiServizi(){
+        FlexboxLayout layout=findViewById(R.id.infoAula_flexLayout);
+        String[] servizi=aula.servizi.split(",");
+
+        for (String s: servizi) {
+            String servizio=s.toUpperCase().trim();
+
+            TextView text =new TextView(InfoAulaActivity.this);
+            text.setGravity(Gravity.CENTER_HORIZONTAL);
+            text.setPadding(15,15,15,15);
+
+            FlexboxLayout.LayoutParams params= new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(20,20, 30, 20);
+
+            GradientDrawable shape =  new GradientDrawable();
+            shape.setCornerRadius( 30 );
+            shape.setColor(Color.argb(255,74, 153, 232));
+
+            text.setText(servizio);
+            text.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+            text.setLayoutParams(params);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                text.setBackground(shape);
+                text.setTextColor(Color.WHITE);
+            }
+            layout.addView(text);
+        }
+
+
     }
 
 // ASYNC TASK --> MI DICE QUANTI POSTI SONO LIBERI
@@ -256,21 +295,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
 // METODO --> RITORNA GLI ORARI PRESI DA SQLITE
     public HashMap<Integer,Orario> mostra_orari_offline(){
-        HashMap<Integer,Orario> mappa_orari=new HashMap<Integer, Orario>();
-        db = dbHelper.getReadableDatabase();
-        String sql = "SELECT * FROM orari_offline where id_aula='"+aula.idAula+"'";
-        cursor = db.rawQuery(sql, null);  //creazione cursore
-        if(cursor==null ||cursor.getCount()==0) return null;
-
-        for(int i=0; i<cursor.getCount();i++){
-            cursor.moveToPosition(i);
-            //String id=cursor.getString(cursor.getColumnIndex("id_aula"));
-            int giorno=cursor.getInt(cursor.getColumnIndex("giorno"));
-            String apertura=cursor.getString(cursor.getColumnIndex("apertura"));
-            String chiusura=cursor.getString(cursor.getColumnIndex("chiusura"));
-            mappa_orari.put(giorno, new Orario(apertura,chiusura));
-        }
-        return mappa_orari;
+        return database.readOrariAula(aula.idAula);
     }
 
 //METODO --> STAMPA IN UI TABELLA ORARI
@@ -424,40 +449,6 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
     }
 
-//DATABASE SQLITE
-    private final SQLiteOpenHelper dbHelper = new SQLiteOpenHelper(InfoAulaActivity.this, "info_aule_offline", null, 1) {
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-
-            String sql = "CREATE TABLE \"info_aule_offline\" (\n" +
-                    "\t\"id\"\tTEXT,\n" +
-                    "\t\"nome\"\tTEXT,\n" +
-                    "\t\"luogo\"\tTEXT,\n" +
-                    "\t\"latitudine\"\tREAL,\n" +
-                    "\t\"longitudine\"\tREAL,\n" +
-                    "\t\"posti_totali\"\tINTEGER,\n" +
-                    "\t\"posti_liberi\"\tINTEGER,\n" +
-                    "\t\"flag_gruppi\"\tINTEGER,\n" +
-                    "\t\"servizi\"\tTEXT,\n" +
-                    "\tPRIMARY KEY(\"id\")\n" +
-                    ")";
-            db.execSQL(sql);
-
-            String sql1 = "CREATE TABLE \"orari_offline\" (\n" +
-                    "\t\"id_aula\"\tTEXT,\n" +
-                    "\t\"giorno\"\tINTEGER,\n" +
-                    "\t\"apertura\"\tTEXT,\n" +
-                    "\t\"chiusura\"\tTEXT,\n" +
-                    "\tPRIMARY KEY(\"id_aula\",\"giorno\")\n" +
-                    ");";
-            db.execSQL(sql1);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
-        }
-    };
 
 //MENU IN ALTO
     @Override
@@ -477,6 +468,8 @@ public class InfoAulaActivity extends AppCompatActivity {
             editor.putString("email", null);
             editor.putString("email_calendar", null);
             editor.putString("matricola", null);
+            editor.putString("nome", null);
+            editor.putString("cognome", null);
             editor.putString("password", null);
             editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);

@@ -75,8 +75,8 @@ public class Home extends AppCompatActivity{
     Intent intent;
     String strUniversita, strMatricola, strPassword;
     boolean utente_non_piu_registrato;
-    SQLiteDatabase db;
-    private Cursor cursor;
+
+    SqliteManager database;
 
 
 protected void initUI(){
@@ -130,6 +130,9 @@ protected void initUI(){
         intent=getIntent();
         boolean b=intent.getBooleanExtra("from_login",false);
 
+        //inizializzo oggetto database
+            database=new SqliteManager(Home.this);
+
         //task asincroni
         if(b==false) new checkUtente().execute();
         checkConnection("create");
@@ -142,9 +145,10 @@ protected void initUI(){
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza info aula");
-        menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota posto");
-        if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per gruppo");
+        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza Informazioni Aula");
+        if(a.posti_liberi>0 && a.aperta==true) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
+        if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per Gruppo");
+        if(a.posti_liberi==0 && a.aperta==true) menu.add(Menu.FIRST, 3, Menu.FIRST+3,"Avvisami quando si libera un posto");
     }
 
     @Override
@@ -159,7 +163,6 @@ protected void initUI(){
             intent.putExtra("bundle", bundle);
             startActivityForResult(intent, 3);
         }
-
         return true;
     }
 
@@ -188,45 +191,7 @@ protected void initUI(){
 
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
-        db = dbHelper.getReadableDatabase();
-        String sql = "SELECT * FROM info_aule_offline";
-        cursor = db.rawQuery(sql, null);
-        ArrayList<Aula> aule=new ArrayList<Aula>();
-        if(cursor==null ||cursor.getCount()==0){
-            return;
-        }
-        for(int i=0; i<cursor.getCount();i++){
-            cursor.moveToPosition(i);
-            String id=cursor.getString(cursor.getColumnIndex("id"));
-            String nome=cursor.getString(cursor.getColumnIndex("nome"));
-            String luogo=cursor.getString(cursor.getColumnIndex("luogo"));
-            double latitudine=cursor.getDouble(cursor.getColumnIndex("latitudine"));
-            double longitudine=cursor.getDouble(cursor.getColumnIndex("longitudine"));
-            int flag_gruppi=cursor.getInt(cursor.getColumnIndex("flag_gruppi"));
-            int posti_totali=cursor.getInt(cursor.getColumnIndex("posti_totali"));
-            int posti_liberi=-1;
-            //int posti_liberi=cursor.getInt(cursor.getColumnIndex("posti_liberi"));
-            String servizi=cursor.getString(cursor.getColumnIndex("servizi"));
-            Aula a=new Aula(id,nome,luogo,latitudine,longitudine,flag_gruppi,posti_totali,posti_liberi,servizi);
-            aule.add(a);
-        }
-        sql = "SELECT * FROM orari_offline";
-        cursor = db.rawQuery(sql, null);  //creazione cursore
-        if(cursor==null ||cursor.getCount()==0){
-            return;
-        }
-        for(int i=0; i<cursor.getCount();i++){
-            cursor.moveToPosition(i);
-            String id=cursor.getString(cursor.getColumnIndex("id_aula"));
-            int giorno=cursor.getInt(cursor.getColumnIndex("giorno"));
-            String apertura=cursor.getString(cursor.getColumnIndex("apertura"));
-            String chiusura=cursor.getString(cursor.getColumnIndex("chiusura"));
-            for(Aula a: aule){
-                if(a.idAula.equals(id)){
-                    a.orari.put(giorno,new Orario(apertura,chiusura));
-                }
-            }
-        }
+        ArrayList<Aula> aule=database.readListaAule();
         adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -412,25 +377,8 @@ protected void initUI(){
             }
         }
         protected void onPostExecute(Aula[] array_aula) {
-            if(array_aula==null) return;
-            db=dbHelper.getWritableDatabase();
-            String sql1 = "DELETE FROM info_aule_offline";
-            String sql2="DELETE FROM orari_offline";
-            db.execSQL(sql2);
-            db.execSQL(sql1);
-                for (Aula a : array_aula) {
-                    String sql =
-                            "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali,posti_liberi, flag_gruppi, servizi) " +
-                                    "VALUES ('" + a.idAula + "', '" + a.nome + "', '" + a.luogo + "', " + a.latitudine + "," + a.longitudine + "," + a.posti_totali + "," + a.posti_liberi + "," + a.gruppi + ",'" + a.servizi + "')";
-                    db.execSQL(sql);
-                }
-                for(Aula a : array_aula){
-                    for(int i = 1; i<=7; i++) {
-                        String sql = "INSERT INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
-                                "VALUES('" + a.idAula + "', " + i + ", '" + a.orari.get(i).apertura + "','" + a.orari.get(i).chiusura + "')";
-                        db.execSQL(sql);
-                    }
-                }
+            database.writeAuleOrari(array_aula);
+
         }
     }
 
@@ -453,8 +401,8 @@ protected void initUI(){
 
                 url = new URL(URL_RICHIEDIAULE);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(3000);
-                urlConnection.setConnectTimeout(3000);
+                urlConnection.setReadTimeout(2000);
+                urlConnection.setConnectTimeout(2000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -475,11 +423,10 @@ protected void initUI(){
                 result = sb.toString();
                 jArrayAule = new JSONArray(result);
 
-
                 url = new URL(URL_CHECKAULAPERTA);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(3000);
-                urlConnection.setConnectTimeout(3000);
+                urlConnection.setReadTimeout(2000);
+                urlConnection.setConnectTimeout(2000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -589,8 +536,8 @@ protected void initUI(){
                     JSONArray jArray;
                     url = new URL(URL_LOGIN);
                     urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setReadTimeout(1000);
-                    urlConnection.setConnectTimeout(1500);
+                    urlConnection.setReadTimeout(2000);
+                    urlConnection.setConnectTimeout(2000);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);
@@ -634,6 +581,8 @@ protected void initUI(){
                     editor.putString("email", null);
                     editor.putString("email_calendar", null);
                     editor.putString("matricola", null);
+                    editor.putString("cognome", null);
+                    editor.putString("password", null);
                     editor.putString("password", null);
                     editor.putBoolean("studente", true);
                     editor.putBoolean("logged", false);
@@ -686,41 +635,5 @@ protected void initUI(){
             }
             return true;
         }
-
-//DATABASE SQLITE
-        private final SQLiteOpenHelper dbHelper = new SQLiteOpenHelper(Home.this, "info_aule_offline", null, 1) {
-            @Override
-            public void onCreate(SQLiteDatabase db) {
-
-                String sql = "CREATE TABLE \"info_aule_offline\" (\n" +
-                        "\t\"id\"\tTEXT,\n" +
-                        "\t\"nome\"\tTEXT,\n" +
-                        "\t\"luogo\"\tTEXT,\n" +
-                        "\t\"latitudine\"\tREAL,\n" +
-                        "\t\"longitudine\"\tREAL,\n" +
-                        "\t\"posti_totali\"\tINTEGER,\n" +
-                        "\t\"posti_liberi\"\tINTEGER,\n" +
-                        "\t\"flag_gruppi\"\tINTEGER,\n" +
-                        "\t\"servizi\"\tTEXT,\n" +
-                        "\tPRIMARY KEY(\"id\")\n" +
-                        ")";
-                db.execSQL(sql);
-
-                String sql1 = "CREATE TABLE \"orari_offline\" (\n" +
-                        "\t\"id_aula\"\tTEXT,\n" +
-                        "\t\"giorno\"\tINTEGER,\n" +
-                        "\t\"apertura\"\tTEXT,\n" +
-                        "\t\"chiusura\"\tTEXT,\n" +
-                        "\tPRIMARY KEY(\"id_aula\",\"giorno\")\n" +
-                        ");";
-                db.execSQL(sql1);
-            }
-
-            @Override
-            public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
-            }
-        };
-
 
 }
