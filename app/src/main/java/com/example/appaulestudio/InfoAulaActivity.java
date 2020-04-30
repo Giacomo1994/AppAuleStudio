@@ -338,7 +338,8 @@ public class InfoAulaActivity extends AppCompatActivity {
             Collections.sort(orari_chiusura.get(data));
         }
 
-        LinkedList<String> arrayList=new LinkedList<String>();
+        //LinkedList<String> arrayList=new LinkedList<String>();
+        LinkedList<Orario_Ufficiale> orari_ufficiali=new LinkedList<Orario_Ufficiale>();
         for (int i = 0; i < 7; i++) {
             String data = dateString[i];
             String giorno=daysOfWeekString[i];
@@ -353,44 +354,88 @@ public class InfoAulaActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                if (aperta == true)
-                    arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + chiusura_default.substring(0,5));
-                else arrayList.add(giorno + "\nChiusa");
+                if (aperta == true){
+                    //arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,apertura_default.substring(0,5),null,null,chiusura_default.substring(0,5)));
+                    //apertura e chiusura default ok
+                }
+                else{
+                    //arrayList.add(giorno + "\nChiusa");
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,null,null,null,null));
+                    // chiusa tutto il giorno ok
+
+                }
             }
             else if (orari_apertura.get(data).size() ==1 && orari_chiusura.get(data).size() == 0) {
-                arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),null,null,chiusura_default.substring(0,5)));
+                //apre dopo ok
             }
             else if (orari_apertura.get(data).size() == 0 && orari_chiusura.get(data).size() ==1) {
-                if(orari_chiusura.get(data).get(0).equals(apertura_default)) arrayList.add(giorno + "\nChiusa");
-                else arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5));
+                if(orari_chiusura.get(data).get(0).equals(apertura_default)){
+                    //arrayList.add(giorno + "\nChiusa");
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,null,null,null,null));
+                    //chiusa tutto il giorno ok
+                }
+                else{
+                    //arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,apertura_default.substring(0,5),null,null,orari_chiusura.get(data).get(0).substring(0,5)));
+                    //chiude prima ok
+                }
             }
             else if(orari_apertura.get(data).size() == 1 && orari_chiusura.get(data).size() == 1){
-                if(orari_apertura.get(data).get(0).compareTo(orari_chiusura.get(data).get(0))>0&&orari_chiusura.get(data).get(0).compareTo(apertura_default)>0)
-                    arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
-                else if(orari_apertura.get(data).get(0).compareTo(orari_chiusura.get(data).get(0))>0&&orari_chiusura.get(data).get(0).equals(apertura_default))
-                    arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
-                else arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5));
+                if(orari_apertura.get(data).get(0).compareTo(orari_chiusura.get(data).get(0))>0&&orari_chiusura.get(data).get(0).compareTo(apertura_default)>0){
+                    //arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,apertura_default.substring(0,5),orari_chiusura.get(data).get(0).substring(0,5),orari_apertura.get(data).get(0).substring(0,5),chiusura_default.substring(0,5)));
+                    //BUCO IN MEZZO ok
+                }
+                else if(orari_apertura.get(data).get(0).compareTo(orari_chiusura.get(data).get(0))>0&&orari_chiusura.get(data).get(0).equals(apertura_default)){
+                    //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),null,null,chiusura_default.substring(0,5)));
+                    //apre dopo ok
+                }
+                else{
+                    //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),null,null,orari_chiusura.get(data).get(0).substring(0,5)));
+                    //riapre(default o dopo) e chiude prima ok
+                }
             }
             else if(orari_apertura.get(data).size() == 2 && orari_chiusura.get(data).size() == 1){
-                arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(1).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(1).substring(0,5) + "\n" + chiusura_default.substring(0,5));
+                orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),orari_chiusura.get(data).get(0).substring(0,5),orari_apertura.get(data).get(1).substring(0,5),chiusura_default.substring(0,5)));
+                //BUCO IN MEZZO ok
             }
             else if(orari_apertura.get(data).size() == 1 && orari_chiusura.get(data).size() == 2){
-                if(!orari_chiusura.get(data).get(0).equals(apertura_default))
-                    arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(1).substring(0,5) +"\n");
-                else arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + " " + orari_chiusura.get(data).get(1).substring(0,5));
+                if(!orari_chiusura.get(data).get(0).equals(apertura_default)){
+                    //arrayList.add(giorno + "\n" + apertura_default.substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(1).substring(0,5) +"\n");
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,apertura_default.substring(0,5),orari_chiusura.get(data).get(0).substring(0,5),orari_apertura.get(data).get(0).substring(0,5),orari_chiusura.get(data).get(1).substring(0,5)));
+                    //BUCO IN MEZZO ok
+                }
+                else{
+                    //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(1).substring(0,5));
+                    orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),null,null,orari_chiusura.get(data).get(1).substring(0,5)));
+                    //apre dopo e chiude prima ok
+                }
             }
             else if(orari_apertura.get(data).size() == 2 && orari_chiusura.get(data).size() == 2){
-                arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(1).substring(0,5) + "\n" + orari_chiusura.get(data).get(1).substring(0,5));
+                //arrayList.add(giorno + "\n" + orari_apertura.get(data).get(0).substring(0,5) + "\n" + orari_chiusura.get(data).get(0).substring(0,5) + "\n" +orari_apertura.get(data).get(1).substring(0,5) + "\n" + orari_chiusura.get(data).get(1).substring(0,5));
+                orari_ufficiali.add(new Orario_Ufficiale(data, giorno,orari_apertura.get(data).get(0).substring(0,5),orari_chiusura.get(data).get(0).substring(0,5),orari_apertura.get(data).get(1).substring(0,5),orari_chiusura.get(data).get(1).substring(0,5)));
+                //BUCO IN MEZZO ok
             }
         }
+        Collections.sort(orari_ufficiali);
+
         LinearLayout layout=findViewById(R.id.infAula_linear);
         LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         params.gravity=Gravity.CENTER_HORIZONTAL;
-        for (int i = 0; i < arrayList.size(); i++) {
+        for (Orario_Ufficiale ouf:orari_ufficiali) {
             TextView text =new TextView(InfoAulaActivity.this);
             text.setGravity(Gravity.CENTER_HORIZONTAL);
             text.setPadding(5,0,5,0);
-            SpannableStringBuilder spannable=new SpannableStringBuilder(arrayList.get(i));
+            Spannable spannable=null;
+            if(ouf.getApertura()==null&&ouf.getChiusura()==null) spannable=new SpannableStringBuilder(ouf.getGiorno()+"\n"+"Chiusa");
+            else if(ouf.getChiusura_intermedia()==null&&ouf.getRiapertura_intermedia()==null) spannable=new SpannableStringBuilder(ouf.getGiorno()+"\n"+ouf.getApertura()+"\n"+ouf.getChiusura());
+            else spannable=new SpannableStringBuilder(ouf.getGiorno()+"\n"+ouf.getApertura()+"\n"+ouf.getChiusura_intermedia()+"\n-\n"+ouf.getRiapertura_intermedia()+"\n"+ouf.getChiusura());
             spannable.setSpan(new StyleSpan(Typeface.BOLD),0,4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             text.setText(spannable);
             text.setLayoutParams(params);
