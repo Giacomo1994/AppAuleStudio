@@ -215,7 +215,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);
-                    String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" +
+                    String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8") + "&matricola=" +
                             URLEncoder.encode(matricola, "UTF-8") + "&nome=" +
                             URLEncoder.encode(nome, "UTF-8") + "&cognome=" +
                             URLEncoder.encode(cognome, "UTF-8") + "&mail=" +

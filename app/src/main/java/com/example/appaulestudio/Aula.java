@@ -7,21 +7,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Aula implements Parcelable {
-     String idAula;
-     String nome;
-     String luogo;
-     double latitudine;
-     double longitudine;
-     int gruppi;
-     int posti_totali;
-     int posti_liberi;
-     String servizi;
-     //String last_update;
+    private String idAula;
+    private String nome;
+    private String luogo;
+    private double latitudine;
+    private double longitudine;
+    private int gruppi;
+    private int posti_totali;
+    private int posti_liberi;
+    private String servizi;
 
-     Map<Integer, Orario> orari;
-     Orario orario;
+    private Map<Integer, Orario> orari;
+    private Orario orario;
 
-     boolean aperta;
+    private boolean aperta;
 
 
     public Aula(String idAula, String nome, String luogo, double latitudione,
@@ -38,19 +37,102 @@ public class Aula implements Parcelable {
         this.orari=new HashMap<Integer, Orario>();
         this.aperta=false;
         this.orario=null;
-        //this.last_update=null;
     }
 
-    //"yyyy-MM-dd HH:mm:ss"
-    public boolean isAperta(String currentTime){
-        //controllo orari speciali
-        if(aperta==false) return false;
-        //controllo orari default
-        String orarioAttuale=currentTime.substring(11,19);
-        String aperturaDefault=orario.apertura;
-        String chiusuraDefault=orario.chiusura;
-        if(orarioAttuale.compareTo(aperturaDefault)<0||orarioAttuale.compareTo(chiusuraDefault)>0) return false;
-        return true;
+    public String getIdAula() {
+        return idAula;
+    }
+
+    public void setIdAula(String idAula) {
+        this.idAula = idAula;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getLuogo() {
+        return luogo;
+    }
+
+    public void setLuogo(String luogo) {
+        this.luogo = luogo;
+    }
+
+    public double getLatitudine() {
+        return latitudine;
+    }
+
+    public void setLatitudine(double latitudine) {
+        this.latitudine = latitudine;
+    }
+
+    public double getLongitudine() {
+        return longitudine;
+    }
+
+    public void setLongitudine(double longitudine) {
+        this.longitudine = longitudine;
+    }
+
+    public int getGruppi() {
+        return gruppi;
+    }
+
+    public void setGruppi(int gruppi) {
+        this.gruppi = gruppi;
+    }
+
+    public int getPosti_totali() {
+        return posti_totali;
+    }
+
+    public void setPosti_totali(int posti_totali) {
+        this.posti_totali = posti_totali;
+    }
+
+    public int getPosti_liberi() {
+        return posti_liberi;
+    }
+
+    public void setPosti_liberi(int posti_liberi) {
+        this.posti_liberi = posti_liberi;
+    }
+
+    public String getServizi() {
+        return servizi;
+    }
+
+    public void setServizi(String servizi) {
+        this.servizi = servizi;
+    }
+
+    public Map<Integer, Orario> getOrari() {
+        return orari;
+    }
+
+    public void setOrari(Map<Integer, Orario> orari) {
+        this.orari = orari;
+    }
+
+    public Orario getOrario() {
+        return orario;
+    }
+
+    public void setOrario(Orario orario) {
+        this.orario = orario;
+    }
+
+    public boolean isAperta() {
+        return aperta;
+    }
+
+    public void setAperta(boolean aperta) {
+        this.aperta = aperta;
     }
 
     protected Aula(Parcel in) {

@@ -6,10 +6,26 @@ import android.os.Parcelable;
 import java.io.Serializable;
 
 public class Orario implements Serializable, Parcelable {
-    String chiusura;
-    String apertura;
+    private String chiusura;
+    private String apertura;
     public Orario(String apertura, String chiusura) {
         this.chiusura = chiusura;
+        this.apertura = apertura;
+    }
+
+    public String getChiusura() {
+        return chiusura;
+    }
+
+    public void setChiusura(String chiusura) {
+        this.chiusura = chiusura;
+    }
+
+    public String getApertura() {
+        return apertura;
+    }
+
+    public void setApertura(String apertura) {
         this.apertura = apertura;
     }
 

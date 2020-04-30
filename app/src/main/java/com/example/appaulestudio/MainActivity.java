@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                String parametri = "universita=" + URLEncoder.encode(universita.codice, "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
+                String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -256,15 +256,15 @@ public class MainActivity extends AppCompatActivity {
             else{
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putString("universita",universita.codice);
-                editor.putString("nome_universita",universita.nome);
-                editor.putString("email",user.email);
-                editor.putString("email_calendar",user.email_calendar);
-                editor.putString("matricola",user.matricola);
-                editor.putString("password",user.password);
-                editor.putString("nome", user.nome);
-                editor.putString("cognome", user.cognome);
-                if(user.studente==true) {
+                editor.putString("universita",universita.getCodice());
+                editor.putString("nome_universita",universita.getCodice());
+                editor.putString("email",user.getEmail());
+                editor.putString("email_calendar",user.getEmail_calendar());
+                editor.putString("matricola",user.getMatricola());
+                editor.putString("password",user.getPassword());
+                editor.putString("nome", user.getNome());
+                editor.putString("cognome", user.getCognome());
+                if(user.isStudente()==true) {
                     editor.putBoolean("studente", true);
                     Intent i=new Intent(MainActivity.this, Home.class);
                     i.putExtra("from_login",true);

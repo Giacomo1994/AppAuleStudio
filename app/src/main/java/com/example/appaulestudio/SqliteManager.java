@@ -22,13 +22,13 @@ public class SqliteManager {
         for (Aula a : array_aula) {
             String sql =
                     "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali,posti_liberi, flag_gruppi, servizi) " +
-                            "VALUES ('" + a.idAula + "', '" + a.nome + "', '" + a.luogo + "', " + a.latitudine + "," + a.longitudine + "," + a.posti_totali + "," + a.posti_liberi + "," + a.gruppi + ",'" + a.servizi + "')";
+                            "VALUES ('" + a.getIdAula() + "', '" + a.getNome() + "', '" + a.getLuogo() + "', " + a.getLatitudine() + "," + a.getLongitudine() + "," + a.getPosti_totali() + "," + a.getPosti_liberi() + "," + a.getGruppi() + ",'" + a.getServizi() + "')";
             db.execSQL(sql);
         }
         for(Aula a : array_aula){
             for(int i = 1; i<=7; i++) {
                 String sql = "INSERT INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
-                        "VALUES('" + a.idAula + "', " + i + ", '" + a.orari.get(i).apertura + "','" + a.orari.get(i).chiusura + "')";
+                        "VALUES('" + a.getIdAula() + "', " + i + ", '" + a.getOrari().get(i).getApertura() + "','" + a.getOrari().get(i).getChiusura() + "')";
                 db.execSQL(sql);
             }
         }
@@ -69,8 +69,8 @@ public class SqliteManager {
             String apertura=cursor.getString(cursor.getColumnIndex("apertura"));
             String chiusura=cursor.getString(cursor.getColumnIndex("chiusura"));
             for(Aula a: aule){
-                if(a.idAula.equals(id)){
-                    a.orari.put(giorno,new Orario(apertura,chiusura));
+                if(a.getIdAula().equals(id)){
+                    a.getOrari().put(giorno,new Orario(apertura,chiusura));
                 }
             }
         }

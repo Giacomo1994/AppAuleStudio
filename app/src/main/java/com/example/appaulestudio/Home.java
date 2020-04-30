@@ -73,7 +73,7 @@ public class Home extends AppCompatActivity{
     ProgressBar bar;
 
     Intent intent;
-    String strUniversita, strMatricola, strPassword;
+    String strUniversita, strMatricola, strPassword, strNome;
     boolean utente_non_piu_registrato;
 
     SqliteManager database;
@@ -116,7 +116,8 @@ protected void initUI(){
      strUniversita=settings.getString("universita", null);
      strMatricola=settings.getString("matricola", null);
      strPassword=settings.getString("password", null);
-     setTitle(strMatricola);
+     strNome=settings.getString("nome", null);
+     setTitle(strNome);
 
 }
 
@@ -146,9 +147,9 @@ protected void initUI(){
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
         menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza  Informazioni Aula");
-        if(a.posti_liberi>0 && a.aperta==true) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-        if(a.gruppi==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per Gruppo");
-        if(a.posti_liberi==0 && a.aperta==true) menu.add(Menu.FIRST, 3, Menu.FIRST+3,"Avvisami quando si libera un posto");
+        if(a.getPosti_liberi()>0 && a.isAperta()==true) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
+        if(a.getGruppi()==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per Gruppo");
+        if(a.getPosti_liberi()==0 && a.isAperta()==true) menu.add(Menu.FIRST, 3, Menu.FIRST+3,"Avvisami quando si libera un posto");
     }
 
     @Override
@@ -159,7 +160,7 @@ protected void initUI(){
             Intent intent=new Intent(Home.this,InfoAulaActivity.class);
             Bundle bundle=new Bundle();
             bundle.putParcelable("aula",a);
-            bundle.putParcelable("orario",a.orario);
+            bundle.putParcelable("orario",a.getOrario());
             intent.putExtra("bundle", bundle);
             startActivityForResult(intent, 3);
         }
@@ -204,12 +205,12 @@ protected void initUI(){
                 immagine_home = convertView.findViewById(R.id.row_image_home);
                 statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
-                nomeAula_home.setText(item.nome);
-                luogoAula_home.setText(item.luogo);
-                postiLiberi_home.setText("Posti totali: " + item.posti_totali);
+                nomeAula_home.setText(item.getNome());
+                luogoAula_home.setText(item.getLuogo());
+                postiLiberi_home.setText("Posti totali: " + item.getPosti_totali());
 
                 //per gruppi o no
-                if (item.gruppi == 0) {
+                if (item.getGruppi() == 0) {
                     flagGruppi_home.setText("Disponibile per i gruppi");
                     immagine_home.setImageResource(R.drawable.group);
                 } else {
@@ -219,7 +220,7 @@ protected void initUI(){
                 //orario
                 Calendar calendar = Calendar.getInstance();
                 int today = calendar.get(Calendar.DAY_OF_WEEK);
-                statoAula_home.setText(""+item.orari.get(today).apertura+" - "+item.orari.get(today).chiusura);
+                statoAula_home.setText(""+item.getOrari().get(today).getApertura()+" - "+item.getOrari().get(today).getChiusura());
                 return convertView;
             }
         };
@@ -368,7 +369,7 @@ protected void initUI(){
                     String apertura = json_data.getString("apertura");
                     String chiusura = json_data.getString("chiusura");
                     for (Aula a : array_aula) {
-                        if (a.idAula.equals(id)) a.orari.put(day,new Orario(apertura,chiusura));
+                        if (a.getIdAula().equals(id)) a.getOrari().put(day,new Orario(apertura,chiusura));
                     }
                 }
                 return array_aula;
@@ -461,7 +462,7 @@ protected void initUI(){
                     JSONObject json_data = jArrayAuleAperte.getJSONObject(i);
                     String id = json_data.getString("id_aula");
                     for (Aula a : array_aula) {
-                        if (a.idAula.equals(id)) a.aperta=true;
+                        if (a.getIdAula().equals(id)) a.setAperta(true);
                     }
                 }
                 return array_aula;
@@ -490,12 +491,12 @@ protected void initUI(){
                     immagine_home = convertView.findViewById(R.id.row_image_home);
                     statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
-                    nomeAula_home.setText(item.nome);
-                    luogoAula_home.setText(item.luogo);
-                    postiLiberi_home.setText("Posti liberi: " + item.posti_liberi + " su " + item.posti_totali);
+                    nomeAula_home.setText(item.getNome());
+                    luogoAula_home.setText(item.getLuogo());
+                    postiLiberi_home.setText("Posti liberi: " + item.getPosti_liberi() + " su " + item.getPosti_totali());
 
                     //per gruppi o no
-                    if (item.gruppi == 0) {
+                    if (item.getGruppi() == 0) {
                         flagGruppi_home.setText("Disponibile per i gruppi");
                         immagine_home.setImageResource(R.drawable.group);
                     } else {
@@ -503,7 +504,7 @@ protected void initUI(){
                         immagine_home.setImageResource(R.drawable.singolo);
                     }
                     //chiusa-aperta
-                    if (item.aperta == true){
+                    if (item.isAperta() == true){
                         statoAula_home.setTextColor(Color.argb(255, 12, 138, 17));
                         statoAula_home.setText("Attualmente Aperta");
                     }

@@ -91,14 +91,14 @@ public class InfoAulaActivity extends AppCompatActivity {
         intent = getIntent();
         bundle=intent.getBundleExtra("bundle");
         aula=bundle.getParcelable("aula");
-        infoAula_nome.setText(aula.nome);
-        infoAula_luogo.setText(aula.luogo);
-        if(aula.gruppi==0) infoAula_gruppi.setText("Disponibile per i gruppi");
+        infoAula_nome.setText(aula.getNome());
+        infoAula_luogo.setText(aula.getLuogo());
+        if(aula.getGruppi()==0) infoAula_gruppi.setText("Disponibile per i gruppi");
         else infoAula_gruppi.setText("Non disponibile per i gruppi");
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        String strMatricola=settings.getString("matricola", null);
-        setTitle(strMatricola);
+        String strNome=settings.getString("nome", null);
+        setTitle(strNome);
 
         database=new SqliteManager(InfoAulaActivity.this);
         new check_posti().execute();
@@ -109,7 +109,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 // riempi servizi
     public  void riempiServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_flexLayout);
-        String[] servizi=aula.servizi.split(",");
+        String[] servizi=aula.getServizi().split(",");
 
         for (String s: servizi) {
             String servizio=s.toUpperCase().trim();
@@ -161,7 +161,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.idAula, "UTF-8") + "&is_gruppi=" + URLEncoder.encode(""+aula.gruppi, "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") + "&is_gruppi=" + URLEncoder.encode(""+aula.getGruppi(), "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -188,7 +188,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(Integer[] result) {
             if(result==null){
-                infoAula_posti.setText("Posti Totali: "+aula.posti_totali);
+                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
                 return;
             }
             infoAula_posti.setText("Posti Totali: "+result[0]+ " - "+"Posti Disponibili: "+result[1]);
@@ -219,7 +219,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.idAula, "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -243,7 +243,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.idAula, "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -295,7 +295,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
 // METODO --> RITORNA GLI ORARI PRESI DA SQLITE
     public HashMap<Integer,Orario> mostra_orari_offline(){
-        return database.readOrariAula(aula.idAula);
+        return database.readOrariAula(aula.getIdAula());
     }
 
 //METODO --> STAMPA IN UI TABELLA ORARI
@@ -330,8 +330,8 @@ public class InfoAulaActivity extends AppCompatActivity {
             orari_chiusura.put(s, new ArrayList<String>());
         }
         for (Orario_Speciale o : orari_speciali) {
-            if(orari_apertura.containsKey(o.giorno_riapertura)) orari_apertura.get(o.giorno_riapertura).add(o.ora_riapertura);
-            if(orari_chiusura.containsKey(o.giorno_chiusura))orari_chiusura.get(o.giorno_chiusura).add(o.ora_chiusura);
+            if(orari_apertura.containsKey(o.getGiorno_riapertura())) orari_apertura.get(o.getGiorno_riapertura()).add(o.getOra_riapertura());
+            if(orari_chiusura.containsKey(o.getGiorno_chiusura()))orari_chiusura.get(o.getGiorno_chiusura()).add(o.getOra_chiusura());
         }
         for (String data : dateString) {
             Collections.sort(orari_apertura.get(data));
@@ -342,13 +342,13 @@ public class InfoAulaActivity extends AppCompatActivity {
         for (int i = 0; i < 7; i++) {
             String data = dateString[i];
             String giorno=daysOfWeekString[i];
-            String apertura_default = orari_default.get(daysOfWeekInt[i]).apertura;
-            String chiusura_default = orari_default.get(daysOfWeekInt[i]).chiusura;
+            String apertura_default = orari_default.get(daysOfWeekInt[i]).getApertura();
+            String chiusura_default = orari_default.get(daysOfWeekInt[i]).getChiusura();
 
             if (orari_apertura.get(data).size() == 0 && orari_chiusura.get(data).size() == 0) {
                 boolean aperta = true;
                 for (Orario_Speciale o : orari_speciali) {
-                    if (data.compareTo(o.giorno_chiusura) > 0 && data.compareTo(o.giorno_riapertura) < 0) {
+                    if (data.compareTo(o.getGiorno_chiusura()) > 0 && data.compareTo(o.getGiorno_riapertura()) < 0) {
                         aperta = false;
                         break;
                     }
@@ -423,7 +423,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.idAula, "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
