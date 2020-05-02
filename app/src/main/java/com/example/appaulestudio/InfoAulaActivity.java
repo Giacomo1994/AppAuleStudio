@@ -115,11 +115,11 @@ public class InfoAulaActivity extends AppCompatActivity {
         database=new SqliteManager(InfoAulaActivity.this);
         new check_aperta().execute();
         new mostra_orari().execute();
-        riempiServizi();
+        getServizi();
     }
 
 // riempi servizi
-    public  void riempiServizi(){
+    public  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
         String[] servizi=aula.getServizi().split(",");
 
@@ -134,7 +134,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
             GradientDrawable shape =  new GradientDrawable();
             shape.setCornerRadius( 30 );
-            shape.setColor(Color.argb(255,135, 204, 75));
+            shape.setColor(Color.argb(255,25, 191, 111));
 
             text.setText(servizio);
             text.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
