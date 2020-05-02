@@ -5,17 +5,14 @@ public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>{
     private String giorno;
     private String apertura;
     private String chiusura;
-    private String riapertura_intermedia;
-    private String chiusura_intermedia;
 
 
-    public Orario_Ufficiale(String data, String giorno, String apertura, String chiusura_intermedia, String riapertura_intermedia, String chiusura) {
+
+    public Orario_Ufficiale(String data, String giorno, String apertura, String chiusura) {
         this.data = data;
         this.giorno = giorno;
         this.apertura = apertura;
         this.chiusura = chiusura;
-        this.chiusura_intermedia=chiusura_intermedia;
-        this.riapertura_intermedia=riapertura_intermedia;
     }
 
     public String getData() {
@@ -48,22 +45,6 @@ public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>{
 
     public void setChiusura(String chiusura) {
         this.chiusura = chiusura;
-    }
-
-    public String getRiapertura_intermedia() {
-        return riapertura_intermedia;
-    }
-
-    public void setRiapertura_intermedia(String riapertura_intermedia) {
-        this.riapertura_intermedia = riapertura_intermedia;
-    }
-
-    public String getChiusura_intermedia() {
-        return chiusura_intermedia;
-    }
-
-    public void setChiusura_intermedia(String chiusura_intermedia) {
-        this.chiusura_intermedia = chiusura_intermedia;
     }
 
     @Override
