@@ -18,6 +18,11 @@
         android:textSize="24sp"
         app:fontFamily="@font/marko_one" />
 
+    <ImageView
+        android:id="@+id/imageView9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,6 +44,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:text="Docente" />
+
     </RadioGroup>
 
     <TableLayout
