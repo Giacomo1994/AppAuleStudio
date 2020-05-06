@@ -214,6 +214,8 @@ protected void initUI(){
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
         ArrayList<Aula> aule=database.readListaAule();
+        if(aule==null) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Error</b></font>"), Toast.LENGTH_LONG).show();
+
         adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -400,7 +402,6 @@ protected void initUI(){
         }
         protected void onPostExecute(Aula[] array_aula) {
             database.writeAuleOrari(array_aula);
-
         }
     }
 
