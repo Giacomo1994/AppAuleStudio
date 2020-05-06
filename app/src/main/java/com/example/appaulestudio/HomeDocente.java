@@ -49,9 +49,6 @@ public class HomeDocente extends AppCompatActivity {
         setContentView(R.layout.activity_home_docente);
         initUI();
 
-
-
-
         new listaCorsi().execute();
     }
 

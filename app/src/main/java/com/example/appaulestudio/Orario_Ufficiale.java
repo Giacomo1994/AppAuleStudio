@@ -1,10 +1,16 @@
 package com.example.appaulestudio;
 
-public class Orario_Speciale {
-    private String data, apertura, chiusura;
+public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>{
+    private String data;
+    private String giorno;
+    private String apertura;
+    private String chiusura;
 
-    public Orario_Speciale(String data, String apertura, String chiusura) {
+
+
+    public Orario_Ufficiale(String data, String giorno, String apertura, String chiusura) {
         this.data = data;
+        this.giorno = giorno;
         this.apertura = apertura;
         this.chiusura = chiusura;
     }
@@ -15,6 +21,14 @@ public class Orario_Speciale {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getGiorno() {
+        return giorno;
+    }
+
+    public void setGiorno(String giorno) {
+        this.giorno = giorno;
     }
 
     public String getApertura() {
@@ -31,5 +45,10 @@ public class Orario_Speciale {
 
     public void setChiusura(String chiusura) {
         this.chiusura = chiusura;
+    }
+
+    @Override
+    public int compareTo(Orario_Ufficiale o) {
+        return this.getData().compareTo(o.getData());
     }
 }

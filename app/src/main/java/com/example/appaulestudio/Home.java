@@ -138,6 +138,20 @@ protected void initUI(){
         if(b==false) new checkUtente().execute();
         checkConnection("create");
 
+        //eventi list view
+            elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Aula a= (Aula) parent.getItemAtPosition(position);
+                    Intent intent=new Intent(Home.this,InfoAulaActivity.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putParcelable("aula",a);
+                    bundle.putParcelable("orario",a.getOrario());
+                    intent.putExtra("bundle", bundle);
+                    startActivityForResult(intent, 3);
+                }
+            });
+
         registerForContextMenu(elencoAule);
     }
 
@@ -146,16 +160,23 @@ protected void initUI(){
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-        menu.add(Menu.FIRST, 0, Menu.FIRST,"Visualizza  Informazioni Aula");
-        if(a.getPosti_liberi()>0 && a.isAperta()==true) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-        if(a.getGruppi()==0) menu.add(Menu.FIRST, 2, Menu.FIRST+2,"Prenota per Gruppo");
-        if(a.getPosti_liberi()==0 && a.isAperta()==true) menu.add(Menu.FIRST, 3, Menu.FIRST+3,"Avvisami quando si libera un posto");
+        if(a.getPosti_liberi()<0) return; //se  non c'è connessione non posso fare nulla
+
+        if(a.getGruppi()==1){ //aula singoli
+            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
+            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
+        }
+        else{ //aula gruppi
+            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
+            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
+            menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Prenota per Gruppo");
+        }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        if(item.getItemId()==0){
+        /*if(item.getItemId()==0){
             Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
             Intent intent=new Intent(Home.this,InfoAulaActivity.class);
             Bundle bundle=new Bundle();
@@ -163,7 +184,7 @@ protected void initUI(){
             bundle.putParcelable("orario",a.getOrario());
             intent.putExtra("bundle", bundle);
             startActivityForResult(intent, 3);
-        }
+        }*/
         return true;
     }
 
@@ -220,7 +241,7 @@ protected void initUI(){
                 //orario
                 Calendar calendar = Calendar.getInstance();
                 int today = calendar.get(Calendar.DAY_OF_WEEK);
-                statoAula_home.setText(""+item.getOrari().get(today).getApertura()+" - "+item.getOrari().get(today).getChiusura());
+                statoAula_home.setText(""+item.getOrari().get(today).getApertura().substring(0,5)+" - "+item.getOrari().get(today).getChiusura().substring(0,5));
                 return convertView;
             }
         };
@@ -228,7 +249,7 @@ protected void initUI(){
         return;
 
     }
-//controllo ultimo aggiornamento aule --> Se è il caso allora aggiorno i dati su SQLITE (task asincrono successivo)
+//controllo ultimo aggiornamento aule --> Se non coincide con quello salvato nell preferenze allora aggiorno i dati su SQLITE (task asincrono successivo)
     private class check_last_update extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voide) {
@@ -289,7 +310,7 @@ protected void initUI(){
         }
     }
 
-// aggiorno i dati statici delle aule + orari default su SQLITE alla creazione dell'activity
+// aggiorno i dati statici delle aule + orari default su SQLITE
     private class aggiornaSQLITE extends AsyncTask<Void, Void, Aula[]> {
         @Override
         protected Aula[] doInBackground(Void... voide) {
@@ -383,7 +404,7 @@ protected void initUI(){
         }
     }
 
-//RIEMPIO LISTVIEW CON I DATI CHE MI SERVONO, PRENDENDOLI DA REMOTO SE C'E' CONNESSIONE OPPURE DA SQLITE
+//RIEMPIO LISTVIEW CON I DATI CHE MI SERVONO, PRENDENDOLI DA REMOTO
     private class listaAule extends AsyncTask<Void, Void, Aula[]> {
         @Override
         protected Aula[] doInBackground(Void... strings) {
@@ -475,7 +496,7 @@ protected void initUI(){
         @Override
         protected void onPostExecute(Aula[] array_aula) {
             bar.setVisibility(ProgressBar.GONE);
-            if (array_aula == null) { //prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
+            if (array_aula == null) {
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
@@ -493,7 +514,8 @@ protected void initUI(){
 
                     nomeAula_home.setText(item.getNome());
                     luogoAula_home.setText(item.getLuogo());
-                    postiLiberi_home.setText("Posti liberi: " + item.getPosti_liberi() + " su " + item.getPosti_totali());
+                    if(item.isAperta()) postiLiberi_home.setText("Posti liberi: " + item.getPosti_liberi() + " su " + item.getPosti_totali());
+                    else postiLiberi_home.setText("Posti totali: " + item.getPosti_totali());
 
                     //per gruppi o no
                     if (item.getGruppi() == 0) {
@@ -606,7 +628,10 @@ protected void initUI(){
 //CREAZIONE MENU IN ALTO
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
-            menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
+
+            menu.add(Menu.FIRST, 3, Menu.FIRST, "Gestisci Gruppi");
+            menu.add(Menu.FIRST, 1, Menu.FIRST+2, "Logout");
+
             menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
             return true;
         }
@@ -634,6 +659,23 @@ protected void initUI(){
                 Intent i = new Intent(this, Home.class);
                 startActivityForResult(i, 100);
                 finish();
+            }
+            if(item.getItemId()==3){
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                /*editor.putString("universita", null);
+                editor.putString("nome_universita", null);
+                editor.putString("email", null);
+                editor.putString("email_calendar", null);
+                editor.putString("matricola", null);
+                //editor.putString("password", null);
+                editor.putBoolean("studente", true);
+                //editor.putBoolean("logged", true);
+                editor.putString("last_update", null);*/
+                editor.commit();
+                Intent i = new Intent(this, GroupActivity.class);
+                startActivityForResult(i, 159);
+               // finish();
             }
             return true;
         }
