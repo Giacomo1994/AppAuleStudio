@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".HomeDocente"></activity>
+        <activity android:name=".CreaCodici"></activity>
+        <activity android:name=".HomeDocente" />
         <activity android:name=".InfoAulaActivity" />
         <activity android:name=".Home" />
         <activity android:name=".RegistrazioneActivity" />

@@ -1,5 +1,7 @@
 package com.example.appaulestudio;
 
+import java.util.Collection;
+
 public class Corso {
 
 
@@ -28,5 +30,11 @@ public class Corso {
     public String getMatricolaDocente() {
         return matricolaDocente;
     }
+
+    public String toString(){
+        String s=codiceCorso+" - "+nomeCorso;
+        return s;
+    }
+
 }
 

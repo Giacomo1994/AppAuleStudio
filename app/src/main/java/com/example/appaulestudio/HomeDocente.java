@@ -1,7 +1,5 @@
 package com.example.appaulestudio;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -16,8 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,12 +25,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -45,6 +40,7 @@ public class HomeDocente extends AppCompatActivity {
     TextView textHomeDocente;
     TextView infoCorso ;
     ListView elencoCorsi;
+    Button creaGruppi;
 
 
     @Override
@@ -72,7 +68,18 @@ public class HomeDocente extends AppCompatActivity {
         elencoCorsi=findViewById(R.id.elencoCorsi);
         setTitle(strNome+" "+strCognome);
        // Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+strMatricola+strUniversita+"</b></font>"), Toast.LENGTH_LONG).show();
-
+        creaGruppi= findViewById(R.id.btnCreaCodici);
+        creaGruppi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent= new Intent(HomeDocente.this, CreaCodici.class);
+                intent.putExtra("nome",strNome);
+                intent.putExtra("cognome",strCognome);
+                intent.putExtra("matricola", strMatricola);
+                intent.putExtra("universita", strUniversita);
+                startActivity(intent);
+            }
+        });
 
 
     }
