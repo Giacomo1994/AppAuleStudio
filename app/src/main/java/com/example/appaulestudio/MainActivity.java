@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     boolean isStudente;
     boolean studentePassato;
 
+    ImageView studente_docente;
+
 
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
     static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
@@ -58,6 +60,29 @@ public class MainActivity extends AppCompatActivity {
         btn_login=findViewById(R.id.btn_login);
         radioStudente=findViewById(R.id.radioButton);
         radioDocente=findViewById(R.id.radioDocente);
+        studente_docente = findViewById(R.id.imageView9);
+
+
+        if(radioStudente.isChecked()){
+            studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.studente));
+        }else {
+            studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
+        }
+
+
+       radioStudente.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
+
+           @Override
+           public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+               if(radioStudente.isChecked()){
+                   studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.studente));
+               }else {
+                   studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
+               }
+
+           }
+       });
+
 
         //link a registrazione
         String stringa="Oppure registrati";
@@ -108,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
-
     }
 
     protected void onResume() {
