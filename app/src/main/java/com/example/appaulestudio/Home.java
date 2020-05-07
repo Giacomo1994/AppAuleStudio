@@ -629,10 +629,11 @@ protected void initUI(){
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
 
-            menu.add(Menu.FIRST, 3, Menu.FIRST, "Gestisci Gruppi");
-            menu.add(Menu.FIRST, 1, Menu.FIRST+2, "Logout");
-
-            menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
+            menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Gestione Prenotazioni");
+            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
+            menu.add(Menu.FIRST, 1, Menu.FIRST+4, "Logout");
+            menu.add(Menu.FIRST, 4, Menu.FIRST+3, "Impostazioni");
+            menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
             return true;
         }
 
