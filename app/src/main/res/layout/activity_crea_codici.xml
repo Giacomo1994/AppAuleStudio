@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".CreaCodici">
+
+    <Spinner
+        android:id="@+id/materieDocente"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:spinnerMode="dialog" />
+
+    <TextView
+        android:id="@+id/textnome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <EditText
+        android:id="@+id/numeroPartecipanti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="numero massimo studenti"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/numeroOre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="monte ore totale per gruppo"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/numeroGruppi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="numeroGruppi"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:id="@+id/dataScadenza"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selezionare la data di scadenza delle ore:" />
+
+    <CalendarView
+        android:id="@+id/calendario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <Button
+        android:id="@+id/btnCreaCodici"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Genera i codici" />
+</LinearLayout>

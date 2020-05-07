@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context=".PrenotazioneStudenteActivity">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    tools:context=".PrenotazioneStudenteActivity">
+
+                        <TextView
+                            android:id="@+id/pren_nome_aula"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="@color/intestazione"
+                            android:textSize="24sp"
+                            app:fontFamily="@font/marko_one" />
+
+                        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+                            android:id="@+id/img_plant"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginBottom="10dp" />
+
+                        <LinearLayout
+                            android:id="@+id/linear_spinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                                <TextView
+                                    android:id="@+id/textView17"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Seleziona tavolo disponibile:" />
+
+                                <Spinner
+                                    android:id="@+id/spinner_tavoli"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:spinnerMode="dialog" />
+
+                        </LinearLayout>
+
+                        <TableLayout
+                            android:id="@+id/pren_tab_layout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:visibility="gone">
+
+                                <TableRow
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent">
+
+                                        <TextView
+                                            android:id="@+id/textView22"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Data:"
+                                            android:textSize="16sp" />
+
+                                        <TextView
+                                            android:id="@+id/pren_et_data"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:text="TextView"
+                                            android:textSize="16sp" />
+                                </TableRow>
+
+                                <TableRow
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent">
+
+                                        <TextView
+                                            android:id="@+id/textView24"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginRight="10dp"
+                                            android:text="Ora inizio:"
+                                            android:textSize="16sp" />
+
+                                        <TextView
+                                            android:id="@+id/pren_et_inizio"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="TextView"
+                                            android:textSize="16sp" />
+                                </TableRow>
+
+                                <TableRow
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent">
+
+                                        <TextView
+                                            android:id="@+id/textView27"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Ora fine:"
+                                            android:textSize="16sp" />
+
+                                        <TextView
+                                            android:id="@+id/pren_et_fine"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:text="TextView"
+                                            android:textSize="16sp" />
+                                </TableRow>
+
+                        </TableLayout>
+
+                </LinearLayout>
+        </ScrollView>
+
+        <Button
+            android:id="@+id/pren_btn"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/button_layout"
+            android:text="Prenota"
+            android:textColor="@color/button_text"
+            android:visibility="gone" />
+</LinearLayout>

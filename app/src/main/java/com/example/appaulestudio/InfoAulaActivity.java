@@ -16,6 +16,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -75,6 +76,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     Aula aula;
     HashMap<Integer, Orario> orari_default;
     LinkedList<Orario_Speciale> orari_speciali;
+    LinkedList<Orario_Ufficiale> orari_giusti;
     ProgressBar bar;
 
     SqliteManager database;
@@ -115,11 +117,24 @@ public class InfoAulaActivity extends AppCompatActivity {
         database=new SqliteManager(InfoAulaActivity.this);
         new check_aperta().execute();
         new mostra_orari().execute();
-        riempiServizi();
+        getServizi();
+
+        btnPrenotazionePosto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(InfoAulaActivity.this,PrenotazioneStudenteActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("aula", aula);
+                bundle.putParcelableArrayList("orari",new ArrayList<Orario_Ufficiale>(orari_giusti));
+                i.putExtra("dati",bundle);
+
+                startActivityForResult(i, 999);
+            }
+        });
     }
 
-// riempi servizi
-    public  void riempiServizi(){
+// METODO --> Li mostra servizi, presi da aula passata con intent
+    public  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
         String[] servizi=aula.getServizi().split(",");
 
@@ -134,7 +149,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
             GradientDrawable shape =  new GradientDrawable();
             shape.setCornerRadius( 30 );
-            shape.setColor(Color.argb(255,135, 204, 75));
+            shape.setColor(Color.argb(255,25, 191, 111));
 
             text.setText(servizio);
             text.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
@@ -149,7 +164,10 @@ public class InfoAulaActivity extends AppCompatActivity {
 
     }
 
-// ASYNC TASK --> MI DICE QUANTI POSTI SONO LIBERI
+// ASYNC TASK-->Chiamato quando l'aula è aperta
+//              Mostra il numero di posti attualmente disponibili
+//              Per i singoli viene mostrato il pulsante "Prenota Posto" oppure "Avvisami se si libera posto"
+//              Se l'aula è disponibile per gruppi viene anche mostrato il pulsante "Prenota per gruppo"
     private class check_posti extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voids) {
@@ -198,15 +216,24 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Integer[] result) {
+            bar.setVisibility(View.GONE);
             if(result==null) return;
             infoAula_posti.setText("Posti Totali: "+result[0]+ " - "+"Posti Liberi: "+result[1]);
-            if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
-            if(result[1]==0) btnNotifica.setVisibility(View.VISIBLE);
-            else btnPrenotazionePosto.setVisibility(View.VISIBLE);
+            if(aula.getGruppi()==0)btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
+            else btnPrenotazioneGruppo.setVisibility(View.GONE);
+            if(result[1]==0){
+                btnNotifica.setVisibility(View.VISIBLE);
+                btnPrenotazionePosto.setVisibility(View.GONE);
+
+            }
+            else{
+                btnPrenotazionePosto.setVisibility(View.VISIBLE);
+                btnNotifica.setVisibility(View.GONE);
+            }
         }
     }
 
-// ASYNC TASK --> MOSTRA ORARI
+// ASYNC TASK --> mostra orari default incrociati con speciali da oggi a 7 giorni. Se non c'è connessione mostra solo quelli di default presi da SQLITE
     private class mostra_orari extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -292,9 +319,7 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            bar.setVisibility(View.GONE);
             if(result==null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
                 orari_default=mostra_orari_offline();
                 orari_speciali=null;
                 if(orari_default==null){
@@ -356,6 +381,7 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
 
             Collections.sort(orari_ufficiali);
+            orari_giusti=orari_ufficiali;
 
             String inizio=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[0])).substring(0,5);
             String fine=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[6])).substring(0,5);
@@ -377,12 +403,13 @@ public class InfoAulaActivity extends AppCompatActivity {
                 text.setLayoutParams(params);
                 layout.addView(text);
             }
-        }catch (Exception e){
-
-        }
+        }catch (Exception e){}
     }
 
-//ASYNC TASK --> CONTROLLA SE L'AULA è ATTUALMENTE APERTA
+//ASYNC TASK --> controlla se l'aula è attualmente aperta
+//              se è aperta viene chiamato il task asincrono checkposti()
+//              se è chiusa vengono mostrati solo i pulsanti "prenota posto" e "prenota per gruppo" e vengono mostrati solo i posti totali
+//              se non c'è connessione non vengono mostrati i pulsanti e vengono mostrati solo i posti totali
     private class check_aperta extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -428,26 +455,32 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            LinearLayout layoutPulsanti=findViewById(R.id.infoAula_pulsanti);
-            Button prenotaPosto=new Button(InfoAulaActivity.this);
-            prenotaPosto.setText("Prenota Posto");
-            Button prenotaGruppo=new Button(InfoAulaActivity.this);
-            prenotaGruppo.setText("Prenota per gruppo");
-            Button notificami=new Button(InfoAulaActivity.this);
-
-            if(result==null) //non c'è connessione
-                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
-
-
+            if(result==null) { //non c'è connessione
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                infoAula_posti.setText("Posti Totali: " + aula.getPosti_totali());
+                btnPrenotazionePosto.setVisibility(View.GONE);
+                btnPrenotazioneGruppo.setVisibility(View.GONE);
+                btnNotifica.setVisibility(View.GONE);
+                bar.setVisibility(View.GONE);
+            }
             else if(result.equals("Chiusa")){ //è chiusa
                 infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
                 btnPrenotazionePosto.setVisibility(View.VISIBLE);
                 if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
+                btnNotifica.setVisibility(View.GONE);
+                bar.setVisibility(View.GONE);
             }
             else if(result.equals("Aperta")){ //è aperta
                 new check_posti().execute();
             }
         }
+    }
+
+//ON RESTART --> rieseguo i task che richiedono un continuo aggiornamento --> Aula aperta/chiusa e posti disponibili
+    protected void onRestart() {
+        super.onRestart();
+        bar.setVisibility(View.VISIBLE);
+        new check_aperta().execute();
     }
 
 

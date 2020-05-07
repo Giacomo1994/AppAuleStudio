@@ -32,7 +32,6 @@ public class SqliteManager {
                 db.execSQL(sql);
             }
         }
-        db.close();
     }
 
     public ArrayList<Aula> readListaAule(){

@@ -1,6 +1,9 @@
 package com.example.appaulestudio;
 
-public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>{
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>, Parcelable {
     private String data;
     private String giorno;
     private String apertura;
@@ -51,4 +54,38 @@ public class Orario_Ufficiale implements Comparable<Orario_Ufficiale>{
     public int compareTo(Orario_Ufficiale o) {
         return this.getData().compareTo(o.getData());
     }
+
+    protected Orario_Ufficiale(Parcel in) {
+        data = in.readString();
+        giorno = in.readString();
+        apertura = in.readString();
+        chiusura = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(data);
+        dest.writeString(giorno);
+        dest.writeString(apertura);
+        dest.writeString(chiusura);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Orario_Ufficiale> CREATOR = new Creator<Orario_Ufficiale>() {
+        @Override
+        public Orario_Ufficiale createFromParcel(Parcel in) {
+            return new Orario_Ufficiale(in);
+        }
+
+        @Override
+        public Orario_Ufficiale[] newArray(int size) {
+            return new Orario_Ufficiale[size];
+        }
+    };
+
+
 }
