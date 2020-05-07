@@ -35,15 +35,17 @@ public class IscrizioneActivity extends AppCompatActivity {
     Button iscriviti;
     String str_codice_gruppo;
    // ArrayAdapter adapter;
-    TextView text_dialog;
-
-    String[] array_info;
-
+    TextView text_dialog, infoCodice;
+    TextView output;
+    //String[] array_info;
+    String nomeProf, cognomeProf, nomeCorso;
     public void initUI() {
-        codice_gruppo = findViewById(R.id.codice_gruppo);
-        iscriviti = findViewById(R.id.iscriviti);
-        array_info = null;
 
+        iscriviti = findViewById(R.id.iscriviti);
+        codice_gruppo = findViewById(R.id.codice_gruppo);
+        //array_info = new String[3];
+        nomeProf=""; cognomeProf=""; nomeCorso="";
+        output= findViewById(R.id.output);
 
     }
 
@@ -53,17 +55,20 @@ public class IscrizioneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_iscrizione);
         this.initUI();
 
-        iscriviti.setOnClickListener(new Button.OnClickListener() {
+        iscriviti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                str_codice_gruppo=codice_gruppo.getText().toString();
+
+                str_codice_gruppo=codice_gruppo.getText().toString().trim();
+                //output.setText(str_codice_gruppo);
                 new get_info_dialog().execute();
-                Dialog d = new Dialog(IscrizioneActivity.this);
-                d.setTitle("Conferma iscrizione");
-                d.setCancelable(false);
-                d.setContentView(R.layout.dialog_conferma_iscrizione);
-                text_dialog.setText("Ti stai iscrivendo al gruppo "+ Arrays.toString(array_info));
-                d.show();
+                //output.setText(nomeProf+nomeCorso);
+
+                //output.append(nomeProf+" "+cognomeProf+" "+nomeCorso);
+                /*
+                *//*text_dialog.setText("Ti stai iscrivendo al gruppo/n"+"Corso: "+nomeCorso+
+                        "/nProfessore: "+nomeProf+" "+cognomeProf);*//*
+                d.show();*/
 
             }
         });
@@ -73,10 +78,10 @@ public class IscrizioneActivity extends AppCompatActivity {
 
 
 
-    private class get_info_dialog extends AsyncTask<Void, Void, String[]> {
+    private class get_info_dialog extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected String[] doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
 
 
             try {
@@ -104,7 +109,7 @@ public class IscrizioneActivity extends AppCompatActivity {
 
                 //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
                 //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
-                params = "$codice_corso=" + URLEncoder.encode(str_codice_gruppo, "UTF-8");
+                params = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8");
 
 
                 dos = new DataOutputStream(urlConnection.getOutputStream());
@@ -129,16 +134,21 @@ public class IscrizioneActivity extends AppCompatActivity {
                 //faccio un ciclo for per tutti gli elementi all'interno dell'array json che sono corsi
                 //per ogni corso mi prendo le relative informazioni relative ad esso e mi creo un array di oggetti corso
                 //che poi metterò nella listview
-                array_info = new String[jArrayInfo.length()];
+                //array_info = new String[jArrayInfo.length()];
 
                 for (int i = 0; i < jArrayInfo.length(); i++) {
                     JSONObject json_data = jArrayInfo.getJSONObject(i);
-                    array_info[i] = (json_data.getString("nome") +
+                   /* array_info[i] = (json_data.getString("nome") +
                             json_data.getString("cognome") +
-                            json_data.getString("nome_corso"));
+                            json_data.getString("nome_corso"));*/
+                   //array_info[i]=json_data[i];
+                    nomeProf=json_data.getString("nome");
+                    cognomeProf=json_data.getString("cognome");
+                    nomeCorso=json_data.getString("nome_corso");
                 }
 
-                return array_info;
+                //return array_info;
+                return null;
             } catch (Exception e) {
                 Log.e("log_tag", "Error " + e.toString());
                 return null;
@@ -146,8 +156,22 @@ public class IscrizioneActivity extends AppCompatActivity {
 
         }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Dialog d = new Dialog(IscrizioneActivity.this);
+            d.setTitle("Conferma iscrizione");
+            d.setCancelable(false);
+            d.setContentView(R.layout.dialog_conferma_iscrizione);
+            text_dialog= d.findViewById(R.id.text_dialog);
+
+
+            text_dialog.setText("Ti stai iscrivendo al gruppo\n"+"Corso: "+nomeCorso+
+                    "\nProfessore: "+nomeProf+" "+cognomeProf);
+            d.show();
 
         }
+    }
 
 
     }
