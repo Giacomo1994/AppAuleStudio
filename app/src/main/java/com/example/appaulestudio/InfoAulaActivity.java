@@ -16,6 +16,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -75,6 +76,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     Aula aula;
     HashMap<Integer, Orario> orari_default;
     LinkedList<Orario_Speciale> orari_speciali;
+    LinkedList<Orario_Ufficiale> orari_giusti;
     ProgressBar bar;
 
     SqliteManager database;
@@ -116,6 +118,19 @@ public class InfoAulaActivity extends AppCompatActivity {
         new check_aperta().execute();
         new mostra_orari().execute();
         getServizi();
+
+        btnPrenotazionePosto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(InfoAulaActivity.this,PrenotazioneStudenteActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("aula", aula);
+                bundle.putParcelableArrayList("orari",new ArrayList<Orario_Ufficiale>(orari_giusti));
+                i.putExtra("dati",bundle);
+
+                startActivityForResult(i, 999);
+            }
+        });
     }
 
 // riempi servizi
@@ -356,6 +371,7 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
 
             Collections.sort(orari_ufficiali);
+            orari_giusti=orari_ufficiali;
 
             String inizio=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[0])).substring(0,5);
             String fine=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[6])).substring(0,5);
@@ -378,7 +394,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                 layout.addView(text);
             }
         }catch (Exception e){
-
         }
     }
 
