@@ -476,7 +476,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
     }
 
-//ON RESTART
+//ON RESTART --> rieseguo i task che richiedono un continuo aggiornamento --> Aula aperta/chiusa e posti disponibili
     protected void onRestart() {
         super.onRestart();
         bar.setVisibility(View.VISIBLE);
