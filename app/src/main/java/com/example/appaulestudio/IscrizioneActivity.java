@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,9 @@ public class IscrizioneActivity extends AppCompatActivity {
     TextView output;
     //String[] array_info;
     String nomeProf, cognomeProf, nomeCorso;
+
+    ImageView close_dialog;
+
     public void initUI() {
 
         iscriviti = findViewById(R.id.iscriviti);
@@ -159,16 +164,27 @@ public class IscrizioneActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Dialog d = new Dialog(IscrizioneActivity.this);
+            final Dialog d = new Dialog(IscrizioneActivity.this);
             d.setTitle("Conferma iscrizione");
+
             d.setCancelable(false);
+
             d.setContentView(R.layout.dialog_conferma_iscrizione);
+
+            d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+
+
             text_dialog= d.findViewById(R.id.text_dialog);
-
-
-            text_dialog.setText("Ti stai iscrivendo al gruppo\n"+"Corso: "+nomeCorso+
-                    "\nProfessore: "+nomeProf+" "+cognomeProf);
+            close_dialog = d.findViewById(R.id.close_dialog);
+            text_dialog.setText("Ti stai iscrivendo al gruppo per il corso di "+nomeCorso+
+                    " tenuto dal professor "+nomeProf+" "+cognomeProf);
             d.show();
+            close_dialog.setOnClickListener(new ImageView.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    d.cancel();
+                }
+            });
 
         }
     }
