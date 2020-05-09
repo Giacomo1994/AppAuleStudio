@@ -172,8 +172,18 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            if(result==null || result.equals("Impossibile prenotare")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare!</b></font>"), Toast.LENGTH_LONG).show();
+            if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione al server!</b></font>"), Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            if(result.equals("Impossibile prenotare")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare! Non ci sono posti disponibili</b></font>"), Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            if(result.equals("ER")){
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Hai già una prenotazione attiva nell'orario specificato!</b></font>"), Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }

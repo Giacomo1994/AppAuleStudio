@@ -21,8 +21,7 @@
         <activity android:name=".RegistrazioneActivity" />
         <activity android:name=".IscrizioneActivity"/>
         <activity android:name=".PrenotazioneStudenteActivity"/>
-
-
+        <activity android:name=".PrenotazioniAttiveActivity"/>
         <activity android:name=".MainActivity">
 
             <intent-filter>
