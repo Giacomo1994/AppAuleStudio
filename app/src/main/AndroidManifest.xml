@@ -13,14 +13,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PrenotazioniAttiveActivity"></activity>
-        <activity android:name=".PrenotazioneStudenteActivity" />
-        <activity android:name=".CreaCodici" />
+        <activity android:name=".GroupActivity"></activity>
+        <activity android:name=".CreaCodici"></activity>
         <activity android:name=".HomeDocente" />
         <activity android:name=".InfoAulaActivity" />
         <activity android:name=".Home" />
         <activity android:name=".RegistrazioneActivity" />
+        <activity android:name=".IscrizioneActivity"/>
+        <activity android:name=".PrenotazioneStudenteActivity"/>
+
+
         <activity android:name=".MainActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
