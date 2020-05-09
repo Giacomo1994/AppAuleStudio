@@ -81,7 +81,6 @@
                                             android:id="@+id/pren_et_data"
                                             android:layout_width="wrap_content"
                                             android:layout_height="match_parent"
-                                            android:text="TextView"
                                             android:textSize="16sp" />
                                 </TableRow>
 
@@ -101,7 +100,6 @@
                                             android:id="@+id/pren_et_inizio"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="TextView"
                                             android:textSize="16sp" />
                                 </TableRow>
 
@@ -120,7 +118,6 @@
                                             android:id="@+id/pren_et_fine"
                                             android:layout_width="wrap_content"
                                             android:layout_height="match_parent"
-                                            android:text="TextView"
                                             android:textSize="16sp" />
                                 </TableRow>
 

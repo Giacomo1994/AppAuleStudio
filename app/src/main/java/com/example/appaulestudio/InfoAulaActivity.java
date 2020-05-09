@@ -122,13 +122,14 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazionePosto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i=new Intent(InfoAulaActivity.this,PrenotazioneStudenteActivity.class);
-                Bundle bundle=new Bundle();
-                bundle.putParcelable("aula", aula);
-                bundle.putParcelableArrayList("orari",new ArrayList<Orario_Ufficiale>(orari_giusti));
-                i.putExtra("dati",bundle);
-
-                startActivityForResult(i, 999);
+                if(aula.getGruppi()!=0) {
+                    Intent i = new Intent(InfoAulaActivity.this, PrenotazioneStudenteActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("aula", aula);
+                    bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
+                    i.putExtra("dati", bundle);
+                    startActivityForResult(i, 999);
+                }
             }
         });
     }
