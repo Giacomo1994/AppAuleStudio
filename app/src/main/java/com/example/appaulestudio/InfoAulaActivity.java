@@ -134,7 +134,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         });
     }
 
-// METODO --> Li mostra servizi, presi da aula passata con intent
+// METODO --> mostra servizi, presi da aula passata con intent
     public  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
         String[] servizi=aula.getServizi().split(",");
@@ -483,45 +483,4 @@ public class InfoAulaActivity extends AppCompatActivity {
         bar.setVisibility(View.VISIBLE);
         new check_aperta().execute();
     }
-
-
-//MENU IN ALTO
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
-        menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 1) {
-            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            editor.putString("email", null);
-            editor.putString("email_calendar", null);
-            editor.putString("matricola", null);
-            editor.putString("nome", null);
-            editor.putString("cognome", null);
-            editor.putString("password", null);
-            editor.putBoolean("studente", true);
-            editor.putBoolean("logged", false);
-            editor.putString("last_update", null);
-            editor.commit();
-            Intent i = new Intent(this, MainActivity.class);
-            startActivityForResult(i, 100);
-            finish();
-        }
-        if (item.getItemId() == 2) {
-            Intent i = new Intent(this, Home.class);
-            startActivityForResult(i, 100);
-        }
-
-        return true;
-    }
-
-
-
 }

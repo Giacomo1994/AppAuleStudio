@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -43,19 +45,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
+//QUANDO CLICCO SU TAVOLO ESEGUO TASK ASINCRONO
+//QUANDO PRENOTO CON SUCCESSO SALVO IN LOCALE
 
 public class PrenotazioneStudenteActivity extends AppCompatActivity {
-    static final String URL_TAVOLI_APERTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli_aulaAperta.php";
-    static final String URL_TAVOLI_CHIUSA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli_aulaChiusa.php";
+    static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli.php";
     static final String URL_PRENOTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_prenota.php";
-    static final String URL_PRENOTAZIONI_PER_TAVOLO="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_prenotazioni_per_tavolo.php";
 
     Intent intent;
     Bundle bundle;
     Aula aula;
     ArrayList<Orario_Ufficiale> orari_ufficiali;
     ArrayList<Tavolo> tavoli;
-    String data_, apertura_, chiusura_, data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
+    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
+    String strMatricola;
     boolean aperta=false;
     Tavolo tavolo;
 
@@ -88,34 +91,29 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         String strNome=settings.getString("nome", null);
+        strMatricola=settings.getString("matricola", null);
         setTitle(strNome);
         txt_nome_aula.setText(aula.getNome());
 
+        //scarica piantina aula
+        new load_image().execute();
 
-        //esecuzione task asincroni
-        new load_image().execute(); //caricamento cartina aula
-
+        //prende tavoli disponibili
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();
         String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
         String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
-
         for(int i=0;i<orari_ufficiali.size();i++){
             if(orari_ufficiali.get(i).getData().equals(date_now)){
-                if(orari_ufficiali.get(i).getApertura()!=null&&time_now.compareTo(orari_ufficiali.get(i).getApertura()) > 0 && time_now.compareTo(orari_ufficiali.get(i).getChiusura()) < 0){
-                    //se in questo momento l'aula è aperta
-                    new get_tavoli_aperta().execute();
-                    aperta=true;
-                }
-                else if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
+                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
                     aperta=false;
                 }
                 else{
                     //se l'aula è chiusa ma aprirà di oggi oppure apre domani
-                    new get_tavoli_chiusa().execute();
-                    aperta = false;
+                     new get_tavoli().execute();
+                     aperta=true;
                 }
                 break;
             }
@@ -125,30 +123,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         btn_prenota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar c=Calendar.getInstance();
-                Date d=c.getTime();
-                String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
-                String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
-                for(Orario_Ufficiale of: orari_ufficiali){
-                    if(of.getData().equals(date_now)){
-                        if(aperta==false && of.getApertura()!=null&&time_now.compareTo(of.getApertura()) > 0 && time_now.compareTo(of.getChiusura()) < 0){
-                            //prenotazione a cavallo tra chiusura ed apertura --> eccezione
-                            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>OPS! C'è stato un problema ! L'aula è passata da chiusa ad aperta durante la prenotazione e non è stato possibile e non è stato possibile prenotare! Riprova!</b></font>"), Toast.LENGTH_LONG).show();
-                            finish();
-                        }
-                        else if(aperta==true && time_now.compareTo(of.getChiusura()) > 0 ){
-                            //prenotazione a cavallo tra apertura e chiusura --> eccezione
-                            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>OPS! C'è stato un problema ! L'aula è passata da aperta a chiusa durante la prenotazione e non è stato possibile e non è stato possibile prenotare! Riprova!</b></font>"), Toast.LENGTH_LONG).show();
-                            finish();
-                        }
-                        else new prenota().execute();
-                        break;
-                    }
-                }
+                new prenota().execute();
             }
         });
     }
-
+//TASK ASINCRONO PRENOTA
     private class prenota extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -163,18 +142,12 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
-                String stato_aula="";
-                if(aperta==true){
-                    orario_inizio_prenotazione=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
-                    stato_aula="aperta";
-                }
-                else stato_aula="chiusa";
+                if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
 
                 String parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") +
                         "&tavolo=" + URLEncoder.encode(""+tavolo.getNum_tavolo(), "UTF-8") +
-                        "&stato_aula=" + URLEncoder.encode(stato_aula, "UTF-8") +
                         "&inizio_prenotazione=" + URLEncoder.encode(inizio_prenotazione, "UTF-8") +
                         "&fine_prenotazione=" + URLEncoder.encode(fine_prenotazione, "UTF-8") +
                         "&matricola=" + URLEncoder.encode(matricola, "UTF-8") ;
@@ -205,12 +178,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 return;
             }
             Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Prenotazione avvenuta con successo</b></font>"), Toast.LENGTH_LONG).show();
-            //salvo prenotazione in sql locale
-            //scateno intent
+            Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
         }
     }
-
-
 
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override
@@ -235,9 +207,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             imgView.setImage(ImageSource.bitmap(result));
         }
     }
-
-//AULA APERTA
-    private class get_tavoli_aperta extends AsyncTask<Void, Void, String> {
+//TASK ASINCRONO TAVOLI DISPONIBILI
+    private class get_tavoli extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -252,14 +223,14 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 String result;
                 JSONArray jArray;
 
-                url = new URL(URL_TAVOLI_APERTA);
+                url = new URL(URL_TAVOLI);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(2000);
                 urlConnection.setConnectTimeout(2000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8")+"&matricola=" + URLEncoder.encode(strMatricola, "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -289,7 +260,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(tavoli==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
             if(tavoli.size()==0){
@@ -308,117 +279,29 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
-                        Calendar cal = Calendar.getInstance();
-                        Date date = cal.getTime();
-                        String dataString = new SimpleDateFormat("yyyy-MM-dd").format(date);
-                        for (Orario_Ufficiale of : orari_ufficiali) {
-                            if (of.getData().equals(dataString)) {
-                                data_prenotazione = of.getData();
-                                String giorno = "";
-                                try {
-                                    giorno = new SimpleDateFormat("E", Locale.ITALY).format(new SimpleDateFormat("yyyy-MM-dd").parse(data_prenotazione));
-                                } catch (ParseException e) {
-                                }
-                                txt_data.setText(giorno.toUpperCase() + " " + data_prenotazione.substring(8, 10) + "/" + data_prenotazione.substring(5, 7));
-                                txt_inizio.setText("A prenotazione confermata");
-                                orario_fine_prenotazione = of.getChiusura();
-                                txt_fine.setText(orario_fine_prenotazione.substring(0, 5));
-                                return;
-                            }
-                        }
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-        }
-    }
-
-    private class get_tavoli_chiusa extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                URL url;
-                HttpURLConnection urlConnection;
-                String parametri;
-                DataOutputStream dos;
-                InputStream is;
-                BufferedReader reader;
-                StringBuilder sb;
-                String line;
-                String result;
-                JSONArray jArray;
-
-                url = new URL(URL_TAVOLI_CHIUSA);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(2000);
-                urlConnection.setConnectTimeout(2000);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-
-                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
-                dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();
-                urlConnection.connect();
-                is = urlConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                is.close();
-                result = sb.toString();
-                jArray = new JSONArray(result);
-                tavoli=new ArrayList<Tavolo>();
-
-                for (int i = 0; i < jArray.length(); i++) {
-                    JSONObject json_data = jArray.getJSONObject(i);
-                    Tavolo t= new Tavolo(aula.getIdAula(),json_data.getInt("num_tavolo"),json_data.getInt("posti_totali"),json_data.getInt("posti_liberi"));
-                    if(t.getPosti_liberi()>0) tavoli.add(t);
-                }
-                return "OK";
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        protected void onPostExecute(String result) {
-            if(tavoli==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione</b></font>"), Toast.LENGTH_LONG).show();
-                return;
-            }
-            if(tavoli.size()==0){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono tavoli disponibili</b></font>"), Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            spinner=findViewById(R.id.spinner_tavoli);
-            adapter = new ArrayAdapter(PrenotazioneStudenteActivity.this, android.R.layout.simple_list_item_1, tavoli);
-            spinner.setAdapter(adapter);
-            linear_spinner.setVisibility(View.VISIBLE);
-            tab_layout.setVisibility(View.VISIBLE);
-            btn_prenota.setVisibility(View.VISIBLE);
-
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    tavolo= (Tavolo) parent.getItemAtPosition(position);
-                    Calendar cal=Calendar.getInstance();
-                    Date date=cal.getTime();
-                    String dataString=new SimpleDateFormat("yyyy-MM-dd").format(date);
+                    Calendar cal = Calendar.getInstance();
+                    Date date = cal.getTime();
+                    String dataString = new SimpleDateFormat("yyyy-MM-dd").format(date);
                     String orarioString =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(date);
+
                     for(int i=0;i<orari_ufficiali.size();i++){
                         if(orari_ufficiali.get(i).getData().equals(dataString)){
-                            if(orari_ufficiali.get(i).getChiusura()==null||orarioString.compareTo(orari_ufficiali.get(i).getChiusura())>0){
+                            if(orari_ufficiali.get(i).getChiusura()==null){ //aula chiusa oggi ma domani apre
                                 data_prenotazione=orari_ufficiali.get(i+1).getData();
                                 orario_inizio_prenotazione=orari_ufficiali.get(i+1).getApertura();
                                 orario_fine_prenotazione=orari_ufficiali.get(i+1).getChiusura();
                             }
-                            else if(orarioString.compareTo(orari_ufficiali.get(i).getApertura())<0){
+                            else if(orarioString.compareTo(orari_ufficiali.get(i).getApertura())>=0&&orarioString.compareTo(orari_ufficiali.get(i).getChiusura())<0){ //aula attualmente aperta
+                                data_prenotazione=orari_ufficiali.get(i).getData();
+                                orario_inizio_prenotazione=null;
+                                orario_fine_prenotazione=orari_ufficiali.get(i).getChiusura();
+                            }
+                            else if(orarioString.compareTo(orari_ufficiali.get(i).getChiusura())>0){ //siamo dopo orario chiusura
+                                data_prenotazione=orari_ufficiali.get(i+1).getData();
+                                orario_inizio_prenotazione=orari_ufficiali.get(i+1).getApertura();
+                                orario_fine_prenotazione=orari_ufficiali.get(i+1).getChiusura();
+                            }
+                            else if(orarioString.compareTo(orari_ufficiali.get(i).getApertura())<0){ //siamo prima di orario apertura
                                 data_prenotazione=orari_ufficiali.get(i).getData();
                                 orario_inizio_prenotazione=orari_ufficiali.get(i).getApertura();
                                 orario_fine_prenotazione=orari_ufficiali.get(i).getChiusura();
@@ -427,7 +310,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                             try { giorno=new SimpleDateFormat("E", Locale.ITALY).format(new SimpleDateFormat("yyyy-MM-dd").parse(data_prenotazione));
                             } catch (ParseException e) { }
                             txt_data.setText(giorno.toUpperCase()+" "+data_prenotazione.substring(8,10)+"/"+data_prenotazione.substring(5,7));
-                            txt_inizio.setText(orario_inizio_prenotazione.substring(0,5));
+                            if(orario_inizio_prenotazione==null) txt_inizio.setText("A prenotazione confermata");
+                            else txt_inizio.setText(orario_inizio_prenotazione.substring(0,5));
                             txt_fine.setText(orario_fine_prenotazione.substring(0,5));
                             return;
                         }
@@ -438,11 +322,35 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
                 }
             });
-
         }
     }
 
-
-
+//ON RESTART
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        linear_spinner.setVisibility(View.GONE);
+        tab_layout.setVisibility(View.GONE);
+        btn_prenota.setVisibility(View.GONE);
+        Calendar c=Calendar.getInstance();
+        Date d=c.getTime();
+        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
+        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
+        for(int i=0;i<orari_ufficiali.size();i++){
+            if(orari_ufficiali.get(i).getData().equals(date_now)){
+                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
+                    //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
+                    aperta=false;
+                }
+                else{
+                    //se l'aula è chiusa ma aprirà di oggi oppure apre domani
+                    new get_tavoli().execute();
+                    aperta=true;
+                }
+                break;
+            }
+        }
+    }
 }
 
