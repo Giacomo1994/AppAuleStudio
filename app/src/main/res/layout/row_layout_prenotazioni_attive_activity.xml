@@ -41,6 +41,24 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/riga_ora_fine"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textVew35"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:text="Fine:" />
+
+        <TextView
+            android:id="@+id/row_fine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </TableRow>
+
+    <TableRow
         android:id="@+id/riga_stato"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

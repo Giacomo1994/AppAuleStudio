@@ -164,14 +164,15 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         Prenotazione item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
                         TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
-                        TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
                         TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
                         TextView row_inizio = convertView.findViewById(R.id.row_inizio);
+                        TextView row_fine = convertView.findViewById(R.id.row_fine);
                         TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
                         TextView row_stato = convertView.findViewById(R.id.row_stato);
 
                         row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" "+item.getOrario_prenotazione().substring(11,16));
+                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" "+item.getOrario_fine_prenotazione().substring(11,16));
                         if(item.getGruppo().equals("null")){
                             riga_gruppo.setVisibility(View.GONE);
                         }
@@ -203,11 +204,14 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
                         TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
                         TextView row_inizio = convertView.findViewById(R.id.row_inizio);
+                        TextView row_fine = convertView.findViewById(R.id.row_fine);
                         TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
 
                         riga_stato.setVisibility(View.GONE);
                         row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" "+item.getOrario_prenotazione().substring(11,16));
+                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" "+item.getOrario_fine_prenotazione().substring(11,16));
+
                         if(item.getGruppo().equals("null")){
                             riga_gruppo.setVisibility(View.GONE);
                         }
@@ -230,11 +234,13 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
                         TableRow riga_gruppo = convertView.findViewById(R.id.riga_gruppo);
                         TableRow riga_stato = convertView.findViewById(R.id.riga_stato);
+                        TableRow riga_fine = convertView.findViewById(R.id.riga_ora_fine);
                         TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
                         TextView row_inizio = convertView.findViewById(R.id.row_inizio);
                         TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
 
                         riga_stato.setVisibility(View.GONE);
+                        riga_fine.setVisibility(View.GONE);
                         row_luogo.setText(item.getAula() + ", Tavolo " + item.getNum_tavolo());
                         row_inizio.setText(item.getOrario_prenotazione().substring(8, 10) + "/" + item.getOrario_prenotazione().substring(5, 7) + " " + item.getOrario_prenotazione().substring(11, 16));
                         if (item.getGruppo().equals("null")) {
