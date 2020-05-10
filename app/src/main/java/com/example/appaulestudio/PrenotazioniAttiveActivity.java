@@ -127,10 +127,21 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
             if(array_prenotazioni==null){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono prenotazioni</b></font>"), Toast.LENGTH_LONG).show();
+                ll_in_corso.setVisibility(View.GONE);
+                ll_future.setVisibility(View.GONE);
+                ll_concluse.setVisibility(View.GONE);
+                v2.setVisibility(View.GONE);
+                v1.setVisibility(View.GONE);
                 return;
             }
             if(array_prenotazioni.length==0){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono prenotazioni</b></font>"), Toast.LENGTH_LONG).show();
+                ll_in_corso.setVisibility(View.GONE);
+                ll_future.setVisibility(View.GONE);
+                ll_concluse.setVisibility(View.GONE);
+                v2.setVisibility(View.GONE);
+                v1.setVisibility(View.GONE);
                 return;
             }
             ArrayList<Prenotazione> prenotazioni_in_corso=new ArrayList<Prenotazione>();
