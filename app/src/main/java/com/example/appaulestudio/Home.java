@@ -629,9 +629,12 @@ protected void initUI(){
 //CREAZIONE MENU IN ALTO
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
-            menu.add(Menu.FIRST, 3, Menu.FIRST, "Gestisci Gruppi");
-            menu.add(Menu.FIRST, 1, Menu.FIRST+2, "Logout");
-            menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
+            menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
+            menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
+            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+            menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
+
+
             return true;
         }
 
@@ -643,7 +646,6 @@ protected void initUI(){
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
                 editor.putString("email", null);
-                editor.putString("email_calendar", null);
                 editor.putString("matricola", null);
                 editor.putString("password", null);
                 editor.putBoolean("studente", true);
@@ -659,10 +661,13 @@ protected void initUI(){
                 startActivityForResult(i, 47);
                 finish();
             }
-            if(item.getItemId()==3){
+            if(item.getItemId() == 3){
                 Intent i = new Intent(this, GroupActivity.class);
                 startActivityForResult(i, 159);
-                finish();
+            }
+            if(item.getItemId() == 4){
+                Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+                startActivityForResult(i, 132);
             }
             return true;
         }
