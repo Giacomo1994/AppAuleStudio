@@ -4,16 +4,27 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.pdf.PdfDocument;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.nfc.FormatException;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
+import android.provider.DocumentsContract;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -27,14 +38,22 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfWriter;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -50,12 +69,13 @@ import java.util.Locale;
 import java.util.Random;
 
 public class CreaCodici extends AppCompatActivity {
+    private static final int STORAGE_CODE = 1000;
+    private static final int READ_CODE = 2000;
     Random random = new Random();
     String[] numeriArray ={"0","1","2","3","4","5","6","7","8","9"};
     String[] caratteriArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i",
             "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "z", "y",
-            "j", "k", "x", "w", "!", "£", "$", "%", "&", "*", ",", "_",
-            "-", "#", ";", "^", "/", ":", ".", "+", "§", "?"};
+            "j", "k", "x", "w"};
     int lunghezzaCodice=10;
     String codice;
     TextView textnome;
@@ -65,7 +85,7 @@ public class CreaCodici extends AppCompatActivity {
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
     Corso corso=null;
-    Button creaCodici, btnScadenza;
+    Button creaCodici, salvaPdf;
     CalendarView calendario;
     int anno;
     int mese;
@@ -81,6 +101,32 @@ public class CreaCodici extends AppCompatActivity {
     //static final String URL_CONTROLLO_CODICI ="http://pmsc9.altervista.org/progetto/controllo_codici_gruppi.php";
     static final String URL_REGISTRAZIONE_CODICE ="http://pmsc9.altervista.org/progetto/registrazione_codice.php";
     private void initUI() {
+        salvaPdf= findViewById(R.id.salvaPDF);
+        salvaPdf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //permission ho gia messo nel manifest la dichiarazione
+                if(Build.VERSION.SDK_INT>Build.VERSION_CODES.M){
+                    if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)==
+                            PackageManager.PERMISSION_DENIED){
+                        //il permesso va richiesto
+                        String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                        requestPermissions(permissions, STORAGE_CODE);
+                    }
+                    else{//permesso già accordato salviamo il pdf
+                        savePdf();
+
+                    }
+
+                }
+                else{//sistema non richiedere runtime permission
+                    savePdf();
+
+                }
+
+
+            }
+        });
         calendario= findViewById(R.id.calendario);
         textnome = findViewById(R.id.textnome);
         //btnScadenza= findViewById(R.id.btnScadenza);
@@ -207,6 +253,58 @@ public class CreaCodici extends AppCompatActivity {
 
     }
 
+    private void savePdf() {
+        //creo oggetto di classe pdf
+        Document mDoc= new Document();
+        //nome del file
+        String mFileName= new SimpleDateFormat(
+                "yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(System.currentTimeMillis());
+        //è deprecata
+        String mFilePath = Environment.getExternalStorageDirectory()+"/"+mFileName+".pdf";
+        try{
+
+            /*PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
+            //apri per scrivere
+            mDoc.open();
+            //openPdfFile(mDoc);
+            //scegli il testo da inserire
+            String mText="ciao";
+            // aggiungi autore opzionale e altre cose
+            mDoc.addAuthor("App Aule Studio");
+            //aggiungi paragrafo
+            mDoc.add(new Paragraph(mText));
+            //chiudi il doc
+            mDoc.close();;
+            //mostra messaggio*/
+            Toast.makeText(this, mFileName+" operazione avvenuta con successo "+ mFilePath, Toast.LENGTH_SHORT).show();
+
+        }
+        catch(Exception e){
+            //we qualcosa va storto
+            Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case STORAGE_CODE:{
+                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    savePdf();
+                }
+                else{
+                    //permesso non accordato dalla finestra di pop un e mostro errore
+                    Toast.makeText(this, "Hai negato il permesso quindi non posso procedere", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+    }
+
     /*public void onDateSet(DatePicker view, int y, int m, int d){
         year=y; month=m; day=d;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -220,6 +318,83 @@ public class CreaCodici extends AppCompatActivity {
     //public void iscriviCodici(String[] codici, Corso c, int numeroPartecipanti,int numeroOre, String dataScadenza){
 
     //}
+
+    //creo menu in alto
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
+        menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("universita", null);
+            editor.putString("nome_universita", null);
+            editor.putString("email", null);
+            editor.putString("email_calendar", null);
+            editor.putString("matricola", null);
+            editor.putString("password", null);
+            editor.putBoolean("studente", true);
+            editor.putBoolean("logged", false);
+            editor.putString("last_update", null);
+            editor.commit();
+            Intent i = new Intent(this, MainActivity.class);
+            startActivityForResult(i, 100);
+            finish();
+        }
+        if (item.getItemId() == 2) {
+            Intent i = new Intent(this, HomeDocente.class);
+            startActivityForResult(i, 150);
+            finish();
+        }
+        return true;
+    }
+
+    private void openPdfFile(File pdfFile) {
+
+        if(Build.VERSION.SDK_INT>=24){
+
+            try{
+
+                //For API's > 24, runtime exception occurs when a URI is exposed BEYOND this particular app that you are writing (AKA when user attempts to open in device/emulator
+
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+
+                m.invoke(null);
+
+            }catch(Exception e){
+
+                e.printStackTrace();
+
+            }
+
+        }
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        target.setDataAndType(Uri.fromFile(pdfFile),"application/pdf");
+
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+
+
+        Intent intent = Intent.createChooser(target, "Open File");
+
+        try {
+
+            startActivity(intent);
+
+        } catch (ActivityNotFoundException e) {
+
+            // Instruct the user to install a PDF reader here, or something
+
+        }
+
+    }
     private class iscriviCodici extends AsyncTask<Void, Void, String> {
 
         @Override
@@ -240,7 +415,8 @@ public class CreaCodici extends AppCompatActivity {
                     "&numeroOre="+URLEncoder.encode(ore, "UTF-8")+
                 "&numeroPartecipanti="+URLEncoder.encode(partecipanti,"UTF-8")+
                 "&codiceCorso="+URLEncoder.encode(corso.getCodiceCorso(),"UTF-8")+
-                "&dataScadenza="+URLEncoder.encode(dataStringa,"UTF-8");
+                "&dataScadenza="+URLEncoder.encode(dataStringa,"UTF-8")+
+                            "&codiceUniversita="+URLEncoder.encode(universita,"UTF-8");
 
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri); //passo i parametri
@@ -304,12 +480,12 @@ public class CreaCodici extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crea_codici);
-
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         Intent intent = getIntent();
-        nome_docente = intent.getStringExtra("nome");
-        cognome_docente = intent.getStringExtra("cognome");
-        matricola_docente = intent.getStringExtra("matricola");
-        universita = intent.getStringExtra("universita");
+        nome_docente = settings.getString("nome", null);
+        cognome_docente = settings.getString("cognome", null);
+        matricola_docente = settings.getString("matricola", null);
+        universita = settings.getString("universita", null);
         if (nome_docente.compareTo("") == 0 || cognome_docente.compareTo("") == 0 ||
                 matricola_docente.compareTo("") == 0 || universita.compareTo("") == 0) {
             //fai qualcosa non so cosa
@@ -425,6 +601,27 @@ public class CreaCodici extends AppCompatActivity {
         }
 
     }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+
+
+
 
 
 

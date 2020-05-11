@@ -97,7 +97,17 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazioneGruppo=findViewById(R.id.infoAula_toPrenGruppo);
         imgGruppo=findViewById(R.id.imageView2);
         bar=this.findViewById(R.id.bar2);
-
+        btnPrenotazioneGruppo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent= new Intent(InfoAulaActivity.this, PrenotazioneGruppoActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("aula", aula);
+                bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
+                intent.putExtra("dati", bundle);
+                startActivityForResult(intent, 61);
+            }
+        });
 
         intent = getIntent();
         bundle=intent.getBundleExtra("bundle");

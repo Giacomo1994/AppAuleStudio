@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     String matricola, password;
     boolean isStudente;
     boolean studentePassato;
-
+    CheckBox checkRicordami;
     ImageView studente_docente;
 
 
@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
 
     private void initUI(){
+        checkRicordami=findViewById(R.id.checkRicordami);
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         boolean logged=settings.getBoolean("logged", false);
         boolean is_studente = settings.getBoolean("studente", false);
@@ -124,6 +125,16 @@ public class MainActivity extends AppCompatActivity {
                 //chiamo asyc task
                 //if(radioStudente.isChecked()) new checkUtente().execute();
                 new checkUtente().execute();
+                /*if(checkRicordami.isChecked()){
+                    SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("logged", true);
+                }
+                else{
+                    SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("logged", false);
+                }*/
             }
         });
 
@@ -252,16 +263,14 @@ public class MainActivity extends AppCompatActivity {
                                 json_data.getString("nome"),
                                 json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
-                                json_data.getString("password"), true,
-                                json_data.getString("mail_calendar"));
+                                json_data.getString("password"), true);
                     }
                     else{
                         user = new User(json_data.getString("matricola"),
                                 json_data.getString("nome"),
                                 json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
-                                json_data.getString("password"), false,
-                                json_data.getString("mail_calendar"));
+                                json_data.getString("password"), false);
                     }
                 }
                 return user;
@@ -283,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getCodice());
                 editor.putString("email",user.getEmail());
-                editor.putString("email_calendar",user.getEmail_calendar());
+                //editor.putString("email_calendar",user.getEmail_calendar());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());
