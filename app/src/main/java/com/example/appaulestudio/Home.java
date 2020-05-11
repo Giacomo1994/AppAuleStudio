@@ -585,7 +585,7 @@ protected void initUI(){
                     User user = null;
                     for (int i = 0; i < jArray.length(); i++) {
                         JSONObject json_data = jArray.getJSONObject(i);
-                        user = new User(json_data.getString("matricola"), json_data.getString("nome"), json_data.getString("cognome"), json_data.getString("codice_universita"), json_data.getString("mail"), json_data.getString("password"), true, json_data.getString("mail_calendar"));
+                        user = new User(json_data.getString("matricola"), json_data.getString("nome"), json_data.getString("cognome"), json_data.getString("codice_universita"), json_data.getString("mail"), json_data.getString("password"), true);
                         return 0;
                     }
                     return 1;
@@ -646,7 +646,6 @@ protected void initUI(){
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
                 editor.putString("email", null);
-                editor.putString("email_calendar", null);
                 editor.putString("matricola", null);
                 editor.putString("password", null);
                 editor.putBoolean("studente", true);

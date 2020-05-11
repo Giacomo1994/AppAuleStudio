@@ -252,16 +252,14 @@ public class MainActivity extends AppCompatActivity {
                                 json_data.getString("nome"),
                                 json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
-                                json_data.getString("password"), true,
-                                json_data.getString("mail_calendar"));
+                                json_data.getString("password"), true);
                     }
                     else{
                         user = new User(json_data.getString("matricola"),
                                 json_data.getString("nome"),
                                 json_data.getString("cognome"),
                                 json_data.getString("codice_universita"), json_data.getString("mail"),
-                                json_data.getString("password"), false,
-                                json_data.getString("mail_calendar"));
+                                json_data.getString("password"), false);
                     }
                 }
                 return user;
@@ -283,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getCodice());
                 editor.putString("email",user.getEmail());
-                editor.putString("email_calendar",user.getEmail_calendar());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());
