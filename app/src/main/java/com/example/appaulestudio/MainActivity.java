@@ -16,25 +16,27 @@ import java.net.*;
 import java.util.ArrayList;
 import android.graphics.*;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
 public class MainActivity extends AppCompatActivity {
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
+    static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
+    static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
+
+    ImageView studente_docente;
     TextView txt_toRegistrazione;
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
     EditText txtMatricola, txtPassword;
     Button btn_login;
-    RadioButton radioStudente;
-    RadioButton radioDocente;
+    RadioButton radioStudente,radioDocente;
+
     Universita universita=null;
-    String matricola, password;
+    String matricola, password, token;
     boolean isStudente;
     boolean studentePassato;
-
-    ImageView studente_docente;
-
-
-    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
-    static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
-    static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
 
     private void initUI(){
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -42,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         boolean is_studente = settings.getBoolean("studente", false);
         if(logged==true&&is_studente==true){
             Intent i=new Intent(MainActivity.this, Home.class);
-            i.putExtra("from_login",false);
-            startActivityForResult(i,2);
+            i.putExtra("start_from_login",false);
+            startActivityForResult(i,-1);
             return;
         }
         if(logged==true&&is_studente==false){
@@ -62,16 +64,13 @@ public class MainActivity extends AppCompatActivity {
         radioDocente=findViewById(R.id.radioDocente);
         studente_docente = findViewById(R.id.imageView9);
 
-
+        //radio button
         if(radioStudente.isChecked()){
             studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.studente));
         }else {
             studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
         }
-
-
        radioStudente.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
-
            @Override
            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                if(radioStudente.isChecked()){
@@ -82,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
 
            }
        });
-
 
         //link a registrazione
         String stringa="Oppure registrati";
@@ -102,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
 
         //riempi universita
         new riempiUniversita().execute();
-
 
         //funzione bottone
         btn_login.setOnClickListener(new View.OnClickListener() {
@@ -133,6 +130,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
+        //ottengo token da Firebase
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                token = instanceIdResult.getToken(); //salvo token in variabile globale
+            }
+        });
     }
 
     protected void onResume() {
@@ -141,8 +145,15 @@ public class MainActivity extends AppCompatActivity {
         boolean logged=settings.getBoolean("logged", false);
 
         if(logged==true) finish();
-        else new riempiUniversita().execute();
-
+        else{
+            new riempiUniversita().execute();
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+                @Override
+                public void onSuccess(InstanceIdResult instanceIdResult) {
+                    token = instanceIdResult.getToken(); //salvo token in variabile globale
+                }
+            });
+        }
     }
 
     //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
@@ -154,8 +165,8 @@ public class MainActivity extends AppCompatActivity {
                 //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
                 urlConnection.connect();
@@ -224,7 +235,10 @@ public class MainActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8") + "&matricola=" + URLEncoder.encode(matricola, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
+                String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
+                        + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
+                        + "&password=" + URLEncoder.encode(password, "UTF-8")
+                        + "&token=" + URLEncoder.encode(token, "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -285,10 +299,11 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());
                 editor.putString("cognome", user.getCognome());
+                editor.putString("token", token);
                 if(user.isStudente()==true) {
                     editor.putBoolean("studente", true);
                     Intent i=new Intent(MainActivity.this, Home.class);
-                    i.putExtra("from_login",true);
+                    i.putExtra("start_from_login",true);
                     startActivityForResult(i,2);
                     finish();
                 }

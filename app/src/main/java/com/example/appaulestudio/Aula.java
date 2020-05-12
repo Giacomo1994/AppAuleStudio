@@ -18,8 +18,6 @@ public class Aula implements Parcelable {
     private String servizi;
 
     private Map<Integer, Orario> orari;
-    private Orario orario;
-
     private boolean aperta;
 
 
@@ -36,7 +34,6 @@ public class Aula implements Parcelable {
         this.servizi=servizi;
         this.orari=new HashMap<Integer, Orario>();
         this.aperta=false;
-        this.orario=null;
     }
 
     public String getIdAula() {
@@ -119,13 +116,6 @@ public class Aula implements Parcelable {
         this.orari = orari;
     }
 
-    public Orario getOrario() {
-        return orario;
-    }
-
-    public void setOrario(Orario orario) {
-        this.orario = orario;
-    }
 
     public boolean isAperta() {
         return aperta;
