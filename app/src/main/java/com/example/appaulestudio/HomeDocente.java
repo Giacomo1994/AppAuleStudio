@@ -115,8 +115,9 @@ public class HomeDocente extends AppCompatActivity {
 
                 //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
                 //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
-                params = "matricola_docente="+URLEncoder.encode(strMatricola, "UTF-8")
-                        +"&codice_universita="+URLEncoder.encode(strUniversita, "UTF-8");
+                params = "matricola_docente="+ URLEncoder.encode(strMatricola, "UTF-8")+
+                        "&codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8");
+
 
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(params);

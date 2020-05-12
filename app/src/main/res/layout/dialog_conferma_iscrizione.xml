@@ -27,6 +27,12 @@
         android:textSize="24sp"
         android:textStyle="bold" />
 
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/nuovo_utente_al_gruppo" />
+
     <TextView
         android:id="@+id/text_dialog"
         android:layout_width="match_parent"

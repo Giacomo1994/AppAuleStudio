@@ -72,6 +72,14 @@ public class GroupActivity extends AppCompatActivity {
         this.initUI();
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);
+        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>Riparto da onCreate </b></font>"),Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        new listaGruppi().execute();
+        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>Riparto da onRestart </b></font>"),Toast.LENGTH_LONG).show();
     }
 
     //MENU CONTESTUALE
@@ -124,7 +132,7 @@ public class GroupActivity extends AppCompatActivity {
 
                 //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
                 //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
-                params = "matricola="+ URLEncoder.encode(strMatricola, "UTF-8");
+                params = "matricola="+ URLEncoder.encode(strMatricola, "UTF-8") + "&codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8");
 
 
                 dos = new DataOutputStream(urlConnection.getOutputStream());
@@ -174,7 +182,7 @@ public class GroupActivity extends AppCompatActivity {
             //qua devo riempire la listview con i corsi scaricati prima e messi nell'array di gruppi
             //controllo che l'array sia stato riempito
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Problema di connessione, i dati potrebbero non essere aggionrati</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
 
