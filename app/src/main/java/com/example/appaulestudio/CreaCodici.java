@@ -342,12 +342,13 @@ public class CreaCodici extends AppCompatActivity {
             editor.putBoolean("logged", false);
             editor.putString("last_update", null);
             editor.commit();
-            Intent i = new Intent(this, MainActivity.class);
+            Intent i = new Intent(CreaCodici.this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivityForResult(i, 100);
             finish();
         }
         if (item.getItemId() == 2) {
-            Intent i = new Intent(this, HomeDocente.class);
+            Intent i = new Intent(CreaCodici.this, HomeDocente.class);
             startActivityForResult(i, 150);
             finish();
         }

@@ -209,6 +209,7 @@ public class HomeDocente extends AppCompatActivity {
             editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivityForResult(i, 100);
             finish();
         }
@@ -219,7 +220,8 @@ public class HomeDocente extends AppCompatActivity {
         }
         if(item.getItemId()==3){
             Intent i = new Intent(this, CreaCodici.class);
-            startActivityForResult(i, 300);
+            startActivityForResult(i,300);
+            finish();
         }
         return true;
     }
