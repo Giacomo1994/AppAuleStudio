@@ -130,7 +130,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
             if(array_prenotazioni==null){
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server</b></font>"), Toast.LENGTH_LONG).show();
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono prenotazioni</b></font>"), Toast.LENGTH_LONG).show();
                 ll_in_corso.setVisibility(View.GONE);
                 ll_future.setVisibility(View.GONE);
                 ll_concluse.setVisibility(View.GONE);
@@ -287,13 +286,14 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putBoolean("logged", false);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
-            finish();
+
         }
         if (item.getItemId() == 2) {
             Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
-            finish();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);

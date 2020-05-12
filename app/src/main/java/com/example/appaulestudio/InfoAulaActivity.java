@@ -138,7 +138,8 @@ public class InfoAulaActivity extends AppCompatActivity {
                     bundle.putParcelable("aula", aula);
                     bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
                     i.putExtra("dati", bundle);
-                    startActivityForResult(i, 999);
+                    startActivity(i);
+                    finish();
                 }
             }
         });
