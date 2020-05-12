@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -271,6 +272,8 @@ public class IscrizioneActivity extends AppCompatActivity {
             else{
                 //torno all'activity precedente
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>"+result+" </b></font>"),Toast.LENGTH_LONG).show();
+                Intent i = new Intent(IscrizioneActivity.this, GroupActivity.class);
+                startActivity(i);
                 finish();
 
             }
