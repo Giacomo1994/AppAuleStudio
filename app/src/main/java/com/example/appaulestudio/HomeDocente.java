@@ -115,8 +115,9 @@ public class HomeDocente extends AppCompatActivity {
 
                 //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
                 //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
-                params = "matricola_docente="+URLEncoder.encode(strMatricola, "UTF-8")
-                        +"&codice_universita="+URLEncoder.encode(strUniversita, "UTF-8");
+                params = "matricola_docente="+ URLEncoder.encode(strMatricola, "UTF-8")+
+                        "&codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8");
+
 
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(params);
@@ -209,6 +210,7 @@ public class HomeDocente extends AppCompatActivity {
             editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivityForResult(i, 100);
             finish();
         }
@@ -219,7 +221,8 @@ public class HomeDocente extends AppCompatActivity {
         }
         if(item.getItemId()==3){
             Intent i = new Intent(this, CreaCodici.class);
-            startActivityForResult(i, 300);
+            startActivityForResult(i,300);
+            finish();
         }
         return true;
     }

@@ -3,7 +3,9 @@ package com.example.appaulestudio;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +35,7 @@ import java.util.Arrays;
 public class IscrizioneActivity extends AppCompatActivity {
 
     final static String URL_INFOGRUPPIFROMCODICE = "http://pmsc9.altervista.org/progetto/info_gruppo_from_codice.php";
+    final static String URL_ISCRIZIONE_GRUPPO= "http://pmsc9.altervista.org/progetto/iscrizione_al_gruppo.php";
 
     EditText codice_gruppo;
     Button iscriviti;
@@ -41,6 +45,12 @@ public class IscrizioneActivity extends AppCompatActivity {
     TextView output;
     //String[] array_info;
     String nomeProf, cognomeProf, nomeCorso;
+    Button annulla_dialog;
+
+    Button  conferma_dialog;
+    String strUniversita, strMatricola, strPassword, strNome, strCognome;
+
+
 
     ImageView close_dialog;
 
@@ -51,6 +61,14 @@ public class IscrizioneActivity extends AppCompatActivity {
         //array_info = new String[3];
         nomeProf=""; cognomeProf=""; nomeCorso="";
         output= findViewById(R.id.output);
+        //preferenze
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        strUniversita=settings.getString("universita", null);
+        strMatricola=settings.getString("matricola", null);
+        strPassword=settings.getString("password", null);
+        strNome=settings.getString("nome", null);
+        strCognome=settings.getString("cognome", null);
+        setTitle(""+strNome+" "+strMatricola);
 
     }
 
@@ -176,6 +194,9 @@ public class IscrizioneActivity extends AppCompatActivity {
 
             text_dialog= d.findViewById(R.id.text_dialog);
             close_dialog = d.findViewById(R.id.close_dialog);
+            annulla_dialog = d.findViewById(R.id.annulla_dialog);
+            conferma_dialog = d.findViewById(R.id.conferma_dialog);
+
             text_dialog.setText("Ti stai iscrivendo al gruppo per il corso di "+nomeCorso+
                     " tenuto dal professor "+nomeProf+" "+cognomeProf);
             d.show();
@@ -185,12 +206,79 @@ public class IscrizioneActivity extends AppCompatActivity {
                     d.cancel();
                 }
             });
+            annulla_dialog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    d.cancel();
+                }
+            });
+            conferma_dialog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new aggiungi_iscrizione().execute();
+                }
+            });
+
+        }
+    }
+
+    private class aggiungi_iscrizione extends AsyncTask<Void, Void, String>{
+
+        @Override
+        protected String doInBackground(Void... strings) {
+              try {
+            URL url;
+            url = new URL(URL_ISCRIZIONE_GRUPPO);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setReadTimeout(1000);
+            urlConnection.setConnectTimeout(1500);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+
+            String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
+                    "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
+                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");;
+
+            DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+            dos.writeBytes(parametri);
+            dos.flush();
+            dos.close();
+            //leggo stringa di ritorno da file php
+            urlConnection.connect();
+            InputStream input = urlConnection.getInputStream();
+            byte[] buffer = new byte[1024];
+            int numRead = 0;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while ((numRead = input.read(buffer)) != -1) {
+                baos.write(buffer, 0, numRead);
+            }
+            input.close();
+            String stringaRicevuta = new String(baos.toByteArray());
+            return stringaRicevuta;
+        } catch (Exception e) {
+            Log.e("SimpleHttpURLConnection", e.getMessage());
+            return "Impossibile connettersi";
+        } finally {
+        }
+    }
+        @Override
+        protected void onPostExecute(String result) {
+            if(result.equals("Iscrizione effettuata con successo!")==false){
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b> Ops, qualcosa è andato storto"+result+"</b></font>"),Toast.LENGTH_LONG).show();
+                return;
+            }
+            else{
+                //torno all'activity precedente
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>"+result+" </b></font>"),Toast.LENGTH_LONG).show();
+                finish();
+
+            }
 
         }
     }
 
 
-    }
-
+}
 
 
