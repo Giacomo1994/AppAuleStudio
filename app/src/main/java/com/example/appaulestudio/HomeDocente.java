@@ -190,6 +190,7 @@ public class HomeDocente extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
+        menu.add(Menu.FIRST, 3, Menu.FIRST + 2, "Crea codici");
         return true;
     }
 
@@ -209,12 +210,18 @@ public class HomeDocente extends AppCompatActivity {
             editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivityForResult(i, 100);
             finish();
         }
         if (item.getItemId() == 2) {
             Intent i = new Intent(this, HomeDocente.class);
             startActivityForResult(i, 150);
+            finish();
+        }
+        if(item.getItemId()==3){
+            Intent i = new Intent(this, CreaCodici.class);
+            startActivityForResult(i,300);
             finish();
         }
         return true;

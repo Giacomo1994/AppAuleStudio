@@ -53,7 +53,7 @@
     <CalendarView
         android:id="@+id/calendario"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="245dp"
         android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <Button
@@ -62,4 +62,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Genera i codici" />
+
+    <Button
+        android:id="@+id/salvaPDF"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SALVA PDF" />
 </LinearLayout>

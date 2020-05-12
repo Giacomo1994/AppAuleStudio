@@ -3,6 +3,7 @@ package com.example.appaulestudio;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -10,6 +11,8 @@ import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -256,6 +259,55 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             }
         }
     }
+
+    //CREAZIONE MENU IN ALTO
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("universita", null);
+            editor.putString("nome_universita", null);
+            editor.putString("email", null);
+            editor.putString("matricola", null);
+            editor.putString("nome", null);
+            editor.putString("cognome", null);
+            editor.putString("password", null);
+            editor.putString("token", null);
+            editor.putBoolean("studente", true);
+            editor.putBoolean("logged", false);
+            editor.commit();
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if (item.getItemId() == 2) {
+            Intent i = new Intent(this, Home.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
+    }
+
 
 
 }

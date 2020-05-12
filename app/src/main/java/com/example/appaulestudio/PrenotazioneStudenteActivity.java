@@ -58,7 +58,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     ArrayList<Orario_Ufficiale> orari_ufficiali;
     ArrayList<Tavolo> tavoli;
     String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
-    String strMatricola;
+    String strMatricola, strUniversita;
     boolean aperta=false;
     Tavolo tavolo;
 
@@ -92,6 +92,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         String strNome=settings.getString("nome", null);
         strMatricola=settings.getString("matricola", null);
+        strUniversita=settings.getString("universita", null);
         setTitle(strNome);
         txt_nome_aula.setText(aula.getNome());
 
@@ -150,7 +151,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                         "&tavolo=" + URLEncoder.encode(""+tavolo.getNum_tavolo(), "UTF-8") +
                         "&inizio_prenotazione=" + URLEncoder.encode(inizio_prenotazione, "UTF-8") +
                         "&fine_prenotazione=" + URLEncoder.encode(fine_prenotazione, "UTF-8") +
-                        "&matricola=" + URLEncoder.encode(matricola, "UTF-8") ;
+                        "&matricola=" + URLEncoder.encode(matricola, "UTF-8") +
+                        "&universita=" + URLEncoder.encode(strUniversita, "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
