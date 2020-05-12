@@ -189,6 +189,7 @@ public class HomeDocente extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST + 1, "Home");
+        menu.add(Menu.FIRST, 3, Menu.FIRST + 2, "Crea codici");
         return true;
     }
 
@@ -215,6 +216,10 @@ public class HomeDocente extends AppCompatActivity {
             Intent i = new Intent(this, HomeDocente.class);
             startActivityForResult(i, 150);
             finish();
+        }
+        if(item.getItemId()==3){
+            Intent i = new Intent(this, CreaCodici.class);
+            startActivityForResult(i, 300);
         }
         return true;
     }

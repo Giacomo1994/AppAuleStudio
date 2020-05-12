@@ -5,6 +5,7 @@ public class User {
     private String universita;
     private String password;
     private String email;
+    //private String email_calendar;
     private String nome;
     private String cognome;
     private boolean studente;
@@ -15,6 +16,7 @@ public class User {
         this.email=email;
         this.password = password;
         this.studente = studente;
+
         this.nome=nome;
         this.cognome=cognome;
 
@@ -51,6 +53,8 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+
 
     public String getNome() {
         return nome;

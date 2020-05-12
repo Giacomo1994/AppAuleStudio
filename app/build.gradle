@@ -37,5 +37,6 @@ dependencies {
     implementation 'com.google.android:flexbox:2.0.1'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     implementation 'com.zolad:zoominimageview:1.0.0'
-
+    //write pdf library
+    implementation 'com.itextpdf:itextg:5.5.10'
 }
