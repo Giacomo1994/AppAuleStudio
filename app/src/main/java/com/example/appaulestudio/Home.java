@@ -590,13 +590,13 @@ protected void initUI(){
                 editor.putString("last_update", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
-                finish();
             }
             if (item.getItemId() == 2) {
                 Intent i = new Intent(this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
-                finish();
             }
             if(item.getItemId() == 3){
                 Intent i = new Intent(this, GroupActivity.class);
