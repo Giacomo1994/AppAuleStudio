@@ -239,7 +239,7 @@ public class IscrizioneActivity extends AppCompatActivity {
 
             String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
                     "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
-                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");;
+                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");
 
             DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
             dos.writeBytes(parametri);

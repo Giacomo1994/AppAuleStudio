@@ -19,6 +19,15 @@ public class Gruppo {
         this.data_scadenza = data_scadenza;
 
     }
+    public Gruppo(Gruppo gruppo){
+        this.codice_gruppo=gruppo.getCodice_gruppo();
+        this.nome_gruppo=gruppo.getNome_gruppo();
+        this.codice_corso=gruppo.getCodice_corso();
+        this.matricola_docente=gruppo.getMatricola_docente();
+        this.componenti_max=gruppo.getComponenti_max();
+        this.ore_disponibili=gruppo.getOre_disponibili();
+        this.data_scadenza=gruppo.getData_scadenza();
+    }
 
 
     public String getCodice_gruppo() {

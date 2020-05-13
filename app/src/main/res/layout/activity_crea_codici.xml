@@ -44,6 +44,22 @@
         android:hint="numeroGruppi"
         android:inputType="textPersonName" />
 
+    <EditText
+        android:id="@+id/txtNomeGruppo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Nome del gruppo (opzionale*)"
+        android:inputType="textPersonName"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtSpiegazione"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="*Se lesciato vuoto verrà assegnato ad ogni gruppo un nome formato da un numero progressivo e il nome del corso"
+        android:textSize="8sp" />
+
     <TextView
         android:id="@+id/dataScadenza"
         android:layout_width="match_parent"
@@ -53,7 +69,7 @@
     <CalendarView
         android:id="@+id/calendario"
         android:layout_width="match_parent"
-        android:layout_height="245dp"
+        android:layout_height="192dp"
         android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <Button

@@ -81,7 +81,7 @@ public class CreaCodici extends AppCompatActivity {
     TextView textnome;
     String nome_docente, cognome_docente, universita, matricola_docente;
     String materia, gruppi, ore, partecipanti;
-    EditText numeroPartecipanti, numeroOre, numeroGruppi;
+    EditText numeroPartecipanti, numeroOre, numeroGruppi, txtNomeGruppo;
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
     Corso corso=null;
@@ -90,6 +90,7 @@ public class CreaCodici extends AppCompatActivity {
     int anno;
     int mese;
     int giorno;
+    String nomeGruppo;
     //int year, month, day;
     String dataStringa=null; //formato dd/mm/YYYY bisogna risolvere inizializzazione
     String[] codici;
@@ -164,6 +165,7 @@ public class CreaCodici extends AppCompatActivity {
 
 
         setTitle(nome_docente + " " + cognome_docente);
+        txtNomeGruppo=findViewById(R.id.txtNomeGruppo);
         numeroGruppi = findViewById(R.id.numeroGruppi);
         numeroPartecipanti = findViewById(R.id.numeroPartecipanti);
         numeroOre = findViewById(R.id.numeroOre);
@@ -176,6 +178,8 @@ public class CreaCodici extends AppCompatActivity {
                 int gruppiIntero=0;
                 int partecipantiIntero=0;
                 int oreIntero=0;
+
+                nomeGruppo=txtNomeGruppo.getText().toString().trim();
                 gruppi=numeroGruppi.getText().toString().trim();
                 partecipanti=numeroPartecipanti.getText().toString().trim();
                 ore=numeroOre.getText().toString().trim();
@@ -223,6 +227,11 @@ public class CreaCodici extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<b><font><p>Numero di ore errato!</p><p>Per favore inserisci un numero maggiore di zero</p></b></font>"), Toast.LENGTH_LONG).show();
                     return;
                 }
+                //si può togliere
+                if(nomeGruppo.length()>=30){
+                    Toast.makeText(getApplicationContext(), Html.fromHtml("<b><font><p>Nome eccessivamente lungo!</p><p>Per favore inserisci un numero maggiore di zero</p></b></font>"), Toast.LENGTH_LONG).show();
+                    return;
+                }
                 //se arrivo qui ho corso, numero di partecipanti ore e gruppi diversi da zero
                 //devo chiamare la funzione che genera i codici
                 int j=0;
@@ -264,7 +273,7 @@ public class CreaCodici extends AppCompatActivity {
         String mFilePath = Environment.getExternalStorageDirectory()+"/"+mFileName+".pdf";
         try{
 
-            /*PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
+            PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
             //apri per scrivere
             mDoc.open();
             //openPdfFile(mDoc);
@@ -276,7 +285,7 @@ public class CreaCodici extends AppCompatActivity {
             mDoc.add(new Paragraph(mText));
             //chiudi il doc
             mDoc.close();;
-            //mostra messaggio*/
+            //mostra messaggio
             Toast.makeText(this, mFileName+" operazione avvenuta con successo "+ mFilePath, Toast.LENGTH_SHORT).show();
 
         }
@@ -402,10 +411,13 @@ public class CreaCodici extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             try {
                 URL url = new URL(URL_REGISTRAZIONE_CODICE);
-
-
+                if(nomeGruppo.equals("")){
+                    nomeGruppo=corso.getNomeCorso();
+                }
 
                 for (int c=0; c<codici.length; c++) {
+                    int g=c+1;
+
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(3000);
                     urlConnection.setConnectTimeout(3000);
@@ -417,7 +429,8 @@ public class CreaCodici extends AppCompatActivity {
                 "&numeroPartecipanti="+URLEncoder.encode(partecipanti,"UTF-8")+
                 "&codiceCorso="+URLEncoder.encode(corso.getCodiceCorso(),"UTF-8")+
                 "&dataScadenza="+URLEncoder.encode(dataStringa,"UTF-8")+
-                            "&codiceUniversita="+URLEncoder.encode(universita,"UTF-8");
+                            "&codiceUniversita="+URLEncoder.encode(universita,"UTF-8")+
+                            "&nomeGruppo="+URLEncoder.encode("Gruppo"+g+"-"+nomeGruppo, "UTF-8");
 
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri); //passo i parametri
