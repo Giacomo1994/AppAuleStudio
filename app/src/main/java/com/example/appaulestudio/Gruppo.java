@@ -1,8 +1,11 @@
 package com.example.appaulestudio;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Date;
 
-public class Gruppo {
+public class Gruppo implements Parcelable {
 
     private String codice_gruppo, nome_gruppo, codice_corso, matricola_docente;
     private int componenti_max, ore_disponibili;
@@ -29,6 +32,28 @@ public class Gruppo {
         this.data_scadenza=gruppo.getData_scadenza();
     }
 
+
+    protected Gruppo(Parcel in) {
+        codice_gruppo = in.readString();
+        nome_gruppo = in.readString();
+        codice_corso = in.readString();
+        matricola_docente = in.readString();
+        componenti_max = in.readInt();
+        ore_disponibili = in.readInt();
+        data_scadenza = in.readString();
+    }
+
+    public static final Creator<Gruppo> CREATOR = new Creator<Gruppo>() {
+        @Override
+        public Gruppo createFromParcel(Parcel in) {
+            return new Gruppo(in);
+        }
+
+        @Override
+        public Gruppo[] newArray(int size) {
+            return new Gruppo[size];
+        }
+    };
 
     public String getCodice_gruppo() {
         return codice_gruppo;
@@ -84,5 +109,21 @@ public class Gruppo {
 
     public void setData_scadenza(String data_scadenza) {
         this.data_scadenza = data_scadenza;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(codice_gruppo);
+        parcel.writeString(nome_gruppo);
+        parcel.writeString(codice_corso);
+        parcel.writeString(matricola_docente);
+        parcel.writeInt(componenti_max);
+        parcel.writeInt(ore_disponibili);
+        parcel.writeString(data_scadenza);
     }
 }

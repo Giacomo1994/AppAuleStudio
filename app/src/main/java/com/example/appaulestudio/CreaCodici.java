@@ -284,7 +284,7 @@ public class CreaCodici extends AppCompatActivity {
             //aggiungi paragrafo
             mDoc.add(new Paragraph(mText));
             //chiudi il doc
-            mDoc.close();;
+            mDoc.close();
             //mostra messaggio
             Toast.makeText(this, mFileName+" operazione avvenuta con successo "+ mFilePath, Toast.LENGTH_SHORT).show();
 

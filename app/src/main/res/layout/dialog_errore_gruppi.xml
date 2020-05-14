@@ -9,6 +9,7 @@
         android:id="@+id/txtTitoloDialogErrore"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/grigio_chiaro"
         android:text="ERRORE" />
 
     <TextView

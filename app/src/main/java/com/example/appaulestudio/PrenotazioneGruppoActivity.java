@@ -5,12 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.sip.SipSession;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -26,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,11 +47,20 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 
 /*new User(json_data.getString("matricola"),
@@ -59,6 +71,11 @@ import java.util.List;
         json_data.getString("password"),
         json_data.getBoolean("studente"));*/
 public class PrenotazioneGruppoActivity extends AppCompatActivity {
+    public DatePickerDialog.OnDateSetListener listener;
+    String[] dateDisponibili;
+    TextView txtDataMostrata;
+    int anno,mese,giorno;
+    Button btnScegliData;
     Button btnIscriviti, btnHome;
     String studente;
     ArrayAdapter adapterComponenti;
@@ -305,9 +322,76 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 }
             }
         });
+        btnScegliData=findViewById(R.id.btnScegliData);
+        /*final DatePickerDialog  StartTime;
+        View.OnClickListener lister=new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        //new prendiUtenti().execute();
+            }
+        };
+        final Calendar newCalendar = Calendar.getInstance();
+        StartTime = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
 
+                output.setText(newDate.toString());
+            }
+
+        }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+        btnScegliData.setOnClickListener(new View.OnClickListener() {
+            @Override   public void onClick(View v) {
+                StartTime.show();
+                }
+            });*/
+
+
+        /*implements DatePickerDialog.OnDateSetListener {
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    getApplicationContext(), MainActivity.this, anno, mese, giorno);
+        }
+
+        btnScegliData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerDialog dataPicker=new DatePickerDialog(getApplicationContext(),
+                        PrenotazioneGruppoActivity.this,anno, mese,giorno);
+                dataPicker.show();
+            }
+        });*/
+
+
+        txtDataMostrata=findViewById(R.id.txtDataMostrata);
+        Calendar c = Calendar.getInstance();
+        anno=c.get(Calendar.YEAR);
+        //il mese parte da zero
+        mese=c.get(Calendar.MONTH);
+        giorno=c.get(Calendar.DAY_OF_MONTH);
+        //output.setText(""+anno+""+mese+""+giorno);
+        //txtDataMostrata.setText("Oggi");
+        output.setText(orariUfficiali.get(0).getApertura());
+
+    }
+    public void gestioneDate(){
+        //ho array di date e orari
+
+    }
+
+
+
+    public void onDateSet(DatePicker view, int y, int m, int d){
+        giorno=d;
+        mese=m;
+        anno=y;
+        if(android.os.Build.VERSION.SDK_INT>= android.os.Build.VERSION_CODES.O){
+            LocalDate date=LocalDate.of(anno,mese,giorno);
+            DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd").withLocale(Locale.ITALY);
+            String s=date.format((formatter));
+            output.append(s);
+        }
     }
 
     public void scegliComponenti(){
@@ -636,6 +720,15 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             });
         }*/
 
+
+    /*int year=0,month=0,day=0,hour=0,minute=0;
+                if(android.os.Build.VERSION.SDK_INT>= android.os.Build.VERSION_CODES.O){
+        LocalDateTime dateTime=LocalDateTime.of(year,month,day,hour,minute);
+        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String s=dateTime.format((formatter));
+        output.append(s);
+
+    }*/
 
 
 }

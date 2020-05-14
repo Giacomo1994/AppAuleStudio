@@ -9,24 +9,27 @@
         android:id="@+id/scegliGruppo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/grigio_chiaro"
         android:text="Seleziona il gruppo per cui vuoi prenotare:" />
 
     <GridView
         android:id="@+id/grigliaGruppi"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="15dp"
+        android:horizontalSpacing="15dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
         android:verticalSpacing="20dp" />
 
     <Button
         android:id="@+id/annullaSelezioneGruppo"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="Annulla" />
 
 </LinearLayout>
