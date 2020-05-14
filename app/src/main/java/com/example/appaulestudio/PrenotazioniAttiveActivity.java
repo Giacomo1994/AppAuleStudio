@@ -187,7 +187,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         richiesta=item.getItemId();
 
         if(richiesta<=3) p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-        else if(richiesta==4) p= (Prenotazione) list_future.getItemAtPosition(info.position);
+        else if(richiesta==4 || richiesta==7 || richiesta==8) p= (Prenotazione) list_future.getItemAtPosition(info.position);
         else p=(Prenotazione) list_concluse.getItemAtPosition(info.position);
 
         if(richiesta!=0 && richiesta!=2){
@@ -365,7 +365,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                             row_gruppo.setText(item.getGruppo());
                         }
                         if(item.getStato()==1) row_stato.setText("Non ancora in aula");
-                        else if(item.getStato()==2) row_stato.setText("In pausa");
+                        else if(item.getStato()==2) row_stato.setText("In pausa dalle ore "+item.getOrario_ultima_uscita().substring(11,16));
                         else row_stato.setText("In aula");
 
                         return convertView;
