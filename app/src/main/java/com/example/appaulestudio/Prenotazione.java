@@ -3,7 +3,8 @@ package com.example.appaulestudio;
 public class Prenotazione {
     private int id_prenotazione;
     private String matricola;
-    private String aula;
+    private String nome_aula;
+    private String id_aula;
     private int num_tavolo;
     private String orario_prenotazione;
     private String orario_ultima_uscita;
@@ -12,10 +13,10 @@ public class Prenotazione {
     private String gruppo;
     private String in_corso;
 
-    public Prenotazione(int id_prenotazione, String matricola, String aula, int num_tavolo, String orario_prenotazione, String orario_ultima_uscita, String orario_fine_prenotazione, int stato, String gruppo, String in_corso) {
+    public Prenotazione(int id_prenotazione, String matricola, String id_aula, String nome_aula, int num_tavolo, String orario_prenotazione, String orario_ultima_uscita, String orario_fine_prenotazione, int stato, String gruppo, String in_corso) {
         this.id_prenotazione = id_prenotazione;
         this.matricola = matricola;
-        this.aula = aula;
+        this.nome_aula = nome_aula;
         this.num_tavolo = num_tavolo;
         this.orario_prenotazione = orario_prenotazione;
         this.orario_ultima_uscita = orario_ultima_uscita;
@@ -23,6 +24,15 @@ public class Prenotazione {
         this.stato = stato;
         this.gruppo = gruppo;
         this.in_corso=in_corso;
+        this.id_aula=id_aula;
+    }
+
+    public String getId_aula() {
+        return id_aula;
+    }
+
+    public void setId_aula(String id_aula) {
+        this.id_aula = id_aula;
     }
 
     public int getId_prenotazione() {
@@ -42,11 +52,11 @@ public class Prenotazione {
     }
 
     public String getAula() {
-        return aula;
+        return nome_aula;
     }
 
     public void setAula(String aula) {
-        this.aula = aula;
+        this.nome_aula = aula;
     }
 
     public int getNum_tavolo() {

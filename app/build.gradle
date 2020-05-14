@@ -39,4 +39,5 @@ dependencies {
     implementation 'com.zolad:zoominimageview:1.0.0'
     //write pdf library
     implementation 'com.itextpdf:itextg:5.5.10'
+    implementation 'com.journeyapps:zxing-android-embedded:3.4.0'
 }

@@ -96,6 +96,21 @@ public class SqliteManager {
         return mappa_orari;
     }
 
+    public String getNomeAula(String id_aula){
+       String aula="";
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM info_aule_offline where id='"+id_aula+"'";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            aula=cursor.getString(cursor.getColumnIndex("nome"));
+        }
+        db.close();
+        return aula;
+    }
+
 
 
 
