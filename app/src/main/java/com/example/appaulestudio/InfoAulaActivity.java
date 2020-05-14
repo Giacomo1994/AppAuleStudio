@@ -47,6 +47,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,6 +67,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     static final String URL_ORARI_SETTIMANA_SPECIALI="http://pmsc9.altervista.org/progetto/infoaula_orariSpeciali.php";
     static final String URL_CHECK_APERTA="http://pmsc9.altervista.org/progetto/infoaula_checkAperta.php";
     static final String URL_CHECK_POSTI="http://pmsc9.altervista.org/progetto/infoaula_checkPosti.php";
+    static final String URL_RICHIEDI_NOTIFICA="http://pmsc9.altervista.org/progetto/infoaula_richiedi_notifica.php";
 
     TextView infoAula_nome, infoAula_luogo, infoAula_output, infoAula_gruppi, infoAula_posti;
     Button btnNotifica, btnPrenotazioneGruppo, btnPrenotazionePosto;
@@ -78,6 +80,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     LinkedList<Orario_Speciale> orari_speciali;
     LinkedList<Orario_Ufficiale> orari_giusti;
     ProgressBar bar;
+    String strNome, strMatricola, strUniversita;
 
     SqliteManager database;
 
@@ -121,7 +124,9 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        String strNome=settings.getString("nome", null);
+        strNome=settings.getString("nome", null);
+        strMatricola=settings.getString("matricola", null);
+        strUniversita=settings.getString("universita", null);
         setTitle(strNome);
 
         database=new SqliteManager(InfoAulaActivity.this);
@@ -143,6 +148,61 @@ public class InfoAulaActivity extends AppCompatActivity {
                 }
             }
         });
+
+        btnNotifica.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new richiedi_notifica().execute();
+            }
+        });
+    }
+
+    private class richiedi_notifica extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                URL url = new URL(URL_RICHIEDI_NOTIFICA);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                String parametri = "aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8")
+                        + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")
+                        + "&universita=" + URLEncoder.encode(strUniversita, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                //leggo stringa di ritorno da file php
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(String result) {
+            if(result==null || !result.equals("OK")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile procedere con la richiesta!</b></font>"), Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Richiesta avvenuta con successo, ti avviseremo quando si libera un posto</b></font>"), Toast.LENGTH_LONG).show();
+            Intent i=new Intent(InfoAulaActivity.this,Home.class);
+            startActivity(i);
+            finish();
+        }
     }
 
 // METODO --> mostra servizi, presi da aula passata con intent

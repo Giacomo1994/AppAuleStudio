@@ -2,7 +2,9 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +25,11 @@ import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+
+import com.itextpdf.text.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,6 +54,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     String strUniversita,strMatricola,strNome;
     ArrayAdapter<Prenotazione> adapter;
     View v1, v2;
+    SqliteManager database;
+    IntentIntegrator qrScan;
+    Prenotazione p=null;
+    int richiesta=-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +71,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         list_concluse=findViewById(R.id.list_concluse);
         v1=findViewById(R.id.delimiter_incorso_future);
         v2=findViewById(R.id.delimiter_future_concluse);
+        database=new SqliteManager(PrenotazioniAttiveActivity.this);
+        qrScan = new IntentIntegrator(this);
 
         //prendo preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -68,8 +82,124 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         setTitle(strNome);
 
         new getPrenotazioni().execute();
+        registerForContextMenu(list_in_corso);
+        registerForContextMenu(list_future);
+        registerForContextMenu(list_concluse);
     }
 
+// RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    String s=result.getContents();
+                    int first=s.indexOf('"')+1;
+                    int second=s.lastIndexOf('"');
+                    String id_aula=s.substring(first,second);
+                    String nome_aula=database.getNomeAula(id_aula);
+                    String entrata_uscita=s.substring(0,first-1);
+
+                    if(!nome_aula.equals(p.getAula())){
+                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034'><b>Hai sbagliato aula!</b></font>"), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(entrata_uscita.equals("entrata") && richiesta!=0 ){
+                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato ad entrare in aula</b></font>"), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(entrata_uscita.equals("uscita") && richiesta!=2 ){
+                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato ad effettuare la pausa</b></font>"), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
+                    builder.setTitle(entrata_uscita+" "+nome_aula);
+                    builder.setMessage("Vuoi procedere?");
+                    // Set click listener for alert dialog buttons
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch(which){
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //TODO
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    dialog.dismiss();
+                                    break;
+                            }
+                        }
+                    };
+
+                    builder.setPositiveButton("Si", dialogClickListener);
+                    builder.setNegativeButton("No",dialogClickListener);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                } catch (Exception e) {
+                    Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+//CONTEXT MENU
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ListView list=(ListView) v;
+        Prenotazione p= (Prenotazione) list.getItemAtPosition(info.position);
+        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
+
+        if(list.equals(list_in_corso)){
+            if(p.getStato()==1 || p.getStato()==2){
+                menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
+                menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
+            }
+            if(p.getStato()==0){
+                menu.add(Menu.FIRST, 2, Menu.FIRST,"Effettua pausa");
+                menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Termina prenotazione");
+            }
+        }
+        else if(list.equals(list_future)){
+            menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
+            menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
+            if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
+        }
+        else{
+            menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
+            menu.add(Menu.FIRST, 6, Menu.FIRST+1,"Esci dall'aula");
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        richiesta=item.getItemId();
+
+        if(richiesta<=3) p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
+        else if(richiesta==4) p= (Prenotazione) list_future.getItemAtPosition(info.position);
+        else p=(Prenotazione) list_concluse.getItemAtPosition(info.position);
+
+        if(richiesta==1) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>termina prenotazione (stato 3)</b></font>"), Toast.LENGTH_SHORT).show();
+        else if(richiesta==3) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>termina prenotazione(stato 3) + apri tornello</b></font>"), Toast.LENGTH_SHORT).show();
+        else if(richiesta==4) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>cancella prenotazione</b></font>"), Toast.LENGTH_SHORT).show();
+        else if(richiesta==5) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>apri tornello entrata</b></font>"), Toast.LENGTH_SHORT).show();
+        else if(richiesta==6) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>apri tornello uscita</b></font>"), Toast.LENGTH_SHORT).show();
+        else if(richiesta==7) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>cancella prenotazione gruppo</b></font>"), Toast.LENGTH_SHORT).show();
+        else qrScan.initiateScan();
+
+        return true;
+    }
+
+//SCARICO PRENOTAZIONI --> incorso, future, terminate e le metto in 3 list view diverse
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
         @Override
         protected Prenotazione[] doInBackground(Void... strings) {
@@ -114,7 +244,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 Prenotazione[] array_prenotazioni = new Prenotazione[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    array_prenotazioni[i] = new Prenotazione(json_data.getInt("id"), json_data.getString("matricola"),json_data.getString("nome"),
+                    array_prenotazioni[i] = new Prenotazione(json_data.getInt("id"), json_data.getString("matricola"),
+                            json_data.getString("id_aula"),json_data.getString("nome"),
                             json_data.getInt("tavolo"),json_data.getString("orario_prenotazione"),
                             json_data.getString("orario_ultima_uscita"),json_data.getString("orario_fine_prenotazione"),
                             json_data.getInt("stato"),json_data.getString("gruppo"), json_data.getString("in_corso"));
@@ -259,7 +390,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
     }
 
-    //CREAZIONE MENU IN ALTO
+//MENU IN ALTO
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
