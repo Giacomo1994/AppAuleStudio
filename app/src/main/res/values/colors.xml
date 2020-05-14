@@ -7,5 +7,6 @@
     <color name="button_text">#FFFFFF</color>
     <color name="verde_trasparente">#bfe3c3</color>
     <color name="grigio_chiaro">#c3c6c9</color>
+    <color name="bianco">#ffffff</color>
 
 </resources>

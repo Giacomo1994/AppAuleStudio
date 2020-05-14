@@ -8,6 +8,6 @@
         android:id="@+id/infoCorso"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/forma_arrotondata"
+        android:background="@drawable/forma_griglia_gruppi"
         android:textSize="20sp" />
 </LinearLayout>

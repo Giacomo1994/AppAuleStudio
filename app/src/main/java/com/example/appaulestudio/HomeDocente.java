@@ -99,10 +99,10 @@ public class HomeDocente extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent= new Intent(HomeDocente.this, CreaCodici.class);
-                intent.putExtra("nome",strNome);
+                /*intent.putExtra("nome",strNome);
                 intent.putExtra("cognome",strCognome);
                 intent.putExtra("matricola", strMatricola);
-                intent.putExtra("universita", strUniversita);
+                intent.putExtra("universita", strUniversita);*/
                 startActivity(intent);
             }
         });
