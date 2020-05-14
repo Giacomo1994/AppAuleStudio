@@ -77,7 +77,7 @@ public class HomeDocente extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
 
 
-        elencoCorsi=findViewById(R.id.elencoCorsi);
+        elencoCorsi=findViewById(R.id.elencoCorsi2);
        /* elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
