@@ -53,6 +53,17 @@ public class HomeDocente extends AppCompatActivity {
 
         new listaCorsi().execute();
 
+        elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+              Corso c= (Corso) parent.getItemAtPosition(position);
+                Intent intent=new Intent(HomeDocente.this,GestioneGruppiDocenteActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("corso",c);
+                intent.putExtra("bundle", bundle);
+                startActivityForResult(intent,345);
+            }
+        });
 
     }
 
@@ -67,17 +78,18 @@ public class HomeDocente extends AppCompatActivity {
 
 
         elencoCorsi=findViewById(R.id.elencoCorsi);
-        elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+       /* elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Corso c= (Corso) elencoCorsi.getItemAtPosition(i);
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Ho cliccato sul corso"+c.getNomeCorso()+"</b></font>"), Toast.LENGTH_LONG).show();
                 Intent intent=new Intent(HomeDocente.this,GestioneGruppiDocenteActivity.class);
                 Bundle bundle=new Bundle();
                 bundle.putParcelable("corso", c);
                 intent.putExtra("bundle", bundle);
                 startActivityForResult(intent, 2);
             }
-        });
+        });*/
         setTitle(strNome+" "+strCognome);
 
 

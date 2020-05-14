@@ -10,6 +10,5 @@
         android:layout_height="wrap_content"
         android:background="@drawable/forma_arrotondata"
         android:capitalize="words"
-        android:text="TextView"
-        android:textSize="18sp" />
+        android:textSize="24sp" />
 </LinearLayout>
