@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -50,6 +52,19 @@ public class HomeDocente extends AppCompatActivity {
         initUI();
 
         new listaCorsi().execute();
+
+        elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+              Corso c= (Corso) parent.getItemAtPosition(position);
+                Intent intent=new Intent(HomeDocente.this,GestioneGruppiDocenteActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("corso",c);
+                intent.putExtra("bundle", bundle);
+                startActivityForResult(intent,345);
+            }
+        });
+
     }
 
     private void initUI(){
@@ -62,8 +77,22 @@ public class HomeDocente extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
 
 
-        elencoCorsi=findViewById(R.id.elencoCorsi);
+        elencoCorsi=findViewById(R.id.elencoCorsi2);
+       /* elencoCorsi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Corso c= (Corso) elencoCorsi.getItemAtPosition(i);
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Ho cliccato sul corso"+c.getNomeCorso()+"</b></font>"), Toast.LENGTH_LONG).show();
+                Intent intent=new Intent(HomeDocente.this,GestioneGruppiDocenteActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("corso", c);
+                intent.putExtra("bundle", bundle);
+                startActivityForResult(intent, 2);
+            }
+        });*/
         setTitle(strNome+" "+strCognome);
+
+
        // Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+strMatricola+strUniversita+"</b></font>"), Toast.LENGTH_LONG).show();
         creaGruppi= findViewById(R.id.btnCreaCodici);
         creaGruppi.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +211,7 @@ public class HomeDocente extends AppCompatActivity {
                 }
             };
             elencoCorsi.setAdapter(adapter);
+
         }
     }
 

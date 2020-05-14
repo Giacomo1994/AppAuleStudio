@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -238,7 +239,7 @@ public class IscrizioneActivity extends AppCompatActivity {
 
             String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
                     "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
-                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");;
+                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");
 
             DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
             dos.writeBytes(parametri);
@@ -271,6 +272,8 @@ public class IscrizioneActivity extends AppCompatActivity {
             else{
                 //torno all'activity precedente
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>"+result+" </b></font>"),Toast.LENGTH_LONG).show();
+                Intent i = new Intent(IscrizioneActivity.this, GroupActivity.class);
+                startActivity(i);
                 finish();
 
             }
