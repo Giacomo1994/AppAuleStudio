@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,6 +50,7 @@ import java.util.Locale;
 
 public class PrenotazioniAttiveActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive.php";
+    static final String URL_OPERAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive_gestionePrenotazione.php";
     LinearLayout ll_in_corso, ll_future, ll_concluse;
     ListView list_in_corso, list_future, list_concluse;
     String strUniversita,strMatricola,strNome;
@@ -126,7 +128,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             switch(which){
                                 case DialogInterface.BUTTON_POSITIVE:
-                                    //TODO
+                                    new doOperazione().execute();
                                     break;
 
                                 case DialogInterface.BUTTON_NEGATIVE:
@@ -142,7 +144,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                     dialog.show();
 
                 } catch (Exception e) {
-                    Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, Html.fromHtml("<font color='#eb4034' ><b>Errore nella lettura del codice QR!</b></font>"), Toast.LENGTH_LONG).show();
                 }
             }
         } else {
@@ -156,7 +158,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         ListView list=(ListView) v;
         Prenotazione p= (Prenotazione) list.getItemAtPosition(info.position);
-        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
 
         if(list.equals(list_in_corso)){
             if(p.getStato()==1 || p.getStato()==2){
@@ -188,16 +190,66 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         else if(richiesta==4) p= (Prenotazione) list_future.getItemAtPosition(info.position);
         else p=(Prenotazione) list_concluse.getItemAtPosition(info.position);
 
-        if(richiesta==1) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>termina prenotazione (stato 3)</b></font>"), Toast.LENGTH_SHORT).show();
-        else if(richiesta==3) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>termina prenotazione(stato 3) + apri tornello</b></font>"), Toast.LENGTH_SHORT).show();
-        else if(richiesta==4) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>cancella prenotazione</b></font>"), Toast.LENGTH_SHORT).show();
-        else if(richiesta==5) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>apri tornello entrata</b></font>"), Toast.LENGTH_SHORT).show();
-        else if(richiesta==6) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>apri tornello uscita</b></font>"), Toast.LENGTH_SHORT).show();
-        else if(richiesta==7) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>cancella prenotazione gruppo</b></font>"), Toast.LENGTH_SHORT).show();
+        if(richiesta!=0 && richiesta!=2){
+            new doOperazione().execute();
+        }
         else qrScan.initiateScan();
 
         return true;
     }
+
+//
+    private class doOperazione extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                URL url = new URL(URL_OPERAZIONI);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                String parametri = "id_aula=" + URLEncoder.encode(p.getId_aula(), "UTF-8") +
+                        "&richiesta=" + URLEncoder.encode(""+richiesta, "UTF-8") +
+                        "&id_prenotazione=" + URLEncoder.encode(""+p.getId_prenotazione(), "UTF-8") +
+                        "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
+                        "&inizio_prenotazione=" + URLEncoder.encode(p.getOrario_prenotazione(), "UTF-8") +
+                        "&gruppo=" + URLEncoder.encode(p.getGruppo(), "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                //leggo stringa di ritorno da file php
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(String result) {
+            if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione al server!</b></font>"), Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+result+"</b></font>"), Toast.LENGTH_LONG).show();
+            Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+    }
+
 
 //SCARICO PRENOTAZIONI --> incorso, future, terminate e le metto in 3 list view diverse
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
@@ -213,7 +265,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 StringBuilder sb;
                 String line;
                 String result;
-                JSONArray jArrayAule;
                 JSONArray jArray;
 
                 url = new URL(URL_PRENOTAZIONI);
