@@ -33,6 +33,8 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\tPRIMARY KEY(\"id_aula\",\"giorno\")\n" +
                 ");";
         db.execSQL(sql1);
+
+
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)

@@ -2,7 +2,9 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,9 +44,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -88,6 +92,25 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         registerForContextMenu(list_future);
         registerForContextMenu(list_concluse);
     }
+
+    public void create_alarm(Prenotazione prenotazione){
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND,30);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.putExtra("name", ""+prenotazione.getAula()+": Prenotazione conclusa");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+    }
+
+    public void cancel_alarm(Prenotazione prenotazione){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        alarmManager.cancel(pendingIntent);
+    }
+
 
 // RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
     @Override
@@ -243,7 +266,15 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+result+"</b></font>"), Toast.LENGTH_LONG).show();
+            else if(result.equals("Accesso consentito")){
+                MyToast.makeText(getApplicationContext(), result, true).show();
+                cancel_alarm(p);
+            }
+            else if(result.equals("Pausa iniziata")){
+                MyToast.makeText(getApplicationContext(), result, true).show();
+                create_alarm(p);
+            }
+            else Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+result+"</b></font>"), Toast.LENGTH_LONG).show();
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
@@ -379,6 +410,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 v2.setVisibility(View.GONE);
             }
             else{
+                Collections.sort(prenotazioni_future);
                 adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_future) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
@@ -411,6 +443,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
             if(prenotazioni_concluse.size()==0) ll_concluse.setVisibility(View.GONE);
             else {
+                Collections.sort(prenotazioni_concluse);
                 adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_concluse) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {

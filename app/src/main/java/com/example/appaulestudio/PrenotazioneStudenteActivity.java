@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -69,6 +71,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner;
+
+    SqliteManager database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,11 +193,33 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Prenotazione avvenuta con successo</b></font>"), Toast.LENGTH_LONG).show();
+            int id_prenotazione=Integer.parseInt(result);
+            create_alarm(id_prenotazione);
+            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Prenotazione avvenuta con successo!</b></font>"), Toast.LENGTH_LONG).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
         }
+    }
+
+    public void create_alarm(int id_prenotazione){
+        String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = null;
+        try {
+            d = df.parse(myTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.SECOND,30);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.putExtra("name", ""+aula.getNome()+": Prenotazione conclusa");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
     }
 
     private class load_image extends AsyncTask<Void, Void, Bitmap> {

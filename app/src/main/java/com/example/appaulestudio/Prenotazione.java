@@ -1,6 +1,6 @@
 package com.example.appaulestudio;
 
-public class Prenotazione {
+public class Prenotazione implements Comparable<Prenotazione>{
     private int id_prenotazione;
     private String matricola;
     private String nome_aula;
@@ -113,5 +113,10 @@ public class Prenotazione {
 
     public void setIn_corso(String in_corso) {
         this.in_corso = in_corso;
+    }
+
+    @Override
+    public int compareTo(Prenotazione o) {
+        return orario_prenotazione.compareTo(o.getOrario_prenotazione());
     }
 }

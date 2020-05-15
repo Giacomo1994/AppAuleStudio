@@ -4,7 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class SqliteManager {
@@ -12,6 +16,7 @@ public class SqliteManager {
     public SqliteManager(Context ctx) {
         dbHelper=new SqliteHelper(ctx);
     }
+
 
     public void writeAuleOrari(Aula[] array_aula){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
