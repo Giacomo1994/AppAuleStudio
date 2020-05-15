@@ -262,7 +262,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione al server!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", true).show();
                 finish();
                 return;
             }
@@ -274,7 +274,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 MyToast.makeText(getApplicationContext(), result, true).show();
                 create_alarm(p);
             }
-            else Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+result+"</b></font>"), Toast.LENGTH_LONG).show();
+            else if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione"))
+                MyToast.makeText(getApplicationContext(), result, false).show();
+            else MyToast.makeText(getApplicationContext(), result, true).show();
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();

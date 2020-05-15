@@ -179,23 +179,23 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione al server!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
             if(result.equals("Impossibile prenotare")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare! Non ci sono posti disponibili</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
                 finish();
                 return;
             }
             if(result.equals("ER")){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Hai già una prenotazione attiva nell'orario specificato!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Hai già una prenotazione attiva nell'orario specificato!", false).show();
                 finish();
                 return;
             }
             int id_prenotazione=Integer.parseInt(result);
             create_alarm(id_prenotazione);
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Prenotazione avvenuta con successo!</b></font>"), Toast.LENGTH_LONG).show();
+            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
