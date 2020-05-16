@@ -128,6 +128,7 @@ protected void initUI(){
         //inizializzo oggetto database
             database=new SqliteManager(Home.this);
 
+
         //se apro l'app ed accedo direttamente alla home, controllo se l'utente è ok ed aggiorno il token dell'app
             intent=getIntent();
             if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==false){

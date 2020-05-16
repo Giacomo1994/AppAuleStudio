@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ import com.itextpdf.text.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -55,11 +57,11 @@ import java.util.Locale;
 public class PrenotazioniAttiveActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive.php";
     static final String URL_OPERAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive_gestionePrenotazione.php";
-    LinearLayout ll_in_corso, ll_future, ll_concluse;
-    ListView list_in_corso, list_future, list_concluse;
+    static final String URL_RICHIESTA_TORNELLO="http://pmsc9arduino.altervista.org/inserisci_richiesta.php";
+    LinearLayout ll_in_corso,ll_cronologia;
+    ListView list_in_corso, list_cronologia;
     String strUniversita,strMatricola,strNome;
     ArrayAdapter<Prenotazione> adapter;
-    View v1, v2;
     SqliteManager database;
     IntentIntegrator qrScan;
     Prenotazione p=null;
@@ -70,17 +72,13 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prenotazioni_attive);
         ll_in_corso=findViewById(R.id.prenInCorso_ll);
-        ll_future=findViewById(R.id.prenFuture_ll);
-        ll_concluse=findViewById(R.id.prenCocluse_ll);
+        ll_cronologia=findViewById(R.id.prenCronologia_ll);
         list_in_corso=findViewById(R.id.list_inCorso);
-        list_future=findViewById(R.id.list_future);
-        list_concluse=findViewById(R.id.list_concluse);
-        v1=findViewById(R.id.delimiter_incorso_future);
-        v2=findViewById(R.id.delimiter_future_concluse);
+        list_cronologia=findViewById(R.id.list_cronologia);
+
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         qrScan = new IntentIntegrator(this);
 
-        //prendo preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
@@ -89,28 +87,47 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
-        registerForContextMenu(list_future);
-        registerForContextMenu(list_concluse);
     }
 
-    public void create_alarm(Prenotazione prenotazione){
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.SECOND,30);
-
+//creazione alarm
+    public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
+        Calendar cal_allarme = Calendar.getInstance();
+        if(pausa==true) cal_allarme.add(Calendar.MINUTE,2);
+        else if(inizio==true){
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_allarme = null;
+            try {
+                date_allarme = df.parse(prenotazione.getOrario_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            cal_allarme.setTime(date_allarme);
+            cal_allarme.add(Calendar.MINUTE,5);
+        }
+        else{
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_allarme = null;
+            try {
+                date_allarme = df.parse(prenotazione.getOrario_fine_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            cal_allarme.setTime(date_allarme);
+        }
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+prenotazione.getAula()+": Prenotazione conclusa");
+        intent.putExtra("name", ""+prenotazione.getAula()+": Prenotazione terminata");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
     }
 
+//rimozione alarm
     public void cancel_alarm(Prenotazione prenotazione){
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.cancel(pendingIntent);
     }
-
 
 // RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
     @Override
@@ -141,11 +158,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         return;
                     }
 
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
                     builder.setTitle(entrata_uscita+" "+nome_aula);
                     builder.setMessage("Vuoi procedere?");
-                    // Set click listener for alert dialog buttons
+                    //click listener for alert dialog buttons --> Se sì esegui task asincrono
                     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -160,19 +176,13 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                             }
                         }
                     };
-
                     builder.setPositiveButton("Si", dialogClickListener);
                     builder.setNegativeButton("No",dialogClickListener);
                     AlertDialog dialog = builder.create();
                     dialog.show();
-
-                } catch (Exception e) {
-                    Toast.makeText(this, Html.fromHtml("<font color='#eb4034' ><b>Errore nella lettura del codice QR!</b></font>"), Toast.LENGTH_LONG).show();
-                }
+                } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        } else super.onActivityResult(requestCode, resultCode, data);
     }
 
 //CONTEXT MENU
@@ -183,7 +193,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         Prenotazione p= (Prenotazione) list.getItemAtPosition(info.position);
         //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
 
-        if(list.equals(list_in_corso)){
+        if(p.getIn_corso().equals("in_corso")){
             if(p.getStato()==1 || p.getStato()==2){
                 menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
                 menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
@@ -193,7 +203,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Termina prenotazione");
             }
         }
-        else if(list.equals(list_future)){
+        else if(p.getIn_corso().equals("futura")){
             menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
             if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
@@ -208,20 +218,51 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         richiesta=item.getItemId();
+        p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
 
-        if(richiesta<=3) p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-        else if(richiesta==4 || richiesta==7 || richiesta==8) p= (Prenotazione) list_future.getItemAtPosition(info.position);
-        else p=(Prenotazione) list_concluse.getItemAtPosition(info.position);
-
-        if(richiesta!=0 && richiesta!=2){
-            new doOperazione().execute();
-        }
+        if(richiesta!=0 && richiesta!=2) new doOperazione().execute();
         else qrScan.initiateScan();
 
         return true;
     }
 
-//
+//TASK ASINCRONO --> Richiesta accesso a tornello
+    private class doRichiestaTornello extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                URL url = new URL(URL_RICHIESTA_TORNELLO);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                String parametri = "id_aula=" + URLEncoder.encode(p.getId_aula(), "UTF-8") + "&richiesta=" + URLEncoder.encode(""+richiesta, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(String result) {}
+    }
+
+//TASK ASINCRONO --> Operazione su prenotazione --> ritorna una stringa di errore o successo
     private class doOperazione extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -244,7 +285,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
-                //leggo stringa di ritorno da file php
                 urlConnection.connect();
                 InputStream input = urlConnection.getInputStream();
                 byte[] buffer = new byte[1024];
@@ -266,17 +306,23 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            else if(result.equals("Accesso consentito")){
-                MyToast.makeText(getApplicationContext(), result, true).show();
-                cancel_alarm(p);
-            }
-            else if(result.equals("Pausa iniziata")){
-                MyToast.makeText(getApplicationContext(), result, true).show();
-                create_alarm(p);
-            }
-            else if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione"))
+            if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione"))
                 MyToast.makeText(getApplicationContext(), result, false).show();
             else MyToast.makeText(getApplicationContext(), result, true).show();
+
+            if(richiesta==0 && result.equals("Accesso consentito")){
+                create_alarm(p, false, false);
+                new doRichiestaTornello().execute();
+            }
+            else if(richiesta==1) cancel_alarm(p);
+            else if(richiesta==2 && result.equals("Pausa iniziata")){
+                create_alarm(p, false,true);
+                new doRichiestaTornello().execute();
+            }
+            else if(richiesta==3) cancel_alarm(p);
+            else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")) cancel_alarm(p);
+            else if(richiesta==5 || richiesta==6) new doRichiestaTornello().execute();
+
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
@@ -284,7 +330,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
 
-//SCARICO PRENOTAZIONI --> incorso, future, terminate e le metto in 3 list view diverse
+//SCARICO PRENOTAZIONI --> prenotazioni incorso, future o terminate nella giornata e le metto in list view --> Se non c'è connessione prendo i dati da sqlite
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
         @Override
         protected Prenotazione[] doInBackground(Void... strings) {
@@ -324,7 +370,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 result = sb.toString();
                 jArray = new JSONArray(result);
 
-
                 Prenotazione[] array_prenotazioni = new Prenotazione[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
@@ -343,92 +388,33 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
+        //offline
             if(array_prenotazioni==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server</b></font>"), Toast.LENGTH_LONG).show();
-                ll_in_corso.setVisibility(View.GONE);
-                ll_future.setVisibility(View.GONE);
-                ll_concluse.setVisibility(View.GONE);
-                v2.setVisibility(View.GONE);
-                v1.setVisibility(View.GONE);
-                return;
-            }
-            if(array_prenotazioni.length==0){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono prenotazioni</b></font>"), Toast.LENGTH_LONG).show();
-                ll_in_corso.setVisibility(View.GONE);
-                ll_future.setVisibility(View.GONE);
-                ll_concluse.setVisibility(View.GONE);
-                v2.setVisibility(View.GONE);
-                v1.setVisibility(View.GONE);
-                return;
-            }
-            ArrayList<Prenotazione> prenotazioni_in_corso=new ArrayList<Prenotazione>();
-            ArrayList<Prenotazione> prenotazioni_future=new ArrayList<Prenotazione>();
-            ArrayList<Prenotazione> prenotazioni_concluse=new ArrayList<Prenotazione>();
+                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
-            for(Prenotazione p:array_prenotazioni){
-                if(p.getIn_corso().equals("in_corso")) prenotazioni_in_corso.add(p);
-                else if(p.getIn_corso().equals("futura")) prenotazioni_future.add(p);
-                else if(p.getIn_corso().equals("conclusa")) prenotazioni_concluse.add(p);
-            }
-            if(prenotazioni_in_corso.size()==0){
-                ll_in_corso.setVisibility(View.GONE);
-                v1.setVisibility(View.GONE);
-            }
-            else{
-                adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_in_corso) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        Prenotazione item = getItem(position);
-                        convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
-                        TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
-                        TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
-                        TextView row_inizio = convertView.findViewById(R.id.row_inizio);
-                        TextView row_fine = convertView.findViewById(R.id.row_fine);
-                        TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
-                        TextView row_stato = convertView.findViewById(R.id.row_stato);
+                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni(strUniversita,strMatricola);
+                if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
+                    MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
+                    return;
+                }
+                Collections.sort(prenotazioni_offline, Collections.<Prenotazione>reverseOrder());
 
-                        row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
-                        row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" "+item.getOrario_prenotazione().substring(11,16));
-                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" "+item.getOrario_fine_prenotazione().substring(11,16));
-                        if(item.getGruppo().equals("null")){
-                            riga_gruppo.setVisibility(View.GONE);
-                        }
-                        else{
-                            riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
-                        }
-                        if(item.getStato()==1) row_stato.setText("Non ancora in aula");
-                        else if(item.getStato()==2) row_stato.setText("In pausa dalle ore "+item.getOrario_ultima_uscita().substring(11,16));
-                        else row_stato.setText("In aula");
-
-                        return convertView;
-                    }
-                };
-                list_in_corso.setAdapter(adapter);
-            }
-
-            if(prenotazioni_future.size()==0){
-                ll_future.setVisibility(View.GONE);
-                v2.setVisibility(View.GONE);
-            }
-            else{
-                Collections.sort(prenotazioni_future);
-                adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_future) {
+                adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_offline) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Prenotazione item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
                         TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
                         TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
+                        TableRow riga_fine= convertView.findViewById(R.id.riga_ora_fine);
                         TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
                         TextView row_inizio = convertView.findViewById(R.id.row_inizio);
-                        TextView row_fine = convertView.findViewById(R.id.row_fine);
                         TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
 
                         riga_stato.setVisibility(View.GONE);
+                        riga_fine.setVisibility(View.GONE);
                         row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
-                        row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" "+item.getOrario_prenotazione().substring(11,16));
-                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" "+item.getOrario_fine_prenotazione().substring(11,16));
+                        row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
 
                         if(item.getGruppo().equals("null")){
                             riga_gruppo.setVisibility(View.GONE);
@@ -440,39 +426,86 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         return convertView;
                     }
                 };
-                list_future.setAdapter(adapter);
+                list_cronologia.setAdapter(adapter);
+                return;
             }
 
-            if(prenotazioni_concluse.size()==0) ll_concluse.setVisibility(View.GONE);
-            else {
-                Collections.sort(prenotazioni_concluse);
-                adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, prenotazioni_concluse) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        Prenotazione item = getItem(position);
-                        convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
-                        TableRow riga_gruppo = convertView.findViewById(R.id.riga_gruppo);
-                        TableRow riga_stato = convertView.findViewById(R.id.riga_stato);
-                        TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
-                        TextView row_inizio = convertView.findViewById(R.id.row_inizio);
-                        TextView row_fine = convertView.findViewById(R.id.row_fine);
-                        TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
+        //online
+            ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
+            for(Prenotazione p:array_prenotazioni){
+                lista_prenotazioni.add(p);
+                if(p.getStato()==1 && (p.getIn_corso().equals("in_corso")|| p.getIn_corso().equals("futura")) && !p.getGruppo().equals("null"))
+                    create_alarm(p,true,false);
+            }
+            Collections.sort(lista_prenotazioni);
 
-                        riga_stato.setVisibility(View.GONE);
-                        row_luogo.setText(item.getAula() + ", Tavolo " + item.getNum_tavolo());
-                        row_inizio.setText(item.getOrario_prenotazione().substring(8, 10) + "/" + item.getOrario_prenotazione().substring(5, 7) + " " + item.getOrario_prenotazione().substring(11, 16));
-                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8, 10) + "/" + item.getOrario_fine_prenotazione().substring(5, 7) + " " + item.getOrario_fine_prenotazione().substring(11, 16));
-                        if (item.getGruppo().equals("null")) {
-                            riga_gruppo.setVisibility(View.GONE);
-                        } else {
+            if(lista_prenotazioni.size()==0){
+                MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
+                database.updatePrenotazioni(strUniversita,strMatricola,lista_prenotazioni);
+                return;
+            }
+            adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, lista_prenotazioni) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    Prenotazione item = getItem(position);
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
+                    TableLayout table_riga=convertView.findViewById(R.id.row_table);
+                    TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
+                    TableRow riga_fine= convertView.findViewById(R.id.riga_ora_fine);
+                    TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
+                    TextView row_luogo = convertView.findViewById(R.id.row_aula_tavolo);
+                    TextView row_inizio = convertView.findViewById(R.id.row_inizio);
+                    TextView row_fine = convertView.findViewById(R.id.row_fine);
+                    TextView row_gruppo = convertView.findViewById(R.id.row_gruppo);
+                    TextView row_stato = convertView.findViewById(R.id.row_stato);
+
+                    if(item.getIn_corso().equals("in_corso")){
+                        table_riga.setBackgroundResource(R.drawable.layout_prenotazione_corso_complete);
+                        row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
+                        row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
+                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" ore "+item.getOrario_fine_prenotazione().substring(11,16));
+                        if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
+
+                        else{
                             riga_gruppo.setVisibility(View.VISIBLE);
                             row_gruppo.setText(item.getGruppo());
                         }
-                        return convertView;
+                        if(item.getStato()==1) row_stato.setText("Non ancora in aula");
+                        else if(item.getStato()==2) row_stato.setText("In pausa");
+                        else row_stato.setText("In aula");
                     }
-                };
-                list_concluse.setAdapter(adapter);
-            }
+
+                    else if(item.getIn_corso().equals("futura")){
+                        table_riga.setBackgroundResource(R.drawable.layout_prenotazione_futura_complete);
+                        row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
+                        row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
+                        row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" ore "+item.getOrario_fine_prenotazione().substring(11,16));
+
+                        if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
+                        else{
+                            riga_gruppo.setVisibility(View.VISIBLE);
+                            row_gruppo.setText(item.getGruppo());
+                        }
+                        row_stato.setText("Non ancora iniziata");
+                    }
+
+                    else{
+                        table_riga.setBackgroundResource(R.drawable.layout_prenotazione_terminata_complete);
+                        riga_fine.setVisibility(View.GONE);
+                        row_luogo.setText(item.getAula() + ", Tavolo " + item.getNum_tavolo());
+                        row_inizio.setText(item.getOrario_prenotazione().substring(8, 10) + "/" + item.getOrario_prenotazione().substring(5, 7) + " ore " + item.getOrario_prenotazione().substring(11, 16));
+                        if (item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
+                        else {
+                            riga_gruppo.setVisibility(View.VISIBLE);
+                            row_gruppo.setText(item.getGruppo());
+                        }
+                        row_stato.setText("Terminata");
+                    }
+                    return convertView;
+                }
+            };
+            list_in_corso.setAdapter(adapter);
+            database.updatePrenotazioni(strUniversita,strMatricola,lista_prenotazioni);
         }
     }
 

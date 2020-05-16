@@ -18,6 +18,51 @@ public class SqliteManager {
     }
 
 
+    public void updatePrenotazioni(String codice_universita, String matricola, ArrayList<Prenotazione> prenotazioni){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql0 = "DELETE FROM prenotazioni_offline";
+        db.execSQL(sql0);
+        if(prenotazioni.size()==0) return;
+
+        String sql2="INSERT INTO prenotazioni_offline (id_prenotazione, codice_universita, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) VALUES ";
+        int i=0;
+        for(Prenotazione p: prenotazioni){
+            if(i==prenotazioni.size()-1) sql2 += "(" + p.getId_prenotazione() + ", '" + codice_universita + "', '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "', " + p.getNum_tavolo() + ", '" + p.getGruppo() + "')";
+            else sql2 += "(" + p.getId_prenotazione() + ", '" + codice_universita + "', '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "', " + p.getNum_tavolo() + ", '" + p.getGruppo() + "'), ";
+            i++;
+        }
+        db.execSQL(sql2);
+
+    }
+
+    public ArrayList<Prenotazione> selectPrenotazioni(String codice_universita, String matricola){
+        ArrayList<Prenotazione> prenotazioni=new ArrayList<Prenotazione>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM prenotazioni_offline where codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"'";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            int id=cursor.getInt(cursor.getColumnIndex("id_prenotazione"));
+            String orario_prenotazione=cursor.getString(cursor.getColumnIndex("orario_prenotazione"));
+            String nome_aula=cursor.getString(cursor.getColumnIndex("nome_aula"));
+            int tavolo=cursor.getInt(cursor.getColumnIndex("tavolo"));
+            String gruppo=cursor.getString(cursor.getColumnIndex("gruppo"));
+
+            prenotazioni.add(new Prenotazione(id,""+matricola,"null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
+        }
+        db.close();
+        return prenotazioni;
+    }
+
+    public void deletePrenotazioneGruppo(String codice_universita, String matricola, String orario_prenotazione, String gruppo){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql = "DELETE FROM prenotazioni_offline WHERE codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"' AND orario_prenotazione='"+ orario_prenotazione +"' AND gruppo='"+ gruppo +"'";
+        db.execSQL(sql);
+    }
+
+
     public void writeAuleOrari(Aula[] array_aula){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql1 = "DELETE FROM info_aule_offline";

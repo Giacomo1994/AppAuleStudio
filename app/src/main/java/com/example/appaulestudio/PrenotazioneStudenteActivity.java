@@ -87,6 +87,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         btn_prenota=findViewById(R.id.pren_btn);
         linear_spinner=findViewById(R.id.linear_spinner);
 
+        database=new SqliteManager(this);
+
         intent =getIntent();
         bundle=intent.getBundleExtra("dati");
         aula=bundle.getParcelable("aula");
@@ -193,6 +195,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 finish();
                 return;
             }
+
             int id_prenotazione=Integer.parseInt(result);
             create_alarm(id_prenotazione);
             MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
@@ -202,7 +205,9 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
+//creazione alarm
     public void create_alarm(int id_prenotazione){
+        //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date d = null;
@@ -213,14 +218,15 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(d);
-        cal.add(Calendar.SECOND,30);
+        cal.add(Calendar.MINUTE,5);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+aula.getNome()+": Prenotazione conclusa");
+        intent.putExtra("name", ""+aula.getNome()+": Prenotazione terminata");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
     }
+
 
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override

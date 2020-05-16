@@ -117,6 +117,12 @@ public class Prenotazione implements Comparable<Prenotazione>{
 
     @Override
     public int compareTo(Prenotazione o) {
-        return orario_prenotazione.compareTo(o.getOrario_prenotazione());
+        if(this.in_corso.equals(o.in_corso)) return orario_prenotazione.compareTo(o.getOrario_prenotazione());
+        else if(this.in_corso.equals("in_corso") && o.in_corso.equals("futura")) return -1;
+        else if(this.in_corso.equals("in_corso") && o.in_corso.equals("conclusa")) return 1;
+        else if(this.in_corso.equals("futura") && o.in_corso.equals("in_corso")) return 1;
+        else if(this.in_corso.equals("futura") && o.in_corso.equals("conclusa")) return -1;
+        else if(this.in_corso.equals("conclusa") && o.in_corso.equals("in_corso")) return 1;
+        return 1;
     }
 }
