@@ -18,27 +18,40 @@ public class SqliteManager {
     }
 
 
-    public void updatePrenotazioni(String codice_universita, String matricola, ArrayList<Prenotazione> prenotazioni){
+    public void insertPrenotazione(int id_prenotazione, String matricola, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql0 = "DELETE FROM prenotazioni_offline";
-        db.execSQL(sql0);
-        if(prenotazioni.size()==0) return;
+        String sql="INSERT INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                "VALUES (" +id_prenotazione + ", '" + matricola + "', '" + orario_prenotazione + "', '" + nome_aula + "'," + tavolo + ",'" + gruppo + "')";
+        db.execSQL(sql);
+    }
 
-        String sql2="INSERT INTO prenotazioni_offline (id_prenotazione, codice_universita, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) VALUES ";
-        int i=0;
-        for(Prenotazione p: prenotazioni){
-            if(i==prenotazioni.size()-1) sql2 += "(" + p.getId_prenotazione() + ", '" + codice_universita + "', '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "', " + p.getNum_tavolo() + ", '" + p.getGruppo() + "')";
-            else sql2 += "(" + p.getId_prenotazione() + ", '" + codice_universita + "', '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "', " + p.getNum_tavolo() + ", '" + p.getGruppo() + "'), ";
-            i++;
+    public void deletePrenotazione(int id_prenotazione){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="DELETE FROM prenotazioni_offline where id_prenotazione="+id_prenotazione;
+        db.execSQL(sql);
+    }
+
+    public void insertPrenotazioniGruppi(ArrayList<Prenotazione> prenotazioni, String matricola){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        ArrayList<Prenotazione> pren_gruppi=new ArrayList<Prenotazione>();
+        for(Prenotazione pren:prenotazioni){
+            if(!pren.getGruppo().equals("null")) pren_gruppi.add(pren);
         }
-        db.execSQL(sql2);
+        String sql0="DELETE FROM prenotazioni_offline where matricola='"+matricola+"' AND gruppo!='null' ";
+        for(Prenotazione p: pren_gruppi){
+            String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                    "VALUES (" +p.getId_prenotazione() + ", '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
+            db.execSQL(sql);
+            sql0+="AND gruppo!='" + p.getGruppo() + "' ";
+        }
+        db.execSQL(sql0);
 
     }
 
-    public ArrayList<Prenotazione> selectPrenotazioni(String codice_universita, String matricola){
+    public ArrayList<Prenotazione> selectPrenotazioni(String matricola){
         ArrayList<Prenotazione> prenotazioni=new ArrayList<Prenotazione>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String sql = "SELECT * FROM prenotazioni_offline where codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"'";
+        String sql = "SELECT * FROM prenotazioni_offline where matricola='"+ matricola +"'";
         Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
         if(cursor==null ||cursor.getCount()==0) return null;
 
@@ -56,11 +69,11 @@ public class SqliteManager {
         return prenotazioni;
     }
 
-    public void deletePrenotazioneGruppo(String codice_universita, String matricola, String orario_prenotazione, String gruppo){
+    /*public void deletePrenotazioneGruppo(String codice_universita, String matricola, String orario_prenotazione, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql = "DELETE FROM prenotazioni_offline WHERE codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"' AND orario_prenotazione='"+ orario_prenotazione +"' AND gruppo='"+ gruppo +"'";
         db.execSQL(sql);
-    }
+    }*/
 
 
     public void writeAuleOrari(Aula[] array_aula){

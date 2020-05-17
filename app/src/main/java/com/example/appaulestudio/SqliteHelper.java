@@ -36,7 +36,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
         String sql2 = "CREATE TABLE \"prenotazioni_offline\" (\n" +
                 "\t\"id_prenotazione\"\tINTEGER PRIMARY KEY,\n" +
-                "\t\"codice_universita\"\tTEXT,\n" +
                 "\t\"matricola\"\tTEXT,\n" +
                 "\t\"orario_prenotazione\"\tTEXT,\n" +
                 "\t\"nome_aula\"\tTEXT,\n" +

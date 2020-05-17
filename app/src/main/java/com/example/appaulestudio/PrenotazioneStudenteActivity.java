@@ -198,6 +198,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
             int id_prenotazione=Integer.parseInt(result);
             create_alarm(id_prenotazione);
+            database.insertPrenotazione(id_prenotazione,""+strMatricola,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
             MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
@@ -218,7 +219,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(d);
-        cal.add(Calendar.MINUTE,5);
+        cal.add(Calendar.SECOND,300);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);

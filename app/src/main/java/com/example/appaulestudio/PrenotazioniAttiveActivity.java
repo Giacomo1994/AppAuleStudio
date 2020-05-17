@@ -92,7 +92,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 //creazione alarm
     public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.MINUTE,2);
+        if(pausa==true) cal_allarme.add(Calendar.SECOND,120);
         else if(inizio==true){
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
@@ -102,7 +102,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.MINUTE,5);
+            cal_allarme.add(Calendar.SECOND,300);
         }
         else{
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -320,7 +320,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 new doRichiestaTornello().execute();
             }
             else if(richiesta==3) cancel_alarm(p);
-            else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")) cancel_alarm(p);
+            else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")){
+                database.deletePrenotazione(p.getId_prenotazione());
+                cancel_alarm(p);
+            }
             else if(richiesta==5 || richiesta==6) new doRichiestaTornello().execute();
 
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
@@ -392,7 +395,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             if(array_prenotazioni==null){
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
-                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni(strUniversita,strMatricola);
+                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni(strMatricola);
                 if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
                     MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
                     return;
@@ -441,7 +444,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
             if(lista_prenotazioni.size()==0){
                 MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
-                database.updatePrenotazioni(strUniversita,strMatricola,lista_prenotazioni);
+                database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
                 return;
             }
             adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, lista_prenotazioni) {
@@ -505,7 +508,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 }
             };
             list_in_corso.setAdapter(adapter);
-            database.updatePrenotazioni(strUniversita,strMatricola,lista_prenotazioni);
+            database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
         }
     }
 
