@@ -64,8 +64,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     ArrayAdapter<Prenotazione> adapter;
     SqliteManager database;
     IntentIntegrator qrScan;
-    Prenotazione p=null;
-    int richiesta=-1;
+    public Prenotazione p=null;
+    public int richiesta=-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,15 +146,15 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                     String entrata_uscita=s.substring(0,first-1);
 
                     if(!nome_aula.equals(p.getAula())){
-                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034'><b>Hai sbagliato aula!</b></font>"), Toast.LENGTH_SHORT).show();
+                        MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
                         return;
                     }
                     if(entrata_uscita.equals("entrata") && richiesta!=0 ){
-                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato ad entrare in aula</b></font>"), Toast.LENGTH_SHORT).show();
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
                         return;
                     }
                     if(entrata_uscita.equals("uscita") && richiesta!=2 ){
-                        Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non sei abilitato ad effettuare la pausa</b></font>"), Toast.LENGTH_SHORT).show();
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad effettuare la pausa!", false).show();
                         return;
                     }
 
@@ -280,6 +280,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         "&id_prenotazione=" + URLEncoder.encode(""+p.getId_prenotazione(), "UTF-8") +
                         "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
                         "&inizio_prenotazione=" + URLEncoder.encode(p.getOrario_prenotazione(), "UTF-8") +
+                        "&fine_prenotazione=" + URLEncoder.encode(p.getOrario_fine_prenotazione(), "UTF-8") +
                         "&gruppo=" + URLEncoder.encode(p.getGruppo(), "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
@@ -302,7 +303,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", true).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
@@ -319,7 +320,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 create_alarm(p, false,true);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==3) cancel_alarm(p);
+            else if(richiesta==3){
+                cancel_alarm(p);
+                new doRichiestaTornello().execute();
+            }
             else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")){
                 database.deletePrenotazione(p.getId_prenotazione());
                 cancel_alarm(p);
