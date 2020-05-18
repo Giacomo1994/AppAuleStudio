@@ -149,7 +149,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
                         return;
                     }
-                    if(entrata_uscita.equals("entrata") && richiesta!=0 ){
+                    if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
                         MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
                         return;
                     }
@@ -220,7 +220,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
 
-        if(richiesta!=0 && richiesta!=2) new doOperazione().execute();
+        if(richiesta!=0 && richiesta!=2 && richiesta!=5) new doOperazione().execute();
         else qrScan.initiateScan();
 
         return true;
