@@ -266,7 +266,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             if(result.equals("Iscrizione effettuata con successo!")==false){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b> Ops, qualcosa è andato storto"+result+"</b></font>"),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b> Ops, qualcosa è andato storto: "+result+"</b></font>"),Toast.LENGTH_LONG).show();
                 return;
             }
             else{

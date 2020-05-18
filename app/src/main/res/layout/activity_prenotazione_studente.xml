@@ -48,12 +48,14 @@
                                     android:id="@+id/textView17"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_weight="0"
                                     android:text="Seleziona tavolo disponibile:" />
 
                                 <Spinner
                                     android:id="@+id/spinner_tavoli"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_weight="1"
                                     android:spinnerMode="dialog" />
 
                         </LinearLayout>
@@ -133,7 +135,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:background="@drawable/button_layout"
-            android:text="Prenota"
+            android:text="Conferma"
             android:textColor="@color/button_text"
             android:visibility="gone" />
 </LinearLayout>
