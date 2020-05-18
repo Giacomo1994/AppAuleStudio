@@ -14,21 +14,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView14"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="INFORMAZIONI AULE"
-            android:textColor="@color/intestazione"
-            android:textSize="24sp"
-            app:fontFamily="@font/marko_one" />
-
         <Button
             android:id="@+id/mappa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="vai a mappa aule" />
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_layout"
+            android:text="vai a mappa aule"
+            android:textColor="@color/button_text" />
 
         <ProgressBar
             android:id="@+id/bar"
@@ -39,7 +32,9 @@
         <ListView
             android:id="@+id/elencoAule"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:divider="#81CACACA"
+            android:dividerHeight="10dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -49,21 +44,14 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView15"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="INFORMAZIONI AULE"
-            android:textColor="@color/intestazione"
-            android:textSize="24sp"
-            app:fontFamily="@font/marko_one" />
-
         <Button
             android:id="@+id/lista"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Vai a elenco aule" />
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_layout"
+            android:text="Vai a elenco aule"
+            android:textColor="@color/button_text" />
 
     </LinearLayout>
 
