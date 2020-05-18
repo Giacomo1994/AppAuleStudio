@@ -30,7 +30,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         }
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "gcmchn")
                 .setSmallIcon(R.drawable.notification) // notification icon
-                .setContentTitle("AppAuleStudio") // title for notification
+                .setContentTitle("StudyAround") // title for notification
                 .setContentText(message)// message for notification
                 .setAutoCancel(true); // clear notification after click
         Intent intent = new Intent(getApplicationContext(), Home.class);
