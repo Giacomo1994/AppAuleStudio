@@ -135,7 +135,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
-                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Risultato non trovato!", false).show();
             } else {
                 try {
                     String s=result.getContents();

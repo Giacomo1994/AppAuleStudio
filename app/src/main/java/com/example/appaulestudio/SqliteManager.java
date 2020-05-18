@@ -63,7 +63,11 @@ public class SqliteManager {
             int tavolo=cursor.getInt(cursor.getColumnIndex("tavolo"));
             String gruppo=cursor.getString(cursor.getColumnIndex("gruppo"));
 
-            prenotazioni.add(new Prenotazione(id,""+matricola,"null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
+            String date_now=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+            String date_prenotazione=orario_prenotazione.substring(0,10);
+
+            if(date_prenotazione.compareTo(date_now)>=0)
+                prenotazioni.add(new Prenotazione(id,""+matricola,"null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
         }
         db.close();
         return prenotazioni;
