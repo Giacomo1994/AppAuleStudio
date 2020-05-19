@@ -75,8 +75,9 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     String[] dateDisponibili;
     TextView txtDataMostrata;
     int anno,mese,giorno;
-    Button btnScegliData;
+    int giornoSelezionatoInt;
     Button btnIscriviti, btnHome;
+    Button btnCercaDisponibilita;
     String studente;
     ArrayAdapter adapterComponenti;
     String risultato; int n;
@@ -87,8 +88,10 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     //TextView txtComponenti;
     CheckBox checkComponente;
     Dialog d,dialogCheckComponenti;
-    TextView nomeAula, output, componenti;
+    TextView nomeAula, output, componenti, txtStatoAula;
+    Button btnIndietro,btnAvanti;
     TextView titoloDialogErrore;
+    TextView txtOreResidue;
     SubsamplingScaleImageView piantaAula;
     ArrayList<Orario_Ufficiale> orariUfficiali;
     String nomeStudente, matricolaStudente,codiceUniversita;
@@ -292,7 +295,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         new load_image().execute();
         new prendiGruppi().execute();
         btnComponenti=findViewById(R.id.btnComponenti);
-
+        txtOreResidue=findViewById(R.id.txtOreResidue);
         btnGruppo=findViewById(R.id.btnGruppo);
 
         btnGruppo.setOnClickListener(new View.OnClickListener() {
@@ -322,7 +325,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 }
             }
         });
-        btnScegliData=findViewById(R.id.btnScegliData);
+
         /*final DatePickerDialog  StartTime;
         View.OnClickListener lister=new View.OnClickListener() {
             @Override
@@ -363,26 +366,70 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             }
         });*/
 
-
+        giornoSelezionatoInt=0;
         txtDataMostrata=findViewById(R.id.txtDataMostrata);
+        txtStatoAula=findViewById(R.id.txtStatoAula);
+        btnAvanti=findViewById(R.id.btnAvanti);
+        btnIndietro=findViewById(R.id.btnIndietro);
         Calendar c = Calendar.getInstance();
         anno=c.get(Calendar.YEAR);
         //il mese parte da zero
-        mese=c.get(Calendar.MONTH);
+        mese=c.get(Calendar.MONTH)+1;
         giorno=c.get(Calendar.DAY_OF_MONTH);
         //output.setText(""+anno+""+mese+""+giorno);
         //txtDataMostrata.setText("Oggi");
-        output.setText(orariUfficiali.get(0).getApertura());
+        if(giornoSelezionatoInt==0){
+            btnIndietro.setVisibility(View.GONE);
+        }
+        if(giornoSelezionatoInt==6){
+            btnAvanti.setVisibility(View.GONE);
+        }
+        mostraData(giornoSelezionatoInt);
+        btnAvanti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnIndietro.setVisibility(View.VISIBLE);
+                giornoSelezionatoInt++;
+                mostraData(giornoSelezionatoInt);
+            }
+        });
+        btnIndietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnAvanti.setVisibility(View.VISIBLE);
+                giornoSelezionatoInt--;
+                mostraData(giornoSelezionatoInt);
+            }
+        });
+
+        btnCercaDisponibilita=findViewById(R.id.btnCercaDisponibilita);
+        //ora ho gruppo, componenti, data
+        //devo cercare la disponibilità per fasce orarie
+
+
 
     }
-    public void gestioneDate(){
+    public void mostraData(int indiceGiorno){
         //ho array di date e orari
-
+        orariUfficiali.get(indiceGiorno).getData();
+        txtDataMostrata.setText(orariUfficiali.get(indiceGiorno).getData());
+        if(orariUfficiali.get(indiceGiorno).getApertura()==null){
+            txtStatoAula.setText("L'aula risulta chiusa nel giorno selezionato");
+        }
+        else{
+            txtStatoAula.setText("L'aula risulta aperta nel giorno selezionato");
+        }
+        if(indiceGiorno==0){
+            btnIndietro.setVisibility(View.GONE);
+        }
+        if(indiceGiorno==6){
+            btnAvanti.setVisibility(View.GONE);
+        }
     }
 
 
 
-    public void onDateSet(DatePicker view, int y, int m, int d){
+    /*public void onDateSet(DatePicker view, int y, int m, int d){
         giorno=d;
         mese=m;
         anno=y;
@@ -392,7 +439,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             String s=date.format((formatter));
             output.append(s);
         }
-    }
+    }*/
 
     public void scegliComponenti(){
         //ora uso solo la matricola per la verifica
@@ -525,6 +572,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 //prendo il gruppo che lo studente seleziona
                 gruppo= new Gruppo(array_gruppo[i]);
                 gruppoSelezionato.setText(gruppo.getNome_gruppo());
+                txtOreResidue.setText("Ore residue: "+gruppo.getOre_disponibili()+"");
                 d.cancel();
                 new prendiUtenti().execute();
 

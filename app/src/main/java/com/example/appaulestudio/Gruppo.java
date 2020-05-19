@@ -8,11 +8,12 @@ import java.util.Date;
 public class Gruppo implements Parcelable {
 
     private String codice_gruppo, nome_gruppo, codice_corso, matricola_docente;
-    private int componenti_max, ore_disponibili;
+    private int componenti_max;
+    private double ore_disponibili;
     private String data_scadenza;
 
 
-    public Gruppo(String codice_gruppo, String nome_gruppo, String codice_corso, String matricola_docente, int componenti_max, int ore_disponibili, String data_scadenza) {
+    public Gruppo(String codice_gruppo, String nome_gruppo, String codice_corso, String matricola_docente, int componenti_max, double ore_disponibili, String data_scadenza) {
         this.codice_gruppo = codice_gruppo;
         this.nome_gruppo = nome_gruppo;
         this.codice_corso = codice_corso;
@@ -95,11 +96,11 @@ public class Gruppo implements Parcelable {
         this.componenti_max = componenti_max;
     }
 
-    public int getOre_disponibili() {
+    public double getOre_disponibili() {
         return ore_disponibili;
     }
 
-    public void setOre_disponibili(int ore_disponibili) {
+    public void setOre_disponibili(double ore_disponibili) {
         this.ore_disponibili = ore_disponibili;
     }
 
@@ -123,7 +124,7 @@ public class Gruppo implements Parcelable {
         parcel.writeString(codice_corso);
         parcel.writeString(matricola_docente);
         parcel.writeInt(componenti_max);
-        parcel.writeInt(ore_disponibili);
+        parcel.writeDouble(ore_disponibili);
         parcel.writeString(data_scadenza);
     }
 }

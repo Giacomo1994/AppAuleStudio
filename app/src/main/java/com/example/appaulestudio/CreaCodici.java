@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +58,8 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -85,7 +88,7 @@ public class CreaCodici extends AppCompatActivity {
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
     Corso corso=null;
-    Button creaCodici, salvaPdf;
+    Button creaCodici, salvaPdf, btnDailogPdf;
     CalendarView calendario;
     int anno;
     int mese;
@@ -102,7 +105,7 @@ public class CreaCodici extends AppCompatActivity {
     //static final String URL_CONTROLLO_CODICI ="http://pmsc9.altervista.org/progetto/controllo_codici_gruppi.php";
     static final String URL_REGISTRAZIONE_CODICE ="http://pmsc9.altervista.org/progetto/registrazione_codice.php";
     private void initUI() {
-        salvaPdf= findViewById(R.id.salvaPDF);
+        /*salvaPdf= findViewById(R.id.salvaPDF);
         salvaPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,7 +130,7 @@ public class CreaCodici extends AppCompatActivity {
 
 
             }
-        });
+        });*/
         calendario= findViewById(R.id.calendario);
         textnome = findViewById(R.id.textnome);
         //btnScadenza= findViewById(R.id.btnScadenza);
@@ -149,7 +152,7 @@ public class CreaCodici extends AppCompatActivity {
             public void onSelectedDayChange(@NonNull CalendarView calendarView, int year, int month, int day) {
                 textnome.setText("");
                 anno=year;
-                mese=month;
+                mese=month+1;
                 giorno=day;
                 textnome.append(anno+" "+mese+" "+giorno);
                 dataStringa=""+anno+"-"+mese+"-"+giorno;
@@ -177,7 +180,7 @@ public class CreaCodici extends AppCompatActivity {
 
                 int gruppiIntero=0;
                 int partecipantiIntero=0;
-                int oreIntero=0;
+                double oreIntero=0;
 
                 nomeGruppo=txtNomeGruppo.getText().toString().trim();
                 gruppi=numeroGruppi.getText().toString().trim();
@@ -208,7 +211,12 @@ public class CreaCodici extends AppCompatActivity {
                     return;
                 }
                 try{
-                    oreIntero= Integer.parseInt(ore);
+                    double oreIntero1= Double.parseDouble(ore);
+                    //oreIntero= Math.floor(oreIntero1 * 100.0) / 100.0;
+                    DecimalFormat twoDForm = new DecimalFormat("#.##");
+                    oreIntero= Double.valueOf(twoDForm.format(oreIntero1));
+                    ore=""+oreIntero;
+
                 }
                 catch(NumberFormatException e){
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<b><font><p>Numero di ore errato!</p><p>Per favore inserisci un numero intero</p></b></font>"), Toast.LENGTH_LONG).show();
@@ -255,6 +263,7 @@ public class CreaCodici extends AppCompatActivity {
                     }
                 }
                 new iscriviCodici().execute();
+                dialogPdfCodici();
             }
         };
 
@@ -262,6 +271,40 @@ public class CreaCodici extends AppCompatActivity {
 
     }
 
+    public void dialogPdfCodici(){
+        final Dialog dialogPdf= new Dialog(CreaCodici.this);
+        dialogPdf.setTitle("Crea Pdf");
+        dialogPdf.setCancelable(true);
+        dialogPdf.setContentView(R.layout.dialog_crea_pdf);
+        btnDailogPdf=dialogPdf.findViewById(R.id.btnDialogPdf);
+        dialogPdf.show();
+        btnDailogPdf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(Build.VERSION.SDK_INT>Build.VERSION_CODES.M){
+                    if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)==
+                            PackageManager.PERMISSION_DENIED){
+                        //il permesso va richiesto
+                        String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                        requestPermissions(permissions, STORAGE_CODE);
+                    }
+                    else{//permesso già accordato salviamo il pdf
+                        savePdf();
+
+                    }
+
+                }
+                else{//sistema non richiedere runtime permission
+                    savePdf();
+
+                }
+                dialogPdf.cancel();
+            }
+        });
+
+
+
+    }
     private void savePdf() {
         //creo oggetto di classe pdf
         Document mDoc= new Document();
@@ -278,7 +321,14 @@ public class CreaCodici extends AppCompatActivity {
             mDoc.open();
             //openPdfFile(mDoc);
             //scegli il testo da inserire
-            String mText="ciao";
+            String mText="";
+            mText+="Scadenza gruppi: "+dataStringa+"\n"+"Numero di partecipanti per ogni gruppo: "+partecipanti+
+                    "\nOre assegnate a ciascun gruppo: "+ore+"\n";
+            int i=1;
+            for(String s:codici){
+                mText+="Gruppo"+i+"-"+nomeGruppo+" codice: "+s+"\n";
+                i++;
+            }
             // aggiungi autore opzionale e altre cose
             mDoc.addAuthor("App Aule Studio");
             //aggiungi paragrafo

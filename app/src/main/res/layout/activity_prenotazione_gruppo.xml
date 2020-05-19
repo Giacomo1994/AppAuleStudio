@@ -117,13 +117,19 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnScegliData"
+            <TextView
+                android:id="@+id/txtOreResidue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@android:drawable/ic_menu_week"
-                android:text="DATA" />
+                android:text="Ore residue: " />
+
+            <TextView
+                android:id="@+id/txtStatoAula"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView" />
 
         </LinearLayout>
 
@@ -135,11 +141,11 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/btnIndietro"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:layout_weight="1"
-                android:text="Button" />
+                android:background="@android:drawable/ic_media_rew" />
 
             <TextView
                 android:id="@+id/txtDataMostrata"
@@ -149,12 +155,22 @@
                 android:text="TextView" />
 
             <Button
-                android:id="@+id/button4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/btnAvanti"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:layout_weight="1"
-                android:text="Button" />
+                android:background="@android:drawable/ic_media_ff" />
+
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnCercaDisponibilita"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="1"
+            android:background="@drawable/forma_griglia_gruppi"
+            android:text="VAI" />
     </LinearLayout>
 
 </LinearLayout>

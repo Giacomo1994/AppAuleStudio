@@ -21,7 +21,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 public class MainActivity extends AppCompatActivity {
-    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
     static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
     static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
 

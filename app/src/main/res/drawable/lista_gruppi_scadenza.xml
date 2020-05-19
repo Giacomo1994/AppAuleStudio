@@ -12,7 +12,6 @@
         android:color="@android:color/black"
         />
     <corners android:radius="0dp" />
-    <solid android:color="#ffffff"
+    <solid android:color="#FFF598"
         android:alpha="150"/>
 </shape>
-
