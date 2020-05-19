@@ -153,39 +153,6 @@ protected void initUI(){
             });
     }
 
-//MENU CONTESTUALE
-   /* @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-        if(a.getPosti_liberi()<0) return; //se  non c'è connessione non posso fare nulla
-
-        if(a.getGruppi()==1){ //aula singoli
-            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
-        }
-        else{ //aula gruppi
-            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
-            menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Prenota per Gruppo");
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        if(item.getItemId()==0){
-            Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-            Intent intent=new Intent(Home.this,InfoAulaActivity.class);
-            Bundle bundle=new Bundle();
-            bundle.putParcelable("aula",a);
-            bundle.putParcelable("orario",a.getOrario());
-            intent.putExtra("bundle", bundle);
-            startActivityForResult(intent, 3);
-        }
-        return true;
-    }*/
-
 
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
@@ -534,7 +501,7 @@ protected void initUI(){
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString("universita", null);

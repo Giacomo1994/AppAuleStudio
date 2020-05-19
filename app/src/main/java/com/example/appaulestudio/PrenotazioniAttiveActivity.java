@@ -53,7 +53,22 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-
+// PRENOTAZIONI MOSTRATE (si connessione)
+    //tutte le prenotazioni in corso e future
+    //tutte le prenotazioni terminate/scadute della giornata odierna
+    //no prenotazioni cancellate, no prenotazioni scadute nei giorni precedenti
+// PRENOTAZIONI MOSTRATE (no connessione)
+    // tutte le prenotazioni da oggi in poi
+    // no la prenotazioni da ieri in giù
+    // no le prenotazioni cancellate
+//QR SCANNER:
+    //1) Quando l'utente vuole entrare in aula deve sempre fotografarlo
+    //2) Quando l'utente vuole uscire dall'aula deve fotografarlo solo se vuole andare in pausa
+//TORNELLO: la richiesta di apertura tornello viene mandata quando
+    //1) Vuole entrare in aula
+    //2) Vuole fare pausa
+    //3) Termina prenotazione ed è dentro l'aula
+    //4) Vuole entrare ed uscire dall'aula e la sua prenotazione è terminata per recuperare gli oggetti (quindi non per stato=1)
 public class PrenotazioniAttiveActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive.php";
     static final String URL_OPERAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive_gestionePrenotazione.php";
@@ -208,7 +223,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
             if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
         }
-        else{
+        else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
             menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
             menu.add(Menu.FIRST, 6, Menu.FIRST+1,"Esci dall'aula");
         }
