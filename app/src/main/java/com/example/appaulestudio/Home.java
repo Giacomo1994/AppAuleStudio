@@ -545,23 +545,16 @@ public class Home extends AppCompatActivity{
                     is.close();
                     result = sb.toString();
                     jArray = new JSONArray(result);
-
-                    User user = null;
-                    for (int i = 0; i < jArray.length(); i++) {
-                        JSONObject json_data = jArray.getJSONObject(i);
-                        user = new User(json_data.getString("matricola"), json_data.getString("nome"), json_data.getString("cognome"), json_data.getString("codice_universita"), json_data.getString("mail"), json_data.getString("password"), true);
-                        return 0;
-                    }
-                    return 1;
+                    if(jArray.length()>0) return 0;
+                    else return 1;
                 } catch (Exception e) {
-                    Log.e("log_tag", "Error " + e.toString());
                     return 2;
                 }
             }
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null || strToken==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
                     //editor.putString("email", null);
