@@ -6,7 +6,8 @@
     <color name="intestazione">#19BF6F</color>
     <color name="button_text">#FFFFFF</color>
     <color name="verde_trasparente">#bfe3c3</color>
-    <color name="grigio_chiaro">#c3c6c9</color>
-    <color name="bianco">#ffffff</color>
-
+    <color name="grigio_chiaro">#E3E5E6</color>
+    <color name="bianco">#FFFFFF</color>
+    <color name="giallo">#DDD05A</color>
+    <color name="background_liste">#F6F4F4</color>
 </resources>

@@ -13,14 +13,20 @@
         android:layout_height="116dp"
         app:srcCompat="@drawable/corso" />
 
-    <Button
-        android:id="@+id/btnCreaCodici"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="crea gruppi" />
-
     <ListView
         android:id="@+id/elencoCorsi2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="450dp">
+
+    </ListView>
+
+    <Button
+        android:id="@+id/btnCreaCodici"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/forma_griglia_gruppi"
+        android:text="crea gruppi" />
 </LinearLayout>

@@ -4,22 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F6F4F4"
     android:orientation="vertical"
     tools:context=".GestioneGruppiDocenteActivity">
 
-    <TextView
-        android:id="@+id/output"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
-
-    <ListView
-        android:id="@+id/listaGruppi"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="100"
-        android:background="#FFFFFF"
-        android:divider="@color/bianco"
-        android:dividerHeight="5dp"
-        android:paddingTop="10dp" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtTitoloInScad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ELENCO GRUPPI"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ListView
+            android:id="@+id/listaGruppi"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:alpha="100"
+            android:background="#F6F4F4"
+            android:divider="#F6F4F4"
+            android:dividerHeight="10dp"
+            android:paddingTop="10dp" />
+
+    </LinearLayout>
+
 </LinearLayout>

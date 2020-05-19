@@ -20,6 +20,7 @@
         android:hardwareAccelerated="true">
         <activity android:name=".PrenotazioneGruppoActivity"></activity>
         <activity android:name=".GroupActivity" />
+        <activity android:name=".GestioneGruppiDocenteActivity" />
         <activity android:name=".CreaCodici" />
         <activity android:name=".HomeDocente" />
         <activity android:name=".InfoAulaActivity" />

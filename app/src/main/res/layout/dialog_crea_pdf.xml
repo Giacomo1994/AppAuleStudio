@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txtTitoloDialogPdf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/grigio_chiaro"
+        android:text="PDF" />
+
+    <TextView
+        android:id="@+id/txtDialogPdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Vuoi scaricare un Pdf\ncon i codici appena creati?" />
+
+    <Button
+        android:id="@+id/btnDialogPdf"
+        android:layout_width="40dp"
+        android:layout_height="31dp"
+        android:layout_gravity="center"
+        android:background="@android:drawable/stat_sys_download_done"
+        android:textColor="#FFFFFF" />
+</LinearLayout>
