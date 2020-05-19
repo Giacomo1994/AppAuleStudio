@@ -80,7 +80,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     LinkedList<Orario_Speciale> orari_speciali;
     LinkedList<Orario_Ufficiale> orari_giusti;
     ProgressBar bar;
-    String strNome, strMatricola, strUniversita;
+    String strNome, strCognome, strMatricola, strUniversita;
 
     SqliteManager database;
 
@@ -125,9 +125,10 @@ public class InfoAulaActivity extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strNome=settings.getString("nome", null);
+        strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        setTitle(strNome);
+        setTitle(strNome+" "+strCognome);
 
         database=new SqliteManager(InfoAulaActivity.this);
         new check_aperta().execute();

@@ -54,16 +54,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli.php";
     static final String URL_PRENOTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_prenota.php";
 
-    Intent intent;
-    Bundle bundle;
-    Aula aula;
-    ArrayList<Orario_Ufficiale> orari_ufficiali;
-    ArrayList<Tavolo> tavoli;
-    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
-    String strMatricola, strUniversita;
-    boolean aperta=false;
-    Tavolo tavolo;
-
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
@@ -73,6 +63,15 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     LinearLayout linear_spinner;
 
     SqliteManager database;
+    Intent intent;
+    Bundle bundle;
+    Aula aula;
+    ArrayList<Orario_Ufficiale> orari_ufficiali;
+    ArrayList<Tavolo> tavoli;
+    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
+    String strMatricola, strNome, strCognome, strUniversita;
+    boolean aperta=false;
+    Tavolo tavolo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,19 +87,20 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         linear_spinner=findViewById(R.id.linear_spinner);
 
         database=new SqliteManager(this);
-
         intent =getIntent();
         bundle=intent.getBundleExtra("dati");
         aula=bundle.getParcelable("aula");
         orari_ufficiali=bundle.getParcelableArrayList("orari");
         Collections.sort(orari_ufficiali);
+        txt_nome_aula.setText(aula.getNome());
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        String strNome=settings.getString("nome", null);
+        strNome=settings.getString("nome", null);
+        strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        setTitle(strNome);
-        txt_nome_aula.setText(aula.getNome());
+        setTitle(strNome+" "+strCognome);
+
 
         //scarica piantina aula
         new load_image().execute();

@@ -73,14 +73,16 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive.php";
     static final String URL_OPERAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive_gestionePrenotazione.php";
     static final String URL_RICHIESTA_TORNELLO="http://pmsc9arduino.altervista.org/inserisci_richiesta.php";
+
     LinearLayout ll_in_corso,ll_cronologia;
     ListView list_in_corso, list_cronologia;
-    String strUniversita,strMatricola,strNome;
     ArrayAdapter<Prenotazione> adapter;
+
     SqliteManager database;
     IntentIntegrator qrScan;
     public Prenotazione p=null;
     public int richiesta=-1;
+    String strUniversita,strMatricola,strNome, strCognome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +100,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
-        setTitle(strNome);
+        strCognome=settings.getString("cognome", null);
+        setTitle(strNome+" "+strCognome);
 
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
@@ -548,7 +551,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("universita", null);
             editor.putString("nome_universita", null);
-            editor.putString("email", null);
+            //editor.putString("email", null);
             editor.putString("matricola", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);

@@ -70,9 +70,7 @@ public class Home extends AppCompatActivity{
     ProgressBar bar;
 
     Intent intent;
-
-    String strUniversita, strMatricola, strPassword, strNome, strToken;
-
+    String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
     SqliteManager database;
 
 
@@ -114,8 +112,9 @@ protected void initUI(){
      strMatricola=settings.getString("matricola", null);
      strPassword=settings.getString("password", null);
      strNome=settings.getString("nome", null);
+     strCognome=settings.getString("cognome", null);
      strToken=settings.getString("token", null);
-     setTitle(strNome);
+     setTitle(strNome+" "+strCognome);
 }
 
     @Override
@@ -506,7 +505,7 @@ protected void initUI(){
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString("universita", null);
                     editor.putString("nome_universita", null);
-                    editor.putString("email", null);
+                    //editor.putString("email", null);
                     editor.putString("matricola", null);
                     editor.putString("nome", null);
                     editor.putString("cognome", null);
@@ -547,7 +546,7 @@ protected void initUI(){
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
-                editor.putString("email", null);
+                //editor.putString("email", null);
                 editor.putString("matricola", null);
                 editor.putString("nome", null);
                 editor.putString("cognome", null);
