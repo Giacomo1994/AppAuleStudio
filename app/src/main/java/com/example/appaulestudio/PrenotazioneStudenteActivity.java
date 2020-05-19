@@ -70,6 +70,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     ArrayList<Tavolo> tavoli;
     String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
     String strMatricola, strNome, strCognome, strUniversita;
+    int inizio;
     boolean aperta=false;
     Tavolo tavolo;
 
@@ -99,6 +100,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
+        inizio=Integer.parseInt(settings.getString("inizio", null));
         setTitle(strNome+" "+strCognome);
 
 

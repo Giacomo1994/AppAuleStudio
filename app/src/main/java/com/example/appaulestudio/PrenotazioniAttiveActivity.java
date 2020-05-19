@@ -83,6 +83,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     public Prenotazione p=null;
     public int richiesta=-1;
     String strUniversita,strMatricola,strNome, strCognome;
+    int inizio, pausa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
+        inizio=Integer.parseInt(settings.getString("inizio", null));
+        pausa=Integer.parseInt(settings.getString("pausa", null));
         setTitle(strNome+" "+strCognome);
 
         new getPrenotazioni().execute();
@@ -549,9 +552,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            //editor.putString("email", null);
             editor.putString("matricola", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);
@@ -559,6 +559,11 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putString("token", null);
             editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);
+            editor.putString("universita", null);
+            editor.putString("nome_universita", null);
+            editor.putString("last_update", null);
+            editor.putString("inizio", null);
+            editor.putString("pausa", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
