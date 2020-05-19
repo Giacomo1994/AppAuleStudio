@@ -149,7 +149,10 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
-                if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
+                String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
+                if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
+                if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
+                if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
 
@@ -180,12 +183,12 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+            if(result==null){//problema di connessione
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
-            if(result.equals("Impossibile prenotare")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+            if(result.equals("Impossibile prenotare")){ //qualcuno ha occupato il tavolo al posto tuo
                 MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
                 finish();
                 return;
@@ -195,6 +198,12 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 finish();
                 return;
             }
+            if(result.equals("OPS")){
+                MyToast.makeText(getApplicationContext(), "OPS! Si è verificato un problema! Riprova!", false).show();
+                finish();
+                return;
+            }
+
 
             int id_prenotazione=Integer.parseInt(result);
             create_alarm(id_prenotazione);
@@ -246,7 +255,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(Bitmap result) {
             if(result==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore Immagine</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nel caricamento dell'immagine</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
             imgView.setImage(ImageSource.bitmap(result));
