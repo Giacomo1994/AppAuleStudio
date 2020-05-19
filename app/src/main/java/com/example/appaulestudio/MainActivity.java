@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
+//TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-    //TASK ASINCRONO PER LOGIN UTENTE
+//TASK ASINCRONO PER LOGIN UTENTE
     private class checkUtente extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... strings) {
@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getCodice());
-                editor.putString("email",user.getEmail());
+                //editor.putString("email",user.getEmail());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());

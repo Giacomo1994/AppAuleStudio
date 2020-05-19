@@ -48,7 +48,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
     String matricola,nome,cognome, email, password, password2;
     boolean isStudente;
 
-    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/listaUniversita.php";
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
     static final String URL_REGISTRAZIONE_STUDENTE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
     static final String URL_REGISTRAZIONE_DOCENTE="http://pmsc9.altervista.org/progetto/registrazione_docente.php";
     //inizializziamo l'intefaccia utente

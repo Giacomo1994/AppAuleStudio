@@ -58,6 +58,7 @@ public class Home extends AppCompatActivity{
     static final String URL_ORARI_DEFAULT="http://pmsc9.altervista.org/progetto/home_orari_default.php";
     static final String URL_AULE_STATICHE="http://pmsc9.altervista.org/progetto/home_info_statiche_aule.php";
     static final String URL_LAST_UPDATE="http://pmsc9.altervista.org/progetto/home_lastUpdate.php";
+    static final String URL_TEMPI="http://pmsc9.altervista.org/progetto/home_tempi_universita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
     FrameLayout fl;
@@ -70,53 +71,52 @@ public class Home extends AppCompatActivity{
     ProgressBar bar;
 
     Intent intent;
-
-    String strUniversita, strMatricola, strPassword, strNome, strToken;
-
+    String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
     SqliteManager database;
 
 
-protected void initUI(){
-     fl= findViewById(R.id.fl);
-     elencoAule= findViewById(R.id.elencoAule);
-     frameLista = findViewById(R.id.frameLista);
-     frameMappa = findViewById(R.id.frameMappa);
-     mappa= findViewById(R.id.mappa);
-     lista = findViewById(R.id.lista);
-     bar=findViewById(R.id.bar);
-     frameLista.setVisibility(fl.VISIBLE);
-     frameMappa.setVisibility(fl.GONE);
+    protected void initUI(){
+         fl= findViewById(R.id.fl);
+         elencoAule= findViewById(R.id.elencoAule);
+         frameLista = findViewById(R.id.frameLista);
+         frameMappa = findViewById(R.id.frameMappa);
+         mappa= findViewById(R.id.mappa);
+         lista = findViewById(R.id.lista);
+         bar=findViewById(R.id.bar);
+         frameLista.setVisibility(fl.VISIBLE);
+         frameMappa.setVisibility(fl.GONE);
 
-    //passo da lista a mappa
-    mappa.setOnClickListener(new View.OnClickListener() {
+        //passo da lista a mappa
+        mappa.setOnClickListener(new View.OnClickListener() {
 
-        public void onClick(View v) {
-            frameLista.setVisibility(fl.GONE);
-            frameMappa.setVisibility(fl.VISIBLE);
-        }
+            public void onClick(View v) {
+                frameLista.setVisibility(fl.GONE);
+                frameMappa.setVisibility(fl.VISIBLE);
+            }
 
-    });
-    //passo da mappa a lista
-    lista.setOnClickListener(new View.OnClickListener() {
+        });
+        //passo da mappa a lista
+        lista.setOnClickListener(new View.OnClickListener() {
 
-        public void onClick(View v) {
-            frameMappa.setVisibility(fl.GONE);
-            frameLista.setVisibility(fl.VISIBLE);
-            bar.setVisibility(ProgressBar.VISIBLE);
-            new listaAule().execute();
-        }
+            public void onClick(View v) {
+                frameMappa.setVisibility(fl.GONE);
+                frameLista.setVisibility(fl.VISIBLE);
+                bar.setVisibility(ProgressBar.VISIBLE);
+                new listaAule().execute();
+            }
 
-    });
+        });
 
-     //prendo preferenze
-     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-     strUniversita=settings.getString("universita", null);
-     strMatricola=settings.getString("matricola", null);
-     strPassword=settings.getString("password", null);
-     strNome=settings.getString("nome", null);
-     strToken=settings.getString("token", null);
-     setTitle(strNome);
-}
+         //prendo preferenze
+         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+         strUniversita=settings.getString("universita", null);
+         strMatricola=settings.getString("matricola", null);
+         strPassword=settings.getString("password", null);
+         strNome=settings.getString("nome", null);
+         strCognome=settings.getString("cognome", null);
+         strToken=settings.getString("token", null);
+         setTitle(strNome+" "+strCognome);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,16 +124,13 @@ protected void initUI(){
         setContentView(R.layout.activity_home);
         //inizializzo variabili
             initUI();
-
         //inizializzo oggetto database
             database=new SqliteManager(Home.this);
-
-        //se apro l'app ed accedo direttamente alla home, controllo se l'utente è ok ed aggiorno il token dell'app
+        //se apro l'app ed accedo direttamente alla home, controllo se l'utente è ok
             intent=getIntent();
             if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==false){
                 new checkUtente().execute();
             }
-
         //task asincrono
         new listaAule().execute();
         new check_last_update().execute();
@@ -151,39 +148,6 @@ protected void initUI(){
                 }
             });
     }
-
-//MENU CONTESTUALE
-   /* @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-        if(a.getPosti_liberi()<0) return; //se  non c'è connessione non posso fare nulla
-
-        if(a.getGruppi()==1){ //aula singoli
-            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
-        }
-        else{ //aula gruppi
-            if(!a.isAperta() || (a.isAperta()&&a.getPosti_liberi()>0)) menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Prenota Posto");
-            else menu.add(Menu.FIRST, 2, Menu.FIRST+1,"Avvisami quando si libera posto");
-            menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Prenota per Gruppo");
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        if(item.getItemId()==0){
-            Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-            Intent intent=new Intent(Home.this,InfoAulaActivity.class);
-            Bundle bundle=new Bundle();
-            bundle.putParcelable("aula",a);
-            bundle.putParcelable("orario",a.getOrario());
-            intent.putExtra("bundle", bundle);
-            startActivityForResult(intent, 3);
-        }
-        return true;
-    }*/
 
 
 //se non c'è connessione mostra nella listview i dati da SQLITE
@@ -269,7 +233,9 @@ protected void initUI(){
                 String last_update=data.getString("last_update");
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String last_update_prefs=settings.getString("last_update", null);
-                if(last_update_prefs!=null && last_update_prefs.equals(last_update)) return null;
+                String inizio_prefs=settings.getString("inizio", null);
+                String pausa_prefs=settings.getString("pausa", null);
+                if(last_update_prefs!=null && last_update_prefs.equals(last_update) && inizio_prefs!=null && pausa_prefs!=null) return null;
                 return last_update;
             } catch (Exception e) {
                 return null;
@@ -282,7 +248,69 @@ protected void initUI(){
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
                 editor.commit();
+                MyToast.makeText(getApplicationContext(),"FIND",true).show();
                 new aggiornaSQLITE().execute();
+                new aggiornaPreferenzeTempi().execute();
+            }
+        }
+    }
+
+    //controllo ultimo aggiornamento aule --> Se non coincide con quello salvato nell preferenze allora aggiorno i dati su SQLITE (task asincrono successivo)
+    private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
+        @Override
+        protected Integer[] doInBackground(Void... voide) {
+            try {
+                URL url;
+                HttpURLConnection urlConnection;
+                String parametri;
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayLastUpdate;
+
+                url = new URL(URL_TEMPI);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayLastUpdate = new JSONArray(result);
+                Integer[] tempi= new Integer[2];
+                JSONObject data = jArrayLastUpdate.getJSONObject(0);
+                tempi[0]=data.getInt("inizio");
+                tempi[1]=data.getInt("pausa");
+                return tempi;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(Integer[] result) {
+            if(result==null) return;
+            else {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("inizio", String.valueOf(result[0]));
+                editor.putString("pausa", String.valueOf(result[1]));
+                editor.commit();
             }
         }
     }
@@ -533,18 +561,20 @@ protected void initUI(){
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("universita", null);
-                    editor.putString("nome_universita", null);
-                    editor.putString("email", null);
+                    //editor.putString("email", null);
                     editor.putString("matricola", null);
                     editor.putString("nome", null);
                     editor.putString("cognome", null);
                     editor.putString("password", null);
-                    editor.putString("last_update", null);
                     editor.putString("token", null);
+                    editor.putString("universita", null);
+                    editor.putString("nome_universita", null);
+                    editor.putString("inizio", null);
+                    editor.putString("pausa", null);
+                    editor.putString("last_update", null);
                     editor.putBoolean("studente", true);
                     editor.putBoolean("logged", false);
                     editor.commit();
@@ -577,9 +607,6 @@ protected void initUI(){
             if (item.getItemId() == 1) {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putString("universita", null);
-                editor.putString("nome_universita", null);
-                editor.putString("email", null);
                 editor.putString("matricola", null);
                 editor.putString("nome", null);
                 editor.putString("cognome", null);
@@ -587,7 +614,11 @@ protected void initUI(){
                 editor.putString("token", null);
                 editor.putBoolean("studente", true);
                 editor.putBoolean("logged", false);
+                editor.putString("universita", null);
+                editor.putString("nome_universita", null);
                 editor.putString("last_update", null);
+                editor.putString("inizio", null);
+                editor.putString("pausa", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

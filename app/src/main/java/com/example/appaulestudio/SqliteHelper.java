@@ -31,8 +31,17 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"apertura\"\tTEXT,\n" +
                 "\t\"chiusura\"\tTEXT,\n" +
                 "\tPRIMARY KEY(\"id_aula\",\"giorno\")\n" +
-                ");";
+                ")";
         db.execSQL(sql1);
+
+        String sql2 = "CREATE TABLE \"prenotazioni_offline\" (\n" +
+                "\t\"id_prenotazione\"\tINTEGER PRIMARY KEY,\n" +
+                "\t\"matricola\"\tTEXT,\n" +
+                "\t\"orario_prenotazione\"\tTEXT,\n" +
+                "\t\"nome_aula\"\tTEXT,\n" +
+                "\t\"tavolo\"\tINTEGER," +
+                "\t\"gruppo\"\tTEXT)";
+        db.execSQL(sql2);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)

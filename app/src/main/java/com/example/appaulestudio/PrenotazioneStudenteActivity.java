@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -52,16 +54,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli.php";
     static final String URL_PRENOTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_prenota.php";
 
-    Intent intent;
-    Bundle bundle;
-    Aula aula;
-    ArrayList<Orario_Ufficiale> orari_ufficiali;
-    ArrayList<Tavolo> tavoli;
-    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
-    String strMatricola, strUniversita;
-    boolean aperta=false;
-    Tavolo tavolo;
-
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
@@ -69,6 +61,18 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner;
+
+    SqliteManager database;
+    Intent intent;
+    Bundle bundle;
+    Aula aula;
+    ArrayList<Orario_Ufficiale> orari_ufficiali;
+    ArrayList<Tavolo> tavoli;
+    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
+    String strMatricola, strNome, strCognome, strUniversita;
+    int inizio;
+    boolean aperta=false;
+    Tavolo tavolo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,18 +87,22 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         btn_prenota=findViewById(R.id.pren_btn);
         linear_spinner=findViewById(R.id.linear_spinner);
 
+        database=new SqliteManager(this);
         intent =getIntent();
         bundle=intent.getBundleExtra("dati");
         aula=bundle.getParcelable("aula");
         orari_ufficiali=bundle.getParcelableArrayList("orari");
         Collections.sort(orari_ufficiali);
+        txt_nome_aula.setText(aula.getNome());
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        String strNome=settings.getString("nome", null);
+        strNome=settings.getString("nome", null);
+        strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        setTitle(strNome);
-        txt_nome_aula.setText(aula.getNome());
+        inizio=Integer.parseInt(settings.getString("inizio", null));
+        setTitle(strNome+" "+strCognome);
+
 
         //scarica piantina aula
         new load_image().execute();
@@ -143,7 +151,10 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
-                if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
+                String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
+                if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
+                if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
+                if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
 
@@ -174,27 +185,60 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nella connessione al server!</b></font>"), Toast.LENGTH_LONG).show();
+            if(result==null){//problema di connessione
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
-            if(result.equals("Impossibile prenotare")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare! Non ci sono posti disponibili</b></font>"), Toast.LENGTH_LONG).show();
+            if(result.equals("Impossibile prenotare")){ //qualcuno ha occupato il tavolo al posto tuo
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
                 finish();
                 return;
             }
             if(result.equals("ER")){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Hai già una prenotazione attiva nell'orario specificato!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Hai già una prenotazione attiva nell'orario specificato!", false).show();
                 finish();
                 return;
             }
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Prenotazione avvenuta con successo</b></font>"), Toast.LENGTH_LONG).show();
+            if(result.equals("OPS")){
+                MyToast.makeText(getApplicationContext(), "OPS! Si è verificato un problema! Riprova!", false).show();
+                finish();
+                return;
+            }
+
+
+            int id_prenotazione=Integer.parseInt(result);
+            create_alarm(id_prenotazione);
+            database.insertPrenotazione(id_prenotazione,""+strMatricola,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
         }
     }
+
+//creazione alarm
+    public void create_alarm(int id_prenotazione){
+        //cancel_alarm(id_prenotazione);
+        String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = null;
+        try {
+            d = df.parse(myTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.SECOND,inizio);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.putExtra("name", ""+aula.getNome()+": Prenotazione terminata");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+    }
+
 
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override
@@ -213,7 +257,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(Bitmap result) {
             if(result==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore Immagine</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nel caricamento dell'immagine</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
             imgView.setImage(ImageSource.bitmap(result));

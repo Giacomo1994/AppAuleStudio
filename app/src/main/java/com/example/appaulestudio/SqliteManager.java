@@ -4,7 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class SqliteManager {
@@ -12,6 +16,69 @@ public class SqliteManager {
     public SqliteManager(Context ctx) {
         dbHelper=new SqliteHelper(ctx);
     }
+
+
+    public void insertPrenotazione(int id_prenotazione, String matricola, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="INSERT INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                "VALUES (" +id_prenotazione + ", '" + matricola + "', '" + orario_prenotazione + "', '" + nome_aula + "'," + tavolo + ",'" + gruppo + "')";
+        db.execSQL(sql);
+    }
+
+    public void deletePrenotazione(int id_prenotazione){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="DELETE FROM prenotazioni_offline where id_prenotazione="+id_prenotazione;
+        db.execSQL(sql);
+    }
+
+    public void insertPrenotazioniGruppi(ArrayList<Prenotazione> prenotazioni, String matricola){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        ArrayList<Prenotazione> pren_gruppi=new ArrayList<Prenotazione>();
+        for(Prenotazione pren:prenotazioni){
+            if(!pren.getGruppo().equals("null")) pren_gruppi.add(pren);
+        }
+        String sql0="DELETE FROM prenotazioni_offline where matricola='"+matricola+"' AND gruppo!='null' ";
+        for(Prenotazione p: pren_gruppi){
+            String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                    "VALUES (" +p.getId_prenotazione() + ", '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
+            db.execSQL(sql);
+            sql0+="AND gruppo!='" + p.getGruppo() + "' ";
+        }
+        db.execSQL(sql0);
+
+    }
+
+    public ArrayList<Prenotazione> selectPrenotazioni(String matricola){
+        ArrayList<Prenotazione> prenotazioni=new ArrayList<Prenotazione>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM prenotazioni_offline where matricola='"+ matricola +"'";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            int id=cursor.getInt(cursor.getColumnIndex("id_prenotazione"));
+            String orario_prenotazione=cursor.getString(cursor.getColumnIndex("orario_prenotazione"));
+            String nome_aula=cursor.getString(cursor.getColumnIndex("nome_aula"));
+            int tavolo=cursor.getInt(cursor.getColumnIndex("tavolo"));
+            String gruppo=cursor.getString(cursor.getColumnIndex("gruppo"));
+
+            String date_now=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+            String date_prenotazione=orario_prenotazione.substring(0,10);
+
+            if(date_prenotazione.compareTo(date_now)>=0)
+                prenotazioni.add(new Prenotazione(id,""+matricola,"null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
+        }
+        db.close();
+        return prenotazioni;
+    }
+
+    /*public void deletePrenotazioneGruppo(String codice_universita, String matricola, String orario_prenotazione, String gruppo){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql = "DELETE FROM prenotazioni_offline WHERE codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"' AND orario_prenotazione='"+ orario_prenotazione +"' AND gruppo='"+ gruppo +"'";
+        db.execSQL(sql);
+    }*/
+
 
     public void writeAuleOrari(Aula[] array_aula){
         SQLiteDatabase db=dbHelper.getWritableDatabase();

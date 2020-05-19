@@ -1,6 +1,6 @@
 package com.example.appaulestudio;
 
-public class Prenotazione {
+public class Prenotazione implements Comparable<Prenotazione>{
     private int id_prenotazione;
     private String matricola;
     private String nome_aula;
@@ -113,5 +113,16 @@ public class Prenotazione {
 
     public void setIn_corso(String in_corso) {
         this.in_corso = in_corso;
+    }
+
+    @Override
+    public int compareTo(Prenotazione o) {
+        if(this.in_corso.equals(o.in_corso)) return orario_prenotazione.compareTo(o.getOrario_prenotazione());
+        else if(this.in_corso.equals("in_corso") && o.in_corso.equals("futura")) return -1;
+        else if(this.in_corso.equals("in_corso") && o.in_corso.equals("conclusa")) return 1;
+        else if(this.in_corso.equals("futura") && o.in_corso.equals("in_corso")) return 1;
+        else if(this.in_corso.equals("futura") && o.in_corso.equals("conclusa")) return -1;
+        else if(this.in_corso.equals("conclusa") && o.in_corso.equals("in_corso")) return 1;
+        return 1;
     }
 }
