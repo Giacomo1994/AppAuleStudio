@@ -113,7 +113,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 //creazione alarm
     public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND,120);
+        if(pausa==true) cal_allarme.add(Calendar.SECOND,this.pausa);
         else if(inizio==true){
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
@@ -123,7 +123,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.SECOND,300);
+            cal_allarme.add(Calendar.SECOND,this.inizio);
         }
         else{
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

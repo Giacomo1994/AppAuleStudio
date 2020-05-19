@@ -233,7 +233,9 @@ public class Home extends AppCompatActivity{
                 String last_update=data.getString("last_update");
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String last_update_prefs=settings.getString("last_update", null);
-                if(last_update_prefs!=null && last_update_prefs.equals(last_update)) return null;
+                String inizio_prefs=settings.getString("inizio", null);
+                String pausa_prefs=settings.getString("pausa", null);
+                if(last_update_prefs!=null && last_update_prefs.equals(last_update) && inizio_prefs!=null && pausa_prefs!=null) return null;
                 return last_update;
             } catch (Exception e) {
                 return null;
@@ -246,6 +248,7 @@ public class Home extends AppCompatActivity{
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
                 editor.commit();
+                MyToast.makeText(getApplicationContext(),"FIND",true).show();
                 new aggiornaSQLITE().execute();
                 new aggiornaPreferenzeTempi().execute();
             }

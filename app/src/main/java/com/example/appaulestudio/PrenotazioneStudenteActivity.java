@@ -230,7 +230,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(d);
-        cal.add(Calendar.SECOND,300);
+        cal.add(Calendar.SECOND,inizio);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
