@@ -232,7 +232,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
             GradientDrawable shape =  new GradientDrawable();
             shape.setCornerRadius( 30 );
-            shape.setColor(Color.argb(255,25, 191, 111));
+            shape.setColor(Color.argb(255,74, 188, 132));
 
             text.setText(servizio);
             text.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
