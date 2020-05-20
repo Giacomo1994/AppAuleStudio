@@ -231,11 +231,10 @@ public class Home extends AppCompatActivity{
                 jArrayLastUpdate = new JSONArray(result);
                 JSONObject data = jArrayLastUpdate.getJSONObject(0);
                 String last_update=data.getString("last_update");
+
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String last_update_prefs=settings.getString("last_update", null);
-                String inizio_prefs=settings.getString("inizio", null);
-                String pausa_prefs=settings.getString("pausa", null);
-                if(last_update_prefs!=null && last_update_prefs.equals(last_update) && inizio_prefs!=null && pausa_prefs!=null) return null;
+                if(last_update_prefs!=null && last_update_prefs.equals(last_update)) return null;
                 return last_update;
             } catch (Exception e) {
                 return null;
@@ -244,19 +243,19 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(String result) {
             if(result==null) return;
             else {
+                MyToast.makeText(getApplicationContext(),"AGGIORNAMENTO",true).show();
+                new aggiornaSQLITE().execute();
+                new aggiornaPreferenzeTempi().execute();
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
                 editor.commit();
-                //MyToast.makeText(getApplicationContext(),"FIND",true).show();
-                new aggiornaSQLITE().execute();
-                //new aggiornaPreferenzeTempi().execute();
             }
         }
     }
 
     //controllo ultimo aggiornamento aule --> Se non coincide con quello salvato nell preferenze allora aggiorno i dati su SQLITE (task asincrono successivo)
-    /*private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
+    private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voide) {
             try {
@@ -296,7 +295,7 @@ public class Home extends AppCompatActivity{
                 jArrayLastUpdate = new JSONArray(result);
                 Integer[] tempi= new Integer[2];
                 JSONObject data = jArrayLastUpdate.getJSONObject(0);
-                tempi[0]=data.getInt("inizio");
+                tempi[0]=data.getInt("ingresso");
                 tempi[1]=data.getInt("pausa");
                 return tempi;
             } catch (Exception e) {
@@ -308,12 +307,12 @@ public class Home extends AppCompatActivity{
             else {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putString("inizio", String.valueOf(result[0]));
-                editor.putString("pausa", String.valueOf(result[1]));
+                editor.putString("ingresso", ""+result[0]);
+                editor.putString("pausa", ""+result[1]);
                 editor.commit();
             }
         }
-    }*/
+    }
 
 // aggiorno i dati statici delle aule + orari default su SQLITE
     private class aggiornaSQLITE extends AsyncTask<Void, Void, Aula[]> {
@@ -554,7 +553,7 @@ public class Home extends AppCompatActivity{
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strCognome==null || strToken==null) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strToken==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString("email", null);
@@ -575,6 +574,7 @@ public class Home extends AppCompatActivity{
                     startActivityForResult(i, 100);
                     finish();
                 }
+                else MyToast.makeText(getApplicationContext(), "USER OK!", true).show();
             }
         }
 
