@@ -152,8 +152,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
                 String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
-                if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
-                if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
+                //if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
+                //if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
                 if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
@@ -196,7 +196,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 return;
             }
             if(result.equals("ER")){
-                MyToast.makeText(getApplicationContext(), "Hai già una prenotazione attiva nell'orario specificato!", false).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Hai già una prenotazione attiva nell'orario specificato!", false).show();
                 finish();
                 return;
             }
@@ -256,10 +256,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Bitmap result) {
-            if(result==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nel caricamento dell'immagine</b></font>"), Toast.LENGTH_LONG).show();
-                return;
-            }
+            if(result==null) return;
             imgView.setImage(ImageSource.bitmap(result));
         }
     }
@@ -316,11 +313,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(tavoli==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server!</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
             if(tavoli.size()==0){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono tavoli disponibili</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare! Non ci sono tavoli disponibili</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
 
