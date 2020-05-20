@@ -75,7 +75,7 @@
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Inserisci matricola:" />
+                    android:text="Inserisci matricola*:" />
 
                 <EditText
                     android:id="@+id/reg_matricola"
@@ -132,7 +132,7 @@
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Inserisci e-mail:" />
+                    android:text="Inserisci e-mail*:" />
 
                 <EditText
                     android:id="@+id/reg_email"
@@ -190,7 +190,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:gravity="center_horizontal"
-            android:text="Matricola ed e-mail devono essere dell'Università di appartenenza"
+            android:text="*Matricola ed e-mail universitarie"
             android:textSize="12sp" />
 
         <Button
