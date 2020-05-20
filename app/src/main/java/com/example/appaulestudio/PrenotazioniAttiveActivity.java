@@ -105,7 +105,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         inizio=Integer.parseInt(settings.getString("inizio", null));
         pausa=Integer.parseInt(settings.getString("pausa", null));
         setTitle(strNome+" "+strCognome);
-
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
     }
