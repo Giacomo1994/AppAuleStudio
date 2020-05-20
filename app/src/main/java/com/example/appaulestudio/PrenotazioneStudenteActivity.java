@@ -70,7 +70,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     ArrayList<Tavolo> tavoli;
     String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
     String strMatricola, strNome, strCognome, strUniversita;
-    int inizio;
+    int ingresso;
     boolean aperta=false;
     Tavolo tavolo;
 
@@ -100,7 +100,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        inizio=Integer.parseInt(settings.getString("inizio", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null));
         setTitle(strNome+" "+strCognome);
 
 
@@ -230,7 +230,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(d);
-        cal.add(Calendar.SECOND,inizio);
+        cal.add(Calendar.SECOND,ingresso);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);

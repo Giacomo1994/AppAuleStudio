@@ -83,7 +83,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     public Prenotazione p=null;
     public int richiesta=-1;
     String strUniversita,strMatricola,strNome, strCognome;
-    int inizio, pausa;
+    int ingresso, pausa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        inizio=Integer.parseInt(settings.getString("inizio", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null));
         pausa=Integer.parseInt(settings.getString("pausa", null));
         setTitle(strNome+" "+strCognome);
         new getPrenotazioni().execute();
@@ -112,7 +112,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 //creazione alarm
     public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND,this.pausa);
+        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa);
         else if(inizio==true){
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
@@ -122,7 +122,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.SECOND,this.inizio);
+            cal_allarme.add(Calendar.SECOND, ingresso);
         }
         else{
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -562,7 +562,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putString("universita", null);
             editor.putString("nome_universita", null);
             editor.putString("last_update", null);
-            editor.putString("inizio", null);
+            editor.putString("ingresso", null);
             editor.putString("pausa", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);

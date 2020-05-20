@@ -74,7 +74,6 @@ public class Home extends AppCompatActivity{
     String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
     SqliteManager database;
 
-
     protected void initUI(){
          fl= findViewById(R.id.fl);
          elencoAule= findViewById(R.id.elencoAule);
@@ -134,6 +133,7 @@ public class Home extends AppCompatActivity{
         //task asincrono
         new listaAule().execute();
         new check_last_update().execute();
+
 
         //listener listview
             elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -248,15 +248,15 @@ public class Home extends AppCompatActivity{
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
                 editor.commit();
-                MyToast.makeText(getApplicationContext(),"FIND",true).show();
+                //MyToast.makeText(getApplicationContext(),"FIND",true).show();
                 new aggiornaSQLITE().execute();
-                new aggiornaPreferenzeTempi().execute();
+                //new aggiornaPreferenzeTempi().execute();
             }
         }
     }
 
     //controllo ultimo aggiornamento aule --> Se non coincide con quello salvato nell preferenze allora aggiorno i dati su SQLITE (task asincrono successivo)
-    private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
+    /*private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voide) {
             try {
@@ -313,7 +313,7 @@ public class Home extends AppCompatActivity{
                 editor.commit();
             }
         }
-    }
+    }*/
 
 // aggiorno i dati statici delle aule + orari default su SQLITE
     private class aggiornaSQLITE extends AsyncTask<Void, Void, Aula[]> {
@@ -565,7 +565,7 @@ public class Home extends AppCompatActivity{
                     editor.putString("token", null);
                     editor.putString("universita", null);
                     editor.putString("nome_universita", null);
-                    editor.putString("inizio", null);
+                    editor.putString("ingresso", null);
                     editor.putString("pausa", null);
                     editor.putString("last_update", null);
                     editor.putBoolean("studente", true);
@@ -611,7 +611,7 @@ public class Home extends AppCompatActivity{
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
                 editor.putString("last_update", null);
-                editor.putString("inizio", null);
+                editor.putString("ingresso", null);
                 editor.putString("pausa", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);

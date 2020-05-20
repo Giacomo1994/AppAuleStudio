@@ -133,7 +133,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         });
     }
 
-    //riempie lo spinner delle univeristà
+//TASK ASINCRONO --> riempie lo spinner delle univeristà
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -162,7 +162,9 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"));
+                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
+                            json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"));
                 }
                 return array_universita;
             } catch (Exception e) {

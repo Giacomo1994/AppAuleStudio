@@ -185,7 +185,9 @@ public class MainActivity extends AppCompatActivity {
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"));
+                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
+                            json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -294,6 +296,8 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getCodice());
+                editor.putString("ingresso", ""+universita.getIngresso());
+                editor.putString("pausa", ""+universita.getPausa());
                 editor.putString("email",user.getEmail());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
