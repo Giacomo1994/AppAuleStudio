@@ -554,10 +554,10 @@ public class Home extends AppCompatActivity{
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null || strToken==null) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strCognome==null || strToken==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    //editor.putString("email", null);
+                    editor.putString("email", null);
                     editor.putString("matricola", null);
                     editor.putString("nome", null);
                     editor.putString("cognome", null);
@@ -601,6 +601,7 @@ public class Home extends AppCompatActivity{
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("matricola", null);
+                editor.putString("email", null);
                 editor.putString("nome", null);
                 editor.putString("cognome", null);
                 editor.putString("password", null);

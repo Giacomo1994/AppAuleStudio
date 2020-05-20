@@ -551,6 +551,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
+            editor.putString("email", null);
             editor.putString("matricola", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);
