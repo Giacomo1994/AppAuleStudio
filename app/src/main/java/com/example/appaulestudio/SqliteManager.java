@@ -17,6 +17,24 @@ public class SqliteManager {
         dbHelper=new SqliteHelper(ctx);
     }
 
+    public void insertEventoCalendario(Prenotazione prenotazione, int id_evento){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_evento) "+
+                "VALUES (" +prenotazione.getId_prenotazione() + ", " + id_evento +  ")";
+        db.execSQL(sql);
+    }
+    public void deleteEventoCalendario(Prenotazione prenotazione){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="DELETE FROM eventi_calendario where id_prenotazione="+prenotazione.getId_prenotazione();
+        db.execSQL(sql);
+    }
+
+    public ArrayList<Integer> getEventiFromPrenotazione(Prenotazione p){
+        ArrayList<Integer> eventi=new ArrayList<Integer>();
+        //TODO
+        return eventi;
+    }
+
 
     public void insertPrenotazione(int id_prenotazione, String matricola, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();

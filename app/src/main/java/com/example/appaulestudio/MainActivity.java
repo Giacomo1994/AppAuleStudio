@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
-                editor.putString("nome_universita",universita.getCodice());
+                editor.putString("nome_universita",universita.getNome());
                 editor.putString("ingresso", ""+universita.getIngresso());
                 editor.putString("pausa", ""+universita.getPausa());
                 editor.putString("email",user.getEmail());

@@ -42,6 +42,13 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"tavolo\"\tINTEGER," +
                 "\t\"gruppo\"\tTEXT)";
         db.execSQL(sql2);
+
+        String sql3 = "CREATE TABLE \"eventi_calendario\" (\n" +
+                "\t\"id\"\tINTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "\t\"id_prenotazione\"\tINTEGER,\n" +
+                "\t\"id_evento\"\tINTEGER)";
+        db.execSQL(sql3);
+
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)

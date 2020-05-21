@@ -1,17 +1,27 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.text.Html;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -22,6 +32,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -82,8 +95,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     IntentIntegrator qrScan;
     public Prenotazione p=null;
     public int richiesta=-1;
-    String strUniversita,strMatricola,strNome, strCognome;
+    String strUniversita, strNomeUniversita, strMatricola,strNome, strCognome;
     int ingresso, pausa;
+    ArrayList<CalendarAccount> array_list_account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,12 +107,14 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ll_cronologia=findViewById(R.id.prenCronologia_ll);
         list_in_corso=findViewById(R.id.list_inCorso);
         list_cronologia=findViewById(R.id.list_cronologia);
+        array_list_account = new ArrayList<CalendarAccount>();
 
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         qrScan = new IntentIntegrator(this);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
+        strNomeUniversita = settings.getString("nome_universita", null);
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
@@ -147,6 +163,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     public void cancel_alarm(Prenotazione prenotazione){
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.cancel(pendingIntent);
     }
@@ -242,7 +259,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
 
-        if(richiesta!=0 && richiesta!=2 && richiesta!=5) new doOperazione().execute();
+        if(richiesta!=0 && richiesta!=2 && richiesta!=5 && richiesta!=8) new doOperazione().execute();
+        else if(richiesta==8) sincronizza();
         else qrScan.initiateScan();
 
         return true;
@@ -537,6 +555,150 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
         }
     }
+
+    //////CALENDARIO
+    public void sincronizza() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
+            } else
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
+        } else dialog_pick_calendar(get_account_from_calendar());
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(PrenotazioniAttiveActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
+            if (requestCode == 1) dialog_pick_calendar(get_account_from_calendar());
+        } else
+            MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari", false).show();
+
+    }
+
+    public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
+        final Dialog dialog = new Dialog(PrenotazioniAttiveActivity.this);
+        dialog.setTitle("Seleziona account");
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.dialog_seleziona_calendario);
+        ListView lv_account = dialog.findViewById(R.id.lv_account);
+        Button conferma = dialog.findViewById(R.id.btn_account_conferma);
+        Button indietro = dialog.findViewById(R.id.btn_account_indietro);
+
+        ArrayAdapter<CalendarAccount> adapter_calendar = new ArrayAdapter<CalendarAccount>(PrenotazioniAttiveActivity.this, R.layout.row_layout_dialog_calendario, lista_account) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final CalendarAccount item = getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_dialog_calendario, parent, false);
+                CheckBox check_cal = convertView.findViewById(R.id.check_account);
+                check_cal.setText(item.getName());
+                check_cal.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked == true) array_list_account.add(item);
+                        else {
+                            if (array_list_account.contains(item)) array_list_account.remove(item);
+                        }
+                    }
+                });
+                return convertView;
+            }
+        };
+        lv_account.setAdapter(adapter_calendar);
+
+        conferma.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (array_list_account.size() == 0)
+                    MyToast.makeText(getApplicationContext(), "Selezionare un account", true).show();
+                else {
+                    boolean sync_success = write_event();
+                    if (sync_success == true)
+                        MyToast.makeText(getApplicationContext(), "Sincronizzazione effettuata", true).show();
+                    else
+                        MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare", false).show();
+                    dialog.dismiss();
+                    array_list_account.clear();
+                }
+            }
+        });
+
+        indietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                array_list_account.clear();
+            }
+        });
+        dialog.show();
+        return;
+    }
+
+
+    public ArrayList<CalendarAccount> get_account_from_calendar() {
+        ArrayList<CalendarAccount> lista = new ArrayList<CalendarAccount>();
+        @SuppressLint("MissingPermission") Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, CalendarContract.Calendars.VISIBLE + " = 1", null, null);
+        while (cursor.moveToNext()) {
+            String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
+            long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+            String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
+            String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
+            if (name.contains("Holidays") || name.contains("Festività")) continue;
+            lista.add(new CalendarAccount(id, name, accountName, type));
+        }
+        return lista;
+    }
+
+
+    @SuppressLint("MissingPermission")
+    public boolean write_event() {
+        for (CalendarAccount c : array_list_account) {
+            ContentResolver cr = getContentResolver();
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_inizio = null;
+            Date date_fine = null;
+            try {
+                date_inizio = df.parse(p.getOrario_prenotazione());
+                date_fine = df.parse(p.getOrario_fine_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (date_inizio == null || date_fine == null) return false;
+
+            Calendar cal_begin = Calendar.getInstance();
+            cal_begin.setTime(date_inizio);
+
+            Calendar cal_end = Calendar.getInstance();
+            cal_end.setTime(date_fine);
+
+            Calendar beginTime = Calendar.getInstance();
+            beginTime.set(2020, 4, 26, 8, 30);
+
+            Calendar endTime = Calendar.getInstance();
+            endTime.set(2020, 4, 26, 20, 30);
+
+            ContentValues values = new ContentValues();
+            values.put(CalendarContract.Events.DTSTART, cal_begin.getTimeInMillis());
+            values.put(CalendarContract.Events.DTEND, cal_end.getTimeInMillis());
+            values.put(CalendarContract.Events.TITLE, "StudyAround - Prenotazione");
+            values.put(CalendarContract.Events.DESCRIPTION, p.getAula()+" Tavolo "+p.getNum_tavolo());
+            values.put(CalendarContract.Events.CALENDAR_ID, c.getId());
+            values.put(CalendarContract.Events.EVENT_TIMEZONE, "Europe/Rome\n");
+            values.put(CalendarContract.Events.EVENT_LOCATION, strNomeUniversita);
+            values.put(CalendarContract.Events.GUESTS_CAN_INVITE_OTHERS, "1");
+            values.put(CalendarContract.Events.GUESTS_CAN_SEE_GUESTS, "1");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+            cr.insert(CalendarContract.Events.CONTENT_URI, values);
+        }
+        return true;
+
+    }
+
+
+
 
 //MENU IN ALTO
     @Override
