@@ -102,8 +102,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        ingresso=Integer.parseInt(settings.getString("ingresso", null));
-        pausa=Integer.parseInt(settings.getString("pausa", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
+        pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
@@ -133,10 +133,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
+            cal_allarme.add(Calendar.SECOND, -300);
         }
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+prenotazione.getAula()+": Prenotazione terminata");
+        intent.setAction("StudyAround");
+        intent.putExtra("name", ""+prenotazione.getAula()+": La prenotazione sta per terminare");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
     }

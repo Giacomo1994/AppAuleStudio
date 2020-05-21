@@ -100,7 +100,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        ingresso=Integer.parseInt(settings.getString("ingresso", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         setTitle(strNome+" "+strCognome);
 
 
@@ -152,8 +152,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
                 String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
-                //if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
-                //if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
                 if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
@@ -234,7 +232,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+aula.getNome()+": Prenotazione terminata");
+        intent.setAction("StudyAround");
+        intent.putExtra("name", ""+aula.getNome()+": La prenotazione sta per terminare");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
     }

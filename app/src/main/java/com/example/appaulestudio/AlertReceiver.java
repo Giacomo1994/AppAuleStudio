@@ -18,7 +18,7 @@ public class AlertReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context=context;
-        showNotification(intent);
+        if(intent.getAction().equals("StudyAround")) showNotification(intent);
     }
 
     public void showNotification(Intent intent){
