@@ -155,7 +155,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
         intent.putExtra("name", ""+prenotazione.getAula()+": La prenotazione sta per terminare");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
     }
 
@@ -164,7 +164,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.cancel(pendingIntent);
     }
 

@@ -234,7 +234,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
         intent.putExtra("name", ""+aula.getNome()+": La prenotazione sta per terminare");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
     }
 
