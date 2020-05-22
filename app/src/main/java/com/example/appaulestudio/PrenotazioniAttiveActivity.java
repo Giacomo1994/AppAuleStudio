@@ -192,8 +192,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
                         return;
                     }
-                    if(entrata_uscita.equals("uscita") && richiesta!=2 ){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad effettuare la pausa!", false).show();
+                    if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
                         return;
                     }
 
@@ -258,8 +258,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-
-        if(richiesta!=0 && richiesta!=2 && richiesta!=5 && richiesta!=8) new doOperazione().execute();
+        //richiata =1,3,4,6 no scanner
+        if(richiesta==1 || richiesta==4) new doOperazione().execute();
         else if(richiesta==8) sincronizza();
         else qrScan.initiateScan();
 
@@ -355,12 +355,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 create_alarm(p, false, false);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==1) cancel_alarm(p);
+            else if(richiesta==1 && result.equals("Prenotazione terminata")) cancel_alarm(p);
             else if(richiesta==2 && result.equals("Pausa iniziata")){
                 create_alarm(p, false,true);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==3){
+            else if(richiesta==3 && result.equals("Prenotazione terminata")){
                 cancel_alarm(p);
                 new doRichiestaTornello().execute();
             }
@@ -368,7 +368,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 database.deletePrenotazione(p.getId_prenotazione());
                 cancel_alarm(p);
             }
-            else if(richiesta==5 || richiesta==6) new doRichiestaTornello().execute();
+            else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
 
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
@@ -439,7 +439,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             if(array_prenotazioni==null){
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
-                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni(strMatricola);
+                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni();
                 if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
                     MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
                     return;
@@ -488,7 +488,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
             if(lista_prenotazioni.size()==0){
                 MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
-                database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
+                database.insertPrenotazioniGruppi(lista_prenotazioni);
                 return;
             }
             adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, lista_prenotazioni) {
@@ -552,7 +552,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 }
             };
             list_in_corso.setAdapter(adapter);
-            database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
+            database.insertPrenotazioniGruppi(lista_prenotazioni);
         }
     }
 

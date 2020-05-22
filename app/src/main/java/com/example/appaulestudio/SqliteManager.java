@@ -17,10 +17,10 @@ public class SqliteManager {
         dbHelper=new SqliteHelper(ctx);
     }
 
-    public void insertEventoCalendario(Prenotazione prenotazione, int id_evento){
+    public void insertEventoCalendario(Prenotazione prenotazione, int id_calendar, int id_evento){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_evento) "+
-                "VALUES (" +prenotazione.getId_prenotazione() + ", " + id_evento +  ")";
+        String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_calendar, id_evento) "+
+                "VALUES (" +prenotazione.getId_prenotazione() + ", " + id_calendar +", " + id_evento +  ")";
         db.execSQL(sql);
     }
     public void deleteEventoCalendario(Prenotazione prenotazione){
@@ -36,10 +36,10 @@ public class SqliteManager {
     }
 
 
-    public void insertPrenotazione(int id_prenotazione, String matricola, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
+    public void insertPrenotazione(int id_prenotazione, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql="INSERT INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
-                "VALUES (" +id_prenotazione + ", '" + matricola + "', '" + orario_prenotazione + "', '" + nome_aula + "'," + tavolo + ",'" + gruppo + "')";
+        String sql="INSERT INTO prenotazioni_offline (id_prenotazione, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                "VALUES (" +id_prenotazione + ", '" + orario_prenotazione + "', '" + nome_aula + "'," + tavolo + ",'" + gruppo + "')";
         db.execSQL(sql);
     }
 
@@ -49,16 +49,16 @@ public class SqliteManager {
         db.execSQL(sql);
     }
 
-    public void insertPrenotazioniGruppi(ArrayList<Prenotazione> prenotazioni, String matricola){
+    public void insertPrenotazioniGruppi(ArrayList<Prenotazione> prenotazioni){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         ArrayList<Prenotazione> pren_gruppi=new ArrayList<Prenotazione>();
         for(Prenotazione pren:prenotazioni){
             if(!pren.getGruppo().equals("null")) pren_gruppi.add(pren);
         }
-        String sql0="DELETE FROM prenotazioni_offline where matricola='"+matricola+"' AND gruppo!='null' ";
+        String sql0="DELETE FROM prenotazioni_offline where gruppo!='null' ";
         for(Prenotazione p: pren_gruppi){
-            String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, matricola, orario_prenotazione, nome_aula, tavolo, gruppo) "+
-                    "VALUES (" +p.getId_prenotazione() + ", '" + matricola + "', '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
+            String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, orario_prenotazione, nome_aula, tavolo, gruppo) "+
+                    "VALUES (" +p.getId_prenotazione() + ", '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
             db.execSQL(sql);
             sql0+="AND gruppo!='" + p.getGruppo() + "' ";
         }
@@ -66,10 +66,10 @@ public class SqliteManager {
 
     }
 
-    public ArrayList<Prenotazione> selectPrenotazioni(String matricola){
+    public ArrayList<Prenotazione> selectPrenotazioni(){
         ArrayList<Prenotazione> prenotazioni=new ArrayList<Prenotazione>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String sql = "SELECT * FROM prenotazioni_offline where matricola='"+ matricola +"'";
+        String sql = "SELECT * FROM prenotazioni_offline";
         Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
         if(cursor==null ||cursor.getCount()==0) return null;
 
@@ -85,7 +85,7 @@ public class SqliteManager {
             String date_prenotazione=orario_prenotazione.substring(0,10);
 
             if(date_prenotazione.compareTo(date_now)>=0)
-                prenotazioni.add(new Prenotazione(id,""+matricola,"null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
+                prenotazioni.add(new Prenotazione(id,"null","null",""+nome_aula,tavolo,""+orario_prenotazione,"null","null",-1, ""+gruppo, "null"));
         }
         db.close();
         return prenotazioni;

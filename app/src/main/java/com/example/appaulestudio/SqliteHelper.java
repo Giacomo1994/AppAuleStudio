@@ -36,7 +36,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
         String sql2 = "CREATE TABLE \"prenotazioni_offline\" (\n" +
                 "\t\"id_prenotazione\"\tINTEGER PRIMARY KEY,\n" +
-                "\t\"matricola\"\tTEXT,\n" +
                 "\t\"orario_prenotazione\"\tTEXT,\n" +
                 "\t\"nome_aula\"\tTEXT,\n" +
                 "\t\"tavolo\"\tINTEGER," +
@@ -46,6 +45,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
         String sql3 = "CREATE TABLE \"eventi_calendario\" (\n" +
                 "\t\"id\"\tINTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "\t\"id_prenotazione\"\tINTEGER,\n" +
+                "\t\"id_calendar\"\tINTEGER,\n" +
                 "\t\"id_evento\"\tINTEGER)";
         db.execSQL(sql3);
 
