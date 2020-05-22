@@ -382,7 +382,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             }
             else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")){
                 database.deletePrenotazione(p.getId_prenotazione());
-                cancel_alarm(p);
+                if(p.getGruppo().equals("null")) cancel_alarm(p);
             }
             else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
 
