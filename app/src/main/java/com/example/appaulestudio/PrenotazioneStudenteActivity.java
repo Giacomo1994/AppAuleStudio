@@ -103,7 +103,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         setTitle(strNome+" "+strCognome);
 
-
         //scarica piantina aula
         new load_image().execute();
 
@@ -230,12 +229,18 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         cal.setTime(d);
         cal.add(Calendar.SECOND,ingresso);
 
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        intent.putExtra("name", ""+aula.getNome()+": La prenotazione sta per terminare");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",strOra);
+        editor.commit();
     }
 
 

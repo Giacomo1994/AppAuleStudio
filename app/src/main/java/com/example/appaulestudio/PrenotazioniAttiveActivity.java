@@ -121,6 +121,11 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
+
+String strAlarm=settings.getString("alarm_time", null);
+if(strAlarm!=null) MyToast.makeText(getApplicationContext(),strAlarm,true).show();
+else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
+
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
     }
@@ -151,12 +156,18 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             cal_allarme.setTime(date_allarme);
             cal_allarme.add(Calendar.SECOND, -300);
         }
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        intent.putExtra("name", ""+prenotazione.getAula()+": La prenotazione sta per terminare");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
+
+        String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",strTarget);
+        editor.commit();
     }
 
 //rimozione alarm
@@ -166,6 +177,11 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         intent.setAction("StudyAround");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.cancel(pendingIntent);
+
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",null);
+        editor.commit();
     }
 
 // RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
