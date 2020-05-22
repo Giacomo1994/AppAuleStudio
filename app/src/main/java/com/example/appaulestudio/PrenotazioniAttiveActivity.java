@@ -275,7 +275,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
         //richiata =1,3,4,6 no scanner
-        if(richiesta==1 || richiesta==4) new doOperazione().execute();
+        if(richiesta==1 || richiesta==4 || richiesta==7) new doOperazione().execute();
         else if(richiesta==8) sincronizza();
         else qrScan.initiateScan();
 
@@ -497,8 +497,6 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
                 lista_prenotazioni.add(p);
-                if(p.getStato()==1 && (p.getIn_corso().equals("in_corso")|| p.getIn_corso().equals("futura")) && !p.getGruppo().equals("null"))
-                    create_alarm(p,true,false);
             }
             Collections.sort(lista_prenotazioni);
 
