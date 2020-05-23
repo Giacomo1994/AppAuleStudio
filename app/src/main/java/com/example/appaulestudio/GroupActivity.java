@@ -36,12 +36,9 @@ import java.net.URLEncoder;
 
 
 public class GroupActivity extends AppCompatActivity {
-
-
-
-
     String strUniversita, strMatricola, strPassword, strNome, strCognome;
     String strCodiceGruppo;
+    Gruppo g;
 
     ListView gruppiPerStudente;
 
@@ -51,9 +48,12 @@ public class GroupActivity extends AppCompatActivity {
     TextView codGrup, oreDisp, nomeGrup;
 
 
-    private void initUI(){
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_group);
         gruppiPerStudente = findViewById(R.id.listaGruppi);
-        //preferenze
+
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
@@ -62,39 +62,32 @@ public class GroupActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         setTitle(""+strNome+" "+strMatricola);
 
-    }
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_group);
-        this.initUI();
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);
-        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>Riparto da onCreate </b></font>"),Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         new listaGruppi().execute();
-        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>Riparto da onRestart </b></font>"),Toast.LENGTH_LONG).show();
     }
 
     //MENU CONTESTUALE
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-           menu.add(Menu.FIRST,1,Menu.FIRST,"Abbandona gruppo");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ListView list=(ListView) v;
+        g=(Gruppo) list.getItemAtPosition(info.position);
+        strCodiceGruppo = g.getCodice_gruppo();
+        menu.add(Menu.FIRST,1,Menu.FIRST+1,"Abbandona gruppo");
+        menu.add(Menu.FIRST,2,Menu.FIRST,"Dettagli gruppo");
     }
     //ESCO DAL GRUPPO -> DEVO CANCELLARE LA MIA ISCRIZIONE DATA LA MIA MATRICOLA E OL CODICE DEL GRUPPO
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Gruppo g = (Gruppo) gruppiPerStudente.getItemAtPosition(info.position);
-        strCodiceGruppo = g.getCodice_gruppo();
-        //setTitle(strCodiceGruppo);
-        new abbandonaGruppo().execute();
+        if(item.getItemId()==1){
+            new abbandonaGruppo().execute();
+        }
         return true;
     }
 
