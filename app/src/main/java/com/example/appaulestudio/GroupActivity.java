@@ -36,17 +36,14 @@ import java.net.URLEncoder;
 
 
 public class GroupActivity extends AppCompatActivity {
+    static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
+    static final String URL_RICHIEDIGRUPPIFROMSTUDENTE="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     String strUniversita, strMatricola, strPassword, strNome, strCognome;
     String strCodiceGruppo;
     Gruppo g;
 
     ListView gruppiPerStudente;
-
-    static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
-    static final String URL_RICHIEDIGRUPPIFROMSTUDENTE="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     ArrayAdapter adapter;
-    TextView codGrup, oreDisp, nomeGrup;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,17 +88,10 @@ public class GroupActivity extends AppCompatActivity {
         return true;
     }
 
-
-
-    //Creo task asincrono
-
     private class listaGruppi extends AsyncTask<Void, Void, Gruppo[]>{
-
         @Override
         protected Gruppo[] doInBackground(Void... voids) {
-
             try {
-                //definisco le variabili
                 String params;
                 URL url;
                 HttpURLConnection urlConnection; //serve per aprire connessione
@@ -112,8 +102,6 @@ public class GroupActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArrayGruppi;
-
-
                 url = new URL(URL_RICHIEDIGRUPPIFROMSTUDENTE); //passo la richiesta post che mi restituisce i corsi dal db
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
@@ -121,21 +109,13 @@ public class GroupActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-
-
-                //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
-                //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
                 params = "matricola="+ URLEncoder.encode(strMatricola, "UTF-8") + "&codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8");
-
-
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(params);
                 dos.flush();
                 dos.close();
                 urlConnection.connect();
                 is = urlConnection.getInputStream();
-
-
                 reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 sb = new StringBuilder();
                 line = null;
@@ -144,14 +124,8 @@ public class GroupActivity extends AppCompatActivity {
                 }
                 is.close();
                 result = sb.toString();
-                jArrayGruppi = new JSONArray(result);  //questa decodifica crea un array di elementi json
-
-
-                //faccio un ciclo for per tutti gli elementi all'interno dell'array json che sono corsi
-                //per ogni corso mi prendo le relative informazioni relative ad esso e mi creo un array di oggetti corso
-                //che poi metterò nella listview
+                jArrayGruppi = new JSONArray(result);
                 Gruppo[] array_gruppo = new Gruppo[jArrayGruppi.length()];
-
                 for(int i = 0; i<jArrayGruppi.length(); i++){
                     JSONObject json_data = jArrayGruppi.getJSONObject(i);
                     array_gruppo[i] = new Gruppo(json_data.getString("codice_gruppo"),
@@ -162,36 +136,26 @@ public class GroupActivity extends AppCompatActivity {
                             json_data.getInt("ore_disponibili"),
                             json_data.getString("data_scadenza"));
                 }
-
                 return array_gruppo;
             }  catch (Exception e) {
-                Log.e("log_tag", "Error " + e.toString());
                 return null;
             }
         }
 
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
-            //qua devo riempire la listview con i corsi scaricati prima e messi nell'array di gruppi
-            //controllo che l'array sia stato riempito
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Problema di connessione, i dati potrebbero non essere aggionrati</b></font>"), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server, i dati potrebbero non essere aggionrati</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
-
-            //devo creare l'adapter per mettere nella listview gli elementi dell'array
-
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+array_gruppo.length+"</b></font>"), Toast.LENGTH_LONG).show();
             adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     Gruppo item = getItem(position);
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_group_activity, parent, false);
-                    codGrup = convertView.findViewById(R.id.codGrup);
-                    oreDisp = convertView.findViewById(R.id.oreDisp);
-                    nomeGrup = convertView.findViewById(R.id.nomeGrup);
+                    TextView codGrup = convertView.findViewById(R.id.codGrup);
+                    TextView nomeGrup = convertView.findViewById(R.id.nomeGrup);
                     codGrup.setText("Codice gruppo: "+item.getCodice_gruppo());
-                    oreDisp.setText("Ore disponibili: "+item.getOre_disponibili());
                     nomeGrup.setText(""+item.getNome_gruppo());
 
                     return convertView;
