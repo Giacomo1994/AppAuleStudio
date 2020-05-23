@@ -261,7 +261,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         else if(p.getIn_corso().equals("futura")){
             menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
-            if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
+            //if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
         }
         else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
             menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
@@ -275,7 +275,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
         //richiata =1,3,4,6 no scanner
-        if(richiesta==1 || richiesta==4 || richiesta==7) new doOperazione().execute();
+        if(richiesta==1 || richiesta==4) new doOperazione().execute();
         else if(richiesta==8) sincronizza();
         else qrScan.initiateScan();
 
@@ -380,7 +380,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                 cancel_alarm(p);
                 new doRichiestaTornello().execute();
             }
-            else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")){
+            else if(richiesta==4 && result.equals("Cancellazione avvenuta con successo")){
                 database.deletePrenotazione(p.getId_prenotazione());
                 if(p.getGruppo().equals("null")) cancel_alarm(p);
             }

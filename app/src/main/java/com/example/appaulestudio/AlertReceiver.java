@@ -60,7 +60,7 @@ public class AlertReceiver extends BroadcastReceiver {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "gcmAlert")
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("StudyAround")
-                .setContentText("Attenzione! La tua prenotazione terminerà tra 5 minuti")
+                .setContentText("Attenzione! La tua prenotazione sta per terminare!")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
         Intent i = new Intent(context.getApplicationContext(), Home.class);
         PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
