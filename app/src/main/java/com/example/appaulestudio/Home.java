@@ -590,7 +590,7 @@ public class Home extends AppCompatActivity{
         public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
             menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
             return true;
         }

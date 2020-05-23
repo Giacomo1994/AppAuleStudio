@@ -3,6 +3,7 @@ package com.example.appaulestudio;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,17 +36,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 
 public class GroupActivity extends AppCompatActivity {
     static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
     static final String URL_RICHIEDIGRUPPIFROMSTUDENTE="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
-    String strUniversita, strMatricola, strPassword, strNome, strCognome;
-    String strCodiceGruppo;
+    static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
+    String strUniversita, strMatricola, strPassword, strNome, strCognome,strCodiceGruppo;
     Gruppo g;
-
     ListView gruppiPerStudente;
-    ArrayAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +61,7 @@ public class GroupActivity extends AppCompatActivity {
         strPassword=settings.getString("password", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        setTitle(""+strNome+" "+strMatricola);
+        setTitle(""+strNome+" "+strCognome);
 
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);
@@ -84,6 +88,9 @@ public class GroupActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getItemId()==1){
             new abbandonaGruppo().execute();
+        }
+        else if(item.getItemId()==2){
+            new dettagliGruppo().execute();
         }
         return true;
     }
@@ -133,8 +140,11 @@ public class GroupActivity extends AppCompatActivity {
                             json_data.getString("codice_corso"),
                             json_data.getString("matricola_docente"),
                             json_data.getInt("componenti_max"),
-                            json_data.getInt("ore_disponibili"),
+                            json_data.getDouble("ore_disponibili"),
                             json_data.getString("data_scadenza"));
+                    array_gruppo[i].setNome_docente(json_data.getString("nome"));
+                    array_gruppo[i].setCognome_docente(json_data.getString("cognome"));
+                    array_gruppo[i].setNome_corso(json_data.getString("nome_corso"));
                 }
                 return array_gruppo;
             }  catch (Exception e) {
@@ -148,7 +158,7 @@ public class GroupActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server, i dati potrebbero non essere aggionrati</b></font>"), Toast.LENGTH_LONG).show();
                 return;
             }
-            adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
+            ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     Gruppo item = getItem(position);
@@ -163,9 +173,114 @@ public class GroupActivity extends AppCompatActivity {
             };
             gruppiPerStudente.setAdapter(adapter);
         }
+    }
 
+    private class dettagliGruppo extends AsyncTask<Void, Void, User[]> {
+        @Override
+        protected User[] doInBackground(Void... voids) {
+            try {
+                String params;
+                URL url;
+                HttpURLConnection urlConnection; //serve per aprire connessione
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArray;
+                url = new URL(URL_COMPONENTI_DA_GRUPPO); //passo la richiesta post che mi restituisce i corsi dal db
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                params = "codice_gruppo=" + URLEncoder.encode(g.getCodice_gruppo(), "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(params);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArray = new JSONArray(result);
+                User[] array_componenti = new User[jArray.length()];
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject json_data = jArray.getJSONObject(i);
+                    array_componenti[i] = new User(json_data.getString("matricola"),
+                            json_data.getString("nome"),
+                            json_data.getString("cognome"),
+                            json_data.getString("codice_universita"),
+                            json_data.getString("mail"),
+                            json_data.getString("password"),
+                            true);
+                }
+                return array_componenti;
+            } catch (Exception e) {
+                return null;
+            }
+        }
 
+        @Override
+        protected void onPostExecute(User[] componenti) {
+            if(componenti==null){
+                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
+                return;
+            }
 
+            final Dialog d = new Dialog(GroupActivity.this);
+            d.setCancelable(false);
+            d.setContentView(R.layout.dialog_dettagli_gruppo);
+            d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+            TextView txt_nome_gruppo= d.findViewById(R.id.txt_dettagli_nome);
+            TextView txt_codice_gruppo=d.findViewById(R.id.txt_dettagli_codice);
+            TextView txt_corso=d.findViewById(R.id.txt_dettagli_corso);
+            TextView txt_docente=d.findViewById(R.id.txt_dettagli_docente);
+            TextView txt_ore=d.findViewById(R.id.txt_dettagli_ore);
+            TextView txt_scadenza=d.findViewById(R.id.txt_dettagli_scadenza);
+            ListView list_componenti=d.findViewById(R.id.list_dettagli_componenti);
+            Button btnok=d.findViewById(R.id.btn_dettagli_gruppo);
+            txt_nome_gruppo.setText(g.getNome_gruppo());
+            txt_codice_gruppo.setText(g.getCodice_gruppo());
+            txt_corso.setText(g.getNome_corso());
+            txt_docente.setText(g.getNome_docente()+" "+g.getCognome_docente());
+            int ore_int= (int) g.getOre_disponibili();
+            int ore_round= (int) Math.ceil(g.getOre_disponibili());
+            if(ore_int==ore_round) txt_ore.setText(""+ore_int+"h");
+            else{
+                int min=(int)((g.getOre_disponibili()-(double)ore_int)*60);
+                txt_ore.setText(""+ore_int+"h "+min+"min");
+            }
+            try {
+                txt_scadenza.setText(new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(g.getData_scadenza())));
+            } catch (ParseException e) { }
+            d.show();
+            btnok.setOnClickListener(new ImageView.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    d.dismiss();
+                }
+            });
+            ArrayAdapter<User> user_adapter=new ArrayAdapter<User>(GroupActivity.this, R.layout.row_layout_dettagli_gruppo, componenti ){
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    User item = getItem(position);
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_dettagli_gruppo, parent, false);
+                    TextView txt_comp = convertView.findViewById(R.id.txt_dettagli_componente);
+                    txt_comp.setText(item.getNome()+" "+item.getCognome()+", "+item.getMatricola());
+                    return convertView;
+                }
+            };
+            list_componenti.setAdapter(user_adapter);
+        }
     }
 
     public void iscrizione_gruppo(View v){
@@ -231,7 +346,7 @@ public class GroupActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-       // menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
         return true;
     }
@@ -241,17 +356,19 @@ public class GroupActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            editor.putString("email", null);
             editor.putString("matricola", null);
+            editor.putString("email", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);
             editor.putString("password", null);
             editor.putString("token", null);
             editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);
+            editor.putString("universita", null);
+            editor.putString("nome_universita", null);
             editor.putString("last_update", null);
+            editor.putString("ingresso", null);
+            editor.putString("pausa", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -259,17 +376,18 @@ public class GroupActivity extends AppCompatActivity {
         }
         if (item.getItemId() == 2) {
             Intent i = new Intent(this, Home.class);
-            //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-        }
-        /*if(item.getItemId() == 3){
-            Intent i = new Intent(this, GroupActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
-        }*/
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
         if(item.getItemId() == 4){
             Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
             startActivity(i);
+            finish();
         }
         return true;
     }

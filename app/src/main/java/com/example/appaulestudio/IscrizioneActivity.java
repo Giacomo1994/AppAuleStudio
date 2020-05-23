@@ -212,7 +212,7 @@ public class IscrizioneActivity extends AppCompatActivity {
             String stringaRicevuta = new String(baos.toByteArray());
             return stringaRicevuta;
         } catch (Exception e) {
-            return "Impossibile connettersi";
+            return "Impossibile contattare il server!";
         } finally {}
     }
         @Override
