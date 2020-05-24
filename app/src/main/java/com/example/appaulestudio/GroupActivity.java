@@ -314,6 +314,7 @@ public class GroupActivity extends AppCompatActivity {
     public void iscrizione_gruppo(View v){
         Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
         startActivity(i);
+        finish();
     }
 
 
