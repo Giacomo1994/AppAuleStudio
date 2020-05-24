@@ -17,24 +17,37 @@ public class SqliteManager {
         dbHelper=new SqliteHelper(ctx);
     }
 
-    public void insertEventoCalendario(Prenotazione prenotazione, int id_calendar, int id_evento){
+
+//EVENTI_CALENDARIO
+    public void insertEventoCalendario(int id_prenotazione, int id_calendar, int id_evento){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_calendar, id_evento) "+
-                "VALUES (" +prenotazione.getId_prenotazione() + ", " + id_calendar +", " + id_evento +  ")";
+                "VALUES (" +id_prenotazione + ", " + id_calendar +", " + id_evento +  ")";
         db.execSQL(sql);
     }
-    public void deleteEventoCalendario(Prenotazione prenotazione){
+    public void deleteEventoCalendario(int id_prenotazione){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql="DELETE FROM eventi_calendario where id_prenotazione="+prenotazione.getId_prenotazione();
+        String sql="DELETE FROM eventi_calendario where id_prenotazione="+id_prenotazione;
         db.execSQL(sql);
     }
 
-    public ArrayList<Integer> getEventiFromPrenotazione(Prenotazione p){
-        ArrayList<Integer> eventi=new ArrayList<Integer>();
-        //TODO
+    public ArrayList<CalendarEvent> getEventiFromPrenotazione(int id_prenotazione){
+        ArrayList<CalendarEvent> eventi=new ArrayList<CalendarEvent>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM eventi_calendario WHERE id_prenotazione="+id_prenotazione;
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+        for(int i=0; i<cursor.getCount();i++) {
+            cursor.moveToPosition(i);
+            int id_calendar = cursor.getInt(cursor.getColumnIndex("id_calendar"));
+            int id_event = cursor.getInt(cursor.getColumnIndex("id_evento"));
+            eventi.add(new CalendarEvent(id_prenotazione,id_calendar,id_event));
+        }
+        db.close();
         return eventi;
     }
 
+//GRUPPI_OFFLINE
     public void insertGruppi(Gruppo[] gruppi){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         if(gruppi.length==0){
@@ -101,6 +114,7 @@ public class SqliteManager {
     }
 
 
+//PRENOTAZIONI_OFFLINE
     public void insertPrenotazione(int id_prenotazione, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="INSERT INTO prenotazioni_offline (id_prenotazione, orario_prenotazione, nome_aula, tavolo, gruppo) "+
@@ -156,13 +170,8 @@ public class SqliteManager {
         return prenotazioni;
     }
 
-    /*public void deletePrenotazioneGruppo(String codice_universita, String matricola, String orario_prenotazione, String gruppo){
-        SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql = "DELETE FROM prenotazioni_offline WHERE codice_universita='"+ codice_universita +"' AND matricola='"+ matricola +"' AND orario_prenotazione='"+ orario_prenotazione +"' AND gruppo='"+ gruppo +"'";
-        db.execSQL(sql);
-    }*/
 
-
+//AULE_OFFLINE E ORARI_OFFLINE
     public void writeAuleOrari(Aula[] array_aula){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql1 = "DELETE FROM info_aule_offline";

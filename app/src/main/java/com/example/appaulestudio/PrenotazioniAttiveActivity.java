@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -383,6 +385,13 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             else if(richiesta==4 && result.equals("Cancellazione avvenuta con successo")){
                 database.deletePrenotazione(p.getId_prenotazione());
                 if(p.getGruppo().equals("null")) cancel_alarm(p);
+                ArrayList<CalendarEvent> eventi=database.getEventiFromPrenotazione(p.getId_prenotazione());
+                if(eventi!=null){
+                    for(CalendarEvent ev:eventi){
+                        database.deleteEventoCalendario(p.getId_prenotazione());
+                        delete_event(ev);
+                    }
+                }
             }
             else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
 
@@ -664,7 +673,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
             String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
             String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
-            if (name.contains("Holidays") || name.contains("Festività")) continue;
+            if (name.contains("Holidays") || name.contains("Festività") || name.equals("Contacts")) continue;
             lista.add(new CalendarAccount(id, name, accountName, type));
         }
         return lista;
@@ -712,10 +721,18 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
-            cr.insert(CalendarContract.Events.CONTENT_URI, values);
+            Uri uri=cr.insert(CalendarContract.Events.CONTENT_URI, values);
+            int eventID = (int) Long.parseLong(uri.getLastPathSegment());
+            database.insertEventoCalendario(p.getId_prenotazione(), (int) c.getId(),eventID);
         }
         return true;
+    }
 
+    public void delete_event(CalendarEvent event){
+        ContentResolver cr = getContentResolver();
+        Uri deleteUri = null;
+        deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, (long) event.getId_event());
+        cr.delete(deleteUri, null, null);
     }
 
 
