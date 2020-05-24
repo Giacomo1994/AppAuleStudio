@@ -35,6 +35,57 @@ public class SqliteManager {
         return eventi;
     }
 
+    public void insertGruppi(Gruppo[] gruppi){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        if(gruppi.length==0){
+            String sql="DELETE FROM gruppi_offline";
+            db.execSQL(sql);
+            return;
+        }
+        for(Gruppo g:gruppi){
+            String sql="INSERT OR REPLACE INTO gruppi_offline "+
+                    "VALUES ('" + g.getCodice_gruppo() + "', '" + g.getNome_gruppo() +"', '" + g.getNome_corso() +"', '"
+                    + g.getNome_docente() +"', '" + g.getCognome_docente() +"', " + g.getOre_disponibili() +", '" + g.getData_scadenza() +"')";
+            db.execSQL(sql);
+        }
+    }
+
+    public void deleteGruppo(Gruppo g){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="DELETE FROM gruppi_offline where codice_gruppo = '" + g.getCodice_gruppo() + "'";
+        db.execSQL(sql);
+    }
+
+    public ArrayList<Gruppo> selectGruppi(){
+        ArrayList<Gruppo> gruppi=new ArrayList<Gruppo>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM gruppi_offline";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+
+        for(int i=0; i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
+            String codice_gruppo=cursor.getString(cursor.getColumnIndex("codice_gruppo"));
+            String nome_gruppo=cursor.getString(cursor.getColumnIndex("nome_gruppo"));
+            String nome_corso=cursor.getString(cursor.getColumnIndex("nome_corso"));
+            String nome_docente=cursor.getString(cursor.getColumnIndex("nome_docente"));
+            String cognome_docente=cursor.getString(cursor.getColumnIndex("cognome_docente"));
+            double ore_disponibili=cursor.getDouble(cursor.getColumnIndex("ore_disponibili"));
+            String data_scadenza=cursor.getString(cursor.getColumnIndex("data_scadenza"));
+            String date_now=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+
+            if(date_now.compareTo(data_scadenza)<=0){
+                Gruppo g=new Gruppo(""+codice_gruppo,""+nome_gruppo,"","",100,ore_disponibili,""+data_scadenza);
+                g.setNome_corso(nome_corso);
+                g.setNome_docente(nome_docente);
+                g.setCognome_docente(cognome_docente);
+                gruppi.add(g);
+            }
+        }
+        db.close();
+        return gruppi;
+    }
+
 
     public void insertPrenotazione(int id_prenotazione, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();

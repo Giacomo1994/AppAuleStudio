@@ -94,7 +94,7 @@
     </TableLayout>
 
     <TextView
-        android:id="@+id/textView43"
+        android:id="@+id/eti_dettagli_componenti"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

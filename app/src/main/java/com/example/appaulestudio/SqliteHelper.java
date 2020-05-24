@@ -49,6 +49,15 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"id_evento\"\tINTEGER)";
         db.execSQL(sql3);
 
+        String sql4 = "CREATE TABLE \"gruppi_offline\" (\n" +
+                "\t\"codice_gruppo\"\tTEXT PRIMARY KEY,\n" +
+                "\t\"nome_gruppo\"\tTEXT,\n" +
+                "\t\"nome_corso\"\tTEXT,\n" +
+                "\t\"nome_docente\"\tTEXT,\n" +
+                "\t\"cognome_docente\"\tTEXT,\n" +
+                "\t\"ore_disponibili\"\tREAL,\n" +
+                "\t\"data_scadenza\"\tTEXT)";
+        db.execSQL(sql4);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)

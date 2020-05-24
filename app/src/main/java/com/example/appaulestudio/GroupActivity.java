@@ -38,6 +38,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class GroupActivity extends AppCompatActivity {
@@ -46,6 +48,7 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strPassword, strNome, strCognome,strCodiceGruppo;
     Gruppo g;
+    SqliteManager database;
     ListView gruppiPerStudente;
 
 
@@ -54,6 +57,7 @@ public class GroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         gruppiPerStudente = findViewById(R.id.listaGruppi);
+        database=new SqliteManager(GroupActivity.this);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
@@ -155,8 +159,30 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server, i dati potrebbero non essere aggionrati</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrbbero non essere aggiornati.",false).show();
+                ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
+                if(arrayList_gruppo==null || arrayList_gruppo.size()==0)
+                    MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
+                else{
+                    ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, arrayList_gruppo ){
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            Gruppo item = getItem(position);
+                            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_group_activity, parent, false);
+                            TextView codGrup = convertView.findViewById(R.id.codGrup);
+                            TextView nomeGrup = convertView.findViewById(R.id.nomeGrup);
+                            codGrup.setText("Codice gruppo: "+item.getCodice_gruppo());
+                            nomeGrup.setText(""+item.getNome_gruppo());
+
+                            return convertView;
+                        }
+                    };
+                    gruppiPerStudente.setAdapter(adapter);
+                }
                 return;
+            }
+            if(array_gruppo.length==0){
+                MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
             }
             ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
                 @Override
@@ -172,16 +198,18 @@ public class GroupActivity extends AppCompatActivity {
                 }
             };
             gruppiPerStudente.setAdapter(adapter);
+            database.insertGruppi(array_gruppo);
         }
     }
 
-    private class dettagliGruppo extends AsyncTask<Void, Void, User[]> {
+// Prendo da database remoto i componenti del gruppo. Se offline prendo i dati del gruppo da SQLITE
+    private class dettagliGruppo extends AsyncTask<Void, Void, User[]> { //OK
         @Override
         protected User[] doInBackground(Void... voids) {
             try {
                 String params;
                 URL url;
-                HttpURLConnection urlConnection; //serve per aprire connessione
+                HttpURLConnection urlConnection;
                 DataOutputStream dos;
                 InputStream is;
                 BufferedReader reader;
@@ -189,11 +217,11 @@ public class GroupActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArray;
-                url = new URL(URL_COMPONENTI_DA_GRUPPO); //passo la richiesta post che mi restituisce i corsi dal db
+                url = new URL(URL_COMPONENTI_DA_GRUPPO);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
-                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 params = "codice_gruppo=" + URLEncoder.encode(g.getCodice_gruppo(), "UTF-8");
@@ -231,11 +259,6 @@ public class GroupActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(User[] componenti) {
-            if(componenti==null){
-                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
-                return;
-            }
-
             final Dialog d = new Dialog(GroupActivity.this);
             d.setCancelable(false);
             d.setContentView(R.layout.dialog_dettagli_gruppo);
@@ -246,6 +269,7 @@ public class GroupActivity extends AppCompatActivity {
             TextView txt_docente=d.findViewById(R.id.txt_dettagli_docente);
             TextView txt_ore=d.findViewById(R.id.txt_dettagli_ore);
             TextView txt_scadenza=d.findViewById(R.id.txt_dettagli_scadenza);
+            TextView eti_componenti=d.findViewById(R.id.eti_dettagli_componenti);
             ListView list_componenti=d.findViewById(R.id.list_dettagli_componenti);
             Button btnok=d.findViewById(R.id.btn_dettagli_gruppo);
             txt_nome_gruppo.setText(g.getNome_gruppo());
@@ -269,6 +293,10 @@ public class GroupActivity extends AppCompatActivity {
                     d.dismiss();
                 }
             });
+            if(componenti==null){
+                eti_componenti.setVisibility(View.GONE);
+                return;
+            }
             ArrayAdapter<User> user_adapter=new ArrayAdapter<User>(GroupActivity.this, R.layout.row_layout_dettagli_gruppo, componenti ){
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -289,7 +317,7 @@ public class GroupActivity extends AppCompatActivity {
     }
 
 
-    //task asincrono per cancellare una riga dalla tabella iscrizione ovvero abbandonare un gruppo
+//task asincrono per cancellare una riga dalla tabella iscrizione ovvero abbandonare un gruppo --> OK
     private class abbandonaGruppo extends AsyncTask<Void, Void, String>{
         @Override
         protected String doInBackground(Void... strings) {
@@ -323,22 +351,20 @@ public class GroupActivity extends AppCompatActivity {
                 String stringaRicevuta = new String(baos.toByteArray());
                 return stringaRicevuta;
             } catch (Exception e) {
-                Log.e("SimpleHttpURLConnection", e.getMessage());
-                return "Impossibile connettersi";
+                return "Impossibile contattare il server";
             } finally {
             }
         }
         @Override
         protected void onPostExecute(String result) {
             if(result.equals("Hai abbandonato il gruppo")==false){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b> Ops, qualcosa è andato storto</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Ops, qualcosa è andato storto: " + result,false).show();
                 return;
             }
             else{
+                database.deleteGruppo(g);
                 new listaGruppi().execute();
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>"+result+" </b></font>"),Toast.LENGTH_LONG).show();
-
-            }
+                MyToast.makeText(getApplicationContext(), result,true).show();            }
         }
     }
 
