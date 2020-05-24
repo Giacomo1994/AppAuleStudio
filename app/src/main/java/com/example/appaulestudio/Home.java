@@ -153,7 +153,10 @@ public class Home extends AppCompatActivity{
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
         ArrayList<Aula> aule=database.readListaAule();
-        if(aule==null) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Error</b></font>"), Toast.LENGTH_LONG).show();
+        if(aule==null){
+            MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare aule!", false).show();
+            return;
+        }
 
         adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
             @Override
@@ -243,7 +246,7 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(String result) {
             if(result==null) return;
             else {
-                MyToast.makeText(getApplicationContext(),"AGGIORNAMENTO",true).show();
+                MyToast.makeText(getApplicationContext(),"AGGIORNAMENTO SQLITE",true).show();
                 new aggiornaSQLITE().execute();
                 new aggiornaPreferenzeTempi().execute();
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -457,7 +460,7 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(Aula[] array_aula) {
             bar.setVisibility(ProgressBar.GONE);
             if (array_aula == null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
                 mostraOffline();
             } else {
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {

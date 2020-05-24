@@ -205,11 +205,11 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null || !result.equals("OK")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile procedere con la richiesta!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile procedere con la richiesta!", false).show();
                 finish();
                 return;
             }
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Richiesta avvenuta con successo, ti avviseremo quando si libera un posto</b></font>"), Toast.LENGTH_LONG).show();
+            MyToast.makeText(getApplicationContext(), "Richiesta avvenuta con successo, ti avviseremo quando si libera un posto!", true).show();
             Intent i=new Intent(InfoAulaActivity.this,Home.class);
             startActivity(i);
             finish();
@@ -406,7 +406,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 orari_default=mostra_orari_offline();
                 orari_speciali=null;
                 if(orari_default==null){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore in visualizzazione orari</b></font>"), Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare gli orari!", false).show();
                     return;
                 }
             }
@@ -539,7 +539,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null) { //non c'è connessione
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
                 infoAula_posti.setText("Posti Totali: " + aula.getPosti_totali());
                 btnPrenotazionePosto.setVisibility(View.GONE);
                 btnPrenotazioneGruppo.setVisibility(View.GONE);

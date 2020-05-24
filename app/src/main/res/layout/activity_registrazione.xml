@@ -200,7 +200,7 @@
             android:layout_gravity="center_horizontal"
             android:background="@drawable/button_layout"
             android:text="Registrati"
-            android:textColor="@color/bianco" />
+            android:textColor="@color/button_text" />
 
     </LinearLayout>
 </ScrollView>

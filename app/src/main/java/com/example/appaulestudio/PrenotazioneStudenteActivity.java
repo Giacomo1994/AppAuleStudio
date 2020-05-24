@@ -115,8 +115,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                  if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
-                    aperta=false;
+                     MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
+                     aperta=false;
                 }
                 else{
                     //se l'aula è chiusa ma aprirà di oggi oppure apre domani
@@ -183,7 +183,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
@@ -317,11 +317,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(tavoli==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server!</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
                 return;
             }
             if(tavoli.size()==0){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare! Non ci sono tavoli disponibili</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare: non ci sono tavoli disponibili!", false).show();
                 return;
             }
 
@@ -397,7 +397,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
                     aperta=false;
                 }
                 else{

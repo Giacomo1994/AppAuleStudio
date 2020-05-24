@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         ss.setSpan(clickableSpan1, 7, 17, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         txt_toRegistrazione.setText(ss);
         txt_toRegistrazione.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //controllo campi vuoti
                 if(matricola.equals("")||password.equals("")){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"Devi inserire tutti i campi!",false).show();
                     return;
                 }
                 if(radioStudente.isChecked()){
@@ -199,8 +200,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
-                //spinner.setEnabled(false);
+                MyToast.makeText(getApplicationContext(),"Errore: impossibile contattare il server!",false).show();
                 return;
             }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user==null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile effettuare login!</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile effettuare il login!",false).show();
                 return;
             }
             else{
@@ -320,15 +320,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editor.putBoolean("logged", true);
                 editor.commit();
-
-                //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + user.email_calendar + "</b></font>"),Toast.LENGTH_LONG).show();
-
-               /* Intent i=new Intent(MainActivity.this, Home.class);
-                i.putExtra("from_login",true);
-                startActivityForResult(i,2);
-                finish();*/
             }
-
         }
     }
 
@@ -348,8 +340,7 @@ public class MainActivity extends AppCompatActivity {
                     radioDocente.setChecked(true);
                     radioStudente.setChecked(false);
                 }
-
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#0cb339' ><b>" + "Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale." + "</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale!",true).show();
             }
         }
     }
