@@ -484,7 +484,9 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                         }
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         return convertView;
                     }
@@ -526,10 +528,11 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
                         row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" ore "+item.getOrario_fine_prenotazione().substring(11,16));
                         if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
-
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         if(item.getStato()==1) row_stato.setText("Non ancora in aula");
                         else if(item.getStato()==2) row_stato.setText("In pausa");
@@ -545,7 +548,9 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                         if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         row_stato.setText("Non ancora iniziata");
                     }
@@ -558,7 +563,9 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                         if (item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
                         else {
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         row_stato.setText("Terminata");
                     }

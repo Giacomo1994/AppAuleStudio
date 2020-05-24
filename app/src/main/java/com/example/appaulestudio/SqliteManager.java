@@ -86,6 +86,20 @@ public class SqliteManager {
         return gruppi;
     }
 
+    public String selectNomegruppo(String codice_gruppo){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql="SELECT nome_gruppo FROM gruppi_offline where codice_gruppo = '" + codice_gruppo + "'";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+        String nome="";
+        for(int i=0; i<cursor.getCount();i++) {
+            cursor.moveToPosition(i);
+            nome = cursor.getString(cursor.getColumnIndex("nome_gruppo"));
+        }
+        db.close();
+        return nome;
+    }
+
 
     public void insertPrenotazione(int id_prenotazione, String orario_prenotazione, String nome_aula, int tavolo, String gruppo){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
