@@ -396,6 +396,7 @@ public class GroupActivity extends AppCompatActivity {
             editor.putString("last_update", null);
             editor.putString("ingresso", null);
             editor.putString("pausa", null);
+            editor.putString("slot", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

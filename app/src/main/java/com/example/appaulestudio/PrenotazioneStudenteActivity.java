@@ -104,8 +104,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         setTitle(strNome+" "+strCognome);
 
         //scarica piantina aula
-        new load_image().execute();
-
+        load_image task_image= (load_image) new load_image().execute();
         //prende tavoli disponibili
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();

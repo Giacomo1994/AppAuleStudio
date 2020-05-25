@@ -7,14 +7,16 @@ public class Universita {
     private double longitudine;
     private int ingresso;
     private int pausa;
+    private int slot;
 
-    public Universita(String codice, String nome, double latitudine, double longitudine, int ingresso, int pausa) {
+    public Universita(String codice, String nome, double latitudine, double longitudine, int ingresso, int pausa, int slot) {
         this.codice = codice;
         this.nome = nome;
         this.latitudine = latitudine;
         this.longitudine = longitudine;
         this.ingresso = ingresso;
         this.pausa = pausa;
+        this.slot=slot;
     }
 
     public String getCodice() {
@@ -63,6 +65,14 @@ public class Universita {
 
     public void setPausa(int pausa) {
         this.pausa = pausa;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public void setSlot(int slot) {
+        this.slot = slot;
     }
 
     @Override
