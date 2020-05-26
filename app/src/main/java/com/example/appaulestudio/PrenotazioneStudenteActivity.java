@@ -70,7 +70,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     ArrayList<Tavolo> tavoli;
     String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
     String strMatricola, strNome, strCognome, strUniversita;
-    int inizio;
+    int ingresso;
     boolean aperta=false;
     Tavolo tavolo;
 
@@ -100,9 +100,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
-        inizio=Integer.parseInt(settings.getString("inizio", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         setTitle(strNome+" "+strCognome);
-
 
         //scarica piantina aula
         new load_image().execute();
@@ -116,8 +115,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                  if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
-                    aperta=false;
+                     MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
+                     aperta=false;
                 }
                 else{
                     //se l'aula è chiusa ma aprirà di oggi oppure apre domani
@@ -152,8 +151,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String matricola=settings.getString("matricola", null);
                 String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
-                if(orario_inizio_prenotazione!=null && now.compareTo(orario_inizio_prenotazione)>0) return "OPS";
-                if(orario_inizio_prenotazione==null && now.compareTo(orario_fine_prenotazione)>=0) return "OPS";
                 if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
@@ -186,7 +183,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
                 finish();
                 return;
             }
@@ -196,7 +193,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 return;
             }
             if(result.equals("ER")){
-                MyToast.makeText(getApplicationContext(), "Hai già una prenotazione attiva nell'orario specificato!", false).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Hai già una prenotazione attiva nell'orario specificato!", false).show();
                 finish();
                 return;
             }
@@ -209,7 +206,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
             int id_prenotazione=Integer.parseInt(result);
             create_alarm(id_prenotazione);
-            database.insertPrenotazione(id_prenotazione,""+strMatricola,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+            database.insertPrenotazione(id_prenotazione,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
             MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
@@ -230,13 +227,20 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(d);
-        cal.add(Calendar.SECOND,inizio);
+        cal.add(Calendar.SECOND,ingresso);
+
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+aula.getNome()+": Prenotazione terminata");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",strOra);
+        editor.commit();
     }
 
 
@@ -256,10 +260,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Bitmap result) {
-            if(result==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore nel caricamento dell'immagine</b></font>"), Toast.LENGTH_LONG).show();
-                return;
-            }
+            if(result==null) return;
             imgView.setImage(ImageSource.bitmap(result));
         }
     }
@@ -316,11 +317,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(tavoli==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile prenotare</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
                 return;
             }
             if(tavoli.size()==0){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Non ci sono tavoli disponibili</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile prenotare: non ci sono tavoli disponibili!", false).show();
                 return;
             }
 
@@ -396,7 +397,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani</b></font>"), Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
                     aperta=false;
                 }
                 else{

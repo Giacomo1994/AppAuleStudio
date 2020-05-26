@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class Gruppo implements Parcelable {
 
-    private String codice_gruppo, nome_gruppo, codice_corso, matricola_docente;
+    private String codice_gruppo, nome_gruppo, codice_corso, matricola_docente, nome_docente, cognome_docente, nome_corso;
     private int componenti_max;
     private double ore_disponibili;
     private String data_scadenza;
@@ -110,6 +110,30 @@ public class Gruppo implements Parcelable {
 
     public void setData_scadenza(String data_scadenza) {
         this.data_scadenza = data_scadenza;
+    }
+
+    public String getNome_docente() {
+        return nome_docente;
+    }
+
+    public void setNome_docente(String nome_docente) {
+        this.nome_docente = nome_docente;
+    }
+
+    public String getCognome_docente() {
+        return cognome_docente;
+    }
+
+    public void setCognome_docente(String cognome_docente) {
+        this.cognome_docente = cognome_docente;
+    }
+
+    public String getNome_corso() {
+        return nome_corso;
+    }
+
+    public void setNome_corso(String nome_corso) {
+        this.nome_corso = nome_corso;
     }
 
     @Override

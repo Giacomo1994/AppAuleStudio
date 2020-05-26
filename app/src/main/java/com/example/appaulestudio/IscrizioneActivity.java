@@ -4,16 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -31,7 +29,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
 
 public class IscrizioneActivity extends AppCompatActivity {
 
@@ -39,75 +36,48 @@ public class IscrizioneActivity extends AppCompatActivity {
     final static String URL_ISCRIZIONE_GRUPPO= "http://pmsc9.altervista.org/progetto/iscrizione_al_gruppo.php";
 
     EditText codice_gruppo;
-    Button iscriviti;
-    String str_codice_gruppo;
-   // ArrayAdapter adapter;
-    TextView text_dialog, infoCodice;
-    TextView output;
-    //String[] array_info;
-    String nomeProf, cognomeProf, nomeCorso;
-    Button annulla_dialog;
-
-    Button  conferma_dialog;
+    TextView text_dialog, output;
+    Button annulla_dialog, conferma_dialog, iscriviti;
+    ImageView close_dialog;
+    String str_codice_gruppo, str_nome_gruppo, nomeProf, cognomeProf, nomeCorso;
     String strUniversita, strMatricola, strPassword, strNome, strCognome;
 
 
 
-    ImageView close_dialog;
-
-    public void initUI() {
-
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_iscrizione);
         iscriviti = findViewById(R.id.iscriviti);
         codice_gruppo = findViewById(R.id.codice_gruppo);
-        //array_info = new String[3];
-        nomeProf=""; cognomeProf=""; nomeCorso="";
         output= findViewById(R.id.output);
-        //preferenze
+
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
         strPassword=settings.getString("password", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        setTitle(""+strNome+" "+strMatricola);
-
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_iscrizione);
-        this.initUI();
+        setTitle(""+strNome+" "+strCognome);
 
         iscriviti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 str_codice_gruppo=codice_gruppo.getText().toString().trim();
-                //output.setText(str_codice_gruppo);
+                if(str_codice_gruppo.equals("")){
+                    MyToast.makeText(getApplicationContext(),"Inserisci un codice!",false).show();
+                    return;
+                }
                 new get_info_dialog().execute();
-                //output.setText(nomeProf+nomeCorso);
-
-                //output.append(nomeProf+" "+cognomeProf+" "+nomeCorso);
-                /*
-                *//*text_dialog.setText("Ti stai iscrivendo al gruppo/n"+"Corso: "+nomeCorso+
-                        "/nProfessore: "+nomeProf+" "+cognomeProf);*//*
-                d.show();*/
-
             }
         });
 
     }
 
 
-
-
-    private class get_info_dialog extends AsyncTask<Void, Void, Void> {
-
+    private class get_info_dialog extends AsyncTask<Void, Void, String> {
         @Override
-        protected Void doInBackground(Void... voids) {
-
-
+        protected String doInBackground(Void... voids) {
             try {
                 //definisco le variabili
                 String params;
@@ -129,21 +99,13 @@ public class IscrizioneActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-
-
-                //devo impostare i parametri, devo passare la matricola del docente e il codice dell'uni
-                //creo una stringa del tipo nome-valore, sono quelli dei parametri del codice post (li passo alla pagina php)
                 params = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8");
-
-
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(params);
                 dos.flush();
                 dos.close();
                 urlConnection.connect();
                 is = urlConnection.getInputStream();
-
-
                 reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 sb = new StringBuilder();
                 line = null;
@@ -152,54 +114,47 @@ public class IscrizioneActivity extends AppCompatActivity {
                 }
                 is.close();
                 result = sb.toString();
-                jArrayInfo = new JSONArray(result);  //questa decodifica crea un array di elementi json
-
-
-                //faccio un ciclo for per tutti gli elementi all'interno dell'array json che sono corsi
-                //per ogni corso mi prendo le relative informazioni relative ad esso e mi creo un array di oggetti corso
-                //che poi metterò nella listview
-                //array_info = new String[jArrayInfo.length()];
+                jArrayInfo = new JSONArray(result);
+                if(jArrayInfo.length()==0) return "Gruppo inesistente!";
 
                 for (int i = 0; i < jArrayInfo.length(); i++) {
                     JSONObject json_data = jArrayInfo.getJSONObject(i);
-                   /* array_info[i] = (json_data.getString("nome") +
-                            json_data.getString("cognome") +
-                            json_data.getString("nome_corso"));*/
-                   //array_info[i]=json_data[i];
                     nomeProf=json_data.getString("nome");
                     cognomeProf=json_data.getString("cognome");
                     nomeCorso=json_data.getString("nome_corso");
+                    str_nome_gruppo=json_data.getString("nome_gruppo");
                 }
-
-                //return array_info;
-                return null;
+                return "OK";
             } catch (Exception e) {
-                Log.e("log_tag", "Error " + e.toString());
                 return null;
             }
 
         }
-
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(String result) {
+            if(result==null){
+                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
+                return;
+            }
+            if(result.equals("Gruppo inesistente!")){
+                MyToast.makeText(getApplicationContext(),result,false).show();
+                return;
+            }
+
             final Dialog d = new Dialog(IscrizioneActivity.this);
             d.setTitle("Conferma iscrizione");
-
             d.setCancelable(false);
-
             d.setContentView(R.layout.dialog_conferma_iscrizione);
-
             d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-
-
-            text_dialog= d.findViewById(R.id.text_dialog);
+            TextView txt_gruppo= d.findViewById(R.id.txt_iscr_gruppo);
+            TextView txt_docente=d.findViewById(R.id.txt_iscr_docente);
+            TextView txt_corso=d.findViewById(R.id.txt_iscr_corso);
             close_dialog = d.findViewById(R.id.close_dialog);
             annulla_dialog = d.findViewById(R.id.annulla_dialog);
             conferma_dialog = d.findViewById(R.id.conferma_dialog);
-
-            text_dialog.setText("Ti stai iscrivendo al gruppo per il corso di "+nomeCorso+
-                    " tenuto dal professor "+nomeProf+" "+cognomeProf);
+            txt_gruppo.setText(str_nome_gruppo);
+            txt_docente.setText(nomeProf+" "+cognomeProf);
+            txt_corso.setText(nomeCorso);
             d.show();
             close_dialog.setOnClickListener(new ImageView.OnClickListener() {
                 @Override
@@ -224,7 +179,6 @@ public class IscrizioneActivity extends AppCompatActivity {
     }
 
     private class aggiungi_iscrizione extends AsyncTask<Void, Void, String>{
-
         @Override
         protected String doInBackground(Void... strings) {
               try {
@@ -258,26 +212,21 @@ public class IscrizioneActivity extends AppCompatActivity {
             String stringaRicevuta = new String(baos.toByteArray());
             return stringaRicevuta;
         } catch (Exception e) {
-            Log.e("SimpleHttpURLConnection", e.getMessage());
-            return "Impossibile connettersi";
-        } finally {
-        }
+            return "Impossibile contattare il server!";
+        } finally {}
     }
         @Override
         protected void onPostExecute(String result) {
             if(result.equals("Iscrizione effettuata con successo!")==false){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b> Ops, qualcosa è andato storto: "+result+"</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Ops, qualcosa è andato storto: "+result,false).show();
                 return;
             }
             else{
-                //torno all'activity precedente
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>"+result+" </b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),result,true).show();
                 Intent i = new Intent(IscrizioneActivity.this, GroupActivity.class);
                 startActivity(i);
                 finish();
-
             }
-
         }
     }
 

@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         ss.setSpan(clickableSpan1, 7, 17, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         txt_toRegistrazione.setText(ss);
         txt_toRegistrazione.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //controllo campi vuoti
                 if(matricola.equals("")||password.equals("")){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"Devi inserire tutti i campi!",false).show();
                     return;
                 }
                 if(radioStudente.isChecked()){
@@ -185,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
                 Universita[] array_universita = new Universita[jArray.length()];
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
-                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"));
+                    array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
+                            json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -197,8 +200,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
-                //spinner.setEnabled(false);
+                MyToast.makeText(getApplicationContext(),"Errore: impossibile contattare il server!",false).show();
                 return;
             }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -286,15 +288,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user==null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile effettuare login!</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile effettuare il login!",false).show();
                 return;
             }
             else{
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
-                editor.putString("nome_universita",universita.getCodice());
-                //editor.putString("email",user.getEmail());
+                editor.putString("nome_universita",universita.getNome());
+                editor.putString("ingresso", ""+universita.getIngresso());
+                editor.putString("pausa", ""+universita.getPausa());
+                editor.putString("email",user.getEmail());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());
@@ -316,15 +320,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editor.putBoolean("logged", true);
                 editor.commit();
-
-                //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + user.email_calendar + "</b></font>"),Toast.LENGTH_LONG).show();
-
-               /* Intent i=new Intent(MainActivity.this, Home.class);
-                i.putExtra("from_login",true);
-                startActivityForResult(i,2);
-                finish();*/
             }
-
         }
     }
 
@@ -344,8 +340,7 @@ public class MainActivity extends AppCompatActivity {
                     radioDocente.setChecked(true);
                     radioStudente.setChecked(false);
                 }
-
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#0cb339' ><b>" + "Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale." + "</b></font>"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale!",true).show();
             }
         }
     }

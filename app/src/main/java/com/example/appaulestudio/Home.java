@@ -74,7 +74,6 @@ public class Home extends AppCompatActivity{
     String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
     SqliteManager database;
 
-
     protected void initUI(){
          fl= findViewById(R.id.fl);
          elencoAule= findViewById(R.id.elencoAule);
@@ -135,6 +134,7 @@ public class Home extends AppCompatActivity{
         new listaAule().execute();
         new check_last_update().execute();
 
+
         //listener listview
             elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -153,7 +153,10 @@ public class Home extends AppCompatActivity{
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
         ArrayList<Aula> aule=database.readListaAule();
-        if(aule==null) Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Error</b></font>"), Toast.LENGTH_LONG).show();
+        if(aule==null){
+            MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare aule!", false).show();
+            return;
+        }
 
         adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
             @Override
@@ -231,11 +234,10 @@ public class Home extends AppCompatActivity{
                 jArrayLastUpdate = new JSONArray(result);
                 JSONObject data = jArrayLastUpdate.getJSONObject(0);
                 String last_update=data.getString("last_update");
+
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 String last_update_prefs=settings.getString("last_update", null);
-                String inizio_prefs=settings.getString("inizio", null);
-                String pausa_prefs=settings.getString("pausa", null);
-                if(last_update_prefs!=null && last_update_prefs.equals(last_update) && inizio_prefs!=null && pausa_prefs!=null) return null;
+                if(last_update_prefs!=null && last_update_prefs.equals(last_update)) return null;
                 return last_update;
             } catch (Exception e) {
                 return null;
@@ -244,13 +246,13 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(String result) {
             if(result==null) return;
             else {
+                MyToast.makeText(getApplicationContext(),"AGGIORNAMENTO SQLITE",true).show();
+                new aggiornaSQLITE().execute();
+                new aggiornaPreferenzeTempi().execute();
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
                 editor.commit();
-                MyToast.makeText(getApplicationContext(),"FIND",true).show();
-                new aggiornaSQLITE().execute();
-                new aggiornaPreferenzeTempi().execute();
             }
         }
     }
@@ -296,7 +298,7 @@ public class Home extends AppCompatActivity{
                 jArrayLastUpdate = new JSONArray(result);
                 Integer[] tempi= new Integer[2];
                 JSONObject data = jArrayLastUpdate.getJSONObject(0);
-                tempi[0]=data.getInt("inizio");
+                tempi[0]=data.getInt("ingresso");
                 tempi[1]=data.getInt("pausa");
                 return tempi;
             } catch (Exception e) {
@@ -308,8 +310,8 @@ public class Home extends AppCompatActivity{
             else {
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putString("inizio", String.valueOf(result[0]));
-                editor.putString("pausa", String.valueOf(result[1]));
+                editor.putString("ingresso", ""+result[0]);
+                editor.putString("pausa", ""+result[1]);
                 editor.commit();
             }
         }
@@ -458,7 +460,7 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(Aula[] array_aula) {
             bar.setVisibility(ProgressBar.GONE);
             if (array_aula == null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Impossibile contattare il server: i dati potrebbero essere non aggiornati</b></font>"), Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
                 mostraOffline();
             } else {
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
@@ -545,26 +547,19 @@ public class Home extends AppCompatActivity{
                     is.close();
                     result = sb.toString();
                     jArray = new JSONArray(result);
-
-                    User user = null;
-                    for (int i = 0; i < jArray.length(); i++) {
-                        JSONObject json_data = jArray.getJSONObject(i);
-                        user = new User(json_data.getString("matricola"), json_data.getString("nome"), json_data.getString("cognome"), json_data.getString("codice_universita"), json_data.getString("mail"), json_data.getString("password"), true);
-                        return 0;
-                    }
-                    return 1;
+                    if(jArray.length()>0) return 0;
+                    else return 1;
                 } catch (Exception e) {
-                    Log.e("log_tag", "Error " + e.toString());
                     return 2;
                 }
             }
 
             @Override
             protected void onPostExecute(Integer user) {
-                if (user == 1 || strMatricola==null || strUniversita==null || strNome==null || strPassword==null) {
+                if (user == 1 || strMatricola==null || strUniversita==null || strToken==null) {
                     SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    //editor.putString("email", null);
+                    editor.putString("email", null);
                     editor.putString("matricola", null);
                     editor.putString("nome", null);
                     editor.putString("cognome", null);
@@ -572,7 +567,7 @@ public class Home extends AppCompatActivity{
                     editor.putString("token", null);
                     editor.putString("universita", null);
                     editor.putString("nome_universita", null);
-                    editor.putString("inizio", null);
+                    editor.putString("ingresso", null);
                     editor.putString("pausa", null);
                     editor.putString("last_update", null);
                     editor.putBoolean("studente", true);
@@ -582,6 +577,7 @@ public class Home extends AppCompatActivity{
                     startActivityForResult(i, 100);
                     finish();
                 }
+                else MyToast.makeText(getApplicationContext(), "USER OK!", true).show();
             }
         }
 
@@ -597,7 +593,7 @@ public class Home extends AppCompatActivity{
         public boolean onCreateOptionsMenu(Menu menu) {
             menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
             menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+            menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
             return true;
         }
@@ -608,6 +604,7 @@ public class Home extends AppCompatActivity{
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("matricola", null);
+                editor.putString("email", null);
                 editor.putString("nome", null);
                 editor.putString("cognome", null);
                 editor.putString("password", null);
@@ -617,7 +614,7 @@ public class Home extends AppCompatActivity{
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
                 editor.putString("last_update", null);
-                editor.putString("inizio", null);
+                editor.putString("ingresso", null);
                 editor.putString("pausa", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);

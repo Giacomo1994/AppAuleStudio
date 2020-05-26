@@ -1,17 +1,29 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.text.Html;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -22,6 +34,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -82,8 +97,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     IntentIntegrator qrScan;
     public Prenotazione p=null;
     public int richiesta=-1;
-    String strUniversita,strMatricola,strNome, strCognome;
-    int inizio, pausa;
+    String strUniversita, strNomeUniversita, strMatricola,strNome, strCognome;
+    int ingresso, pausa;
+    ArrayList<CalendarAccount> array_list_account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,18 +109,24 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ll_cronologia=findViewById(R.id.prenCronologia_ll);
         list_in_corso=findViewById(R.id.list_inCorso);
         list_cronologia=findViewById(R.id.list_cronologia);
+        array_list_account = new ArrayList<CalendarAccount>();
 
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         qrScan = new IntentIntegrator(this);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
+        strNomeUniversita = settings.getString("nome_universita", null);
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        inizio=Integer.parseInt(settings.getString("inizio", null));
-        pausa=Integer.parseInt(settings.getString("pausa", null));
+        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
+        pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
+
+String strAlarm=settings.getString("alarm_time", null);
+if(strAlarm!=null) MyToast.makeText(getApplicationContext(),strAlarm,true).show();
+else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
 
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
@@ -113,7 +135,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 //creazione alarm
     public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND,this.pausa);
+        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa);
         else if(inizio==true){
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
@@ -123,7 +145,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.SECOND,this.inizio);
+            cal_allarme.add(Calendar.SECOND, ingresso);
         }
         else{
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -134,20 +156,34 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             cal_allarme.setTime(date_allarme);
+            cal_allarme.add(Calendar.SECOND, -300);
         }
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        intent.putExtra("name", ""+prenotazione.getAula()+": Prenotazione terminata");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
+
+        String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",strTarget);
+        editor.commit();
     }
 
 //rimozione alarm
     public void cancel_alarm(Prenotazione prenotazione){
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager.cancel(pendingIntent);
+
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",null);
+        editor.commit();
     }
 
 // RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
@@ -174,8 +210,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
                         return;
                     }
-                    if(entrata_uscita.equals("uscita") && richiesta!=2 ){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad effettuare la pausa!", false).show();
+                    if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
                         return;
                     }
 
@@ -227,7 +263,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         else if(p.getIn_corso().equals("futura")){
             menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
-            if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
+            //if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
         }
         else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
             menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
@@ -240,8 +276,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-
-        if(richiesta!=0 && richiesta!=2 && richiesta!=5) new doOperazione().execute();
+        //richiata =1,3,4,6 no scanner
+        if(richiesta==1 || richiesta==4) new doOperazione().execute();
+        else if(richiesta==8) sincronizza();
         else qrScan.initiateScan();
 
         return true;
@@ -336,20 +373,27 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 create_alarm(p, false, false);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==1) cancel_alarm(p);
+            else if(richiesta==1 && result.equals("Prenotazione terminata")) cancel_alarm(p);
             else if(richiesta==2 && result.equals("Pausa iniziata")){
                 create_alarm(p, false,true);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==3){
+            else if(richiesta==3 && result.equals("Prenotazione terminata")){
                 cancel_alarm(p);
                 new doRichiestaTornello().execute();
             }
-            else if((richiesta==4 || richiesta==7) && result.equals("Cancellazione avvenuta con successo")){
+            else if(richiesta==4 && result.equals("Cancellazione avvenuta con successo")){
                 database.deletePrenotazione(p.getId_prenotazione());
-                cancel_alarm(p);
+                if(p.getGruppo().equals("null")) cancel_alarm(p);
+                ArrayList<CalendarEvent> eventi=database.getEventiFromPrenotazione(p.getId_prenotazione());
+                if(eventi!=null){
+                    for(CalendarEvent ev:eventi){
+                        database.deleteEventoCalendario(p.getId_prenotazione());
+                        delete_event(ev);
+                    }
+                }
             }
-            else if(richiesta==5 || richiesta==6) new doRichiestaTornello().execute();
+            else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
 
             Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
@@ -420,7 +464,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             if(array_prenotazioni==null){
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
-                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni(strMatricola);
+                ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni();
                 if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
                     MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
                     return;
@@ -449,7 +493,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         }
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         return convertView;
                     }
@@ -462,14 +508,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
                 lista_prenotazioni.add(p);
-                if(p.getStato()==1 && (p.getIn_corso().equals("in_corso")|| p.getIn_corso().equals("futura")) && !p.getGruppo().equals("null"))
-                    create_alarm(p,true,false);
             }
             Collections.sort(lista_prenotazioni);
 
             if(lista_prenotazioni.size()==0){
                 MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
-                database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
+                database.insertPrenotazioniGruppi(lista_prenotazioni);
                 return;
             }
             adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, lista_prenotazioni) {
@@ -493,10 +537,11 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
                         row_fine.setText(item.getOrario_fine_prenotazione().substring(8,10)+"/"+item.getOrario_fine_prenotazione().substring(5,7)+" ore "+item.getOrario_fine_prenotazione().substring(11,16));
                         if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
-
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         if(item.getStato()==1) row_stato.setText("Non ancora in aula");
                         else if(item.getStato()==2) row_stato.setText("In pausa");
@@ -512,7 +557,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         if(item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
                         else{
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         row_stato.setText("Non ancora iniziata");
                     }
@@ -525,7 +572,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         if (item.getGruppo().equals("null")) riga_gruppo.setVisibility(View.GONE);
                         else {
                             riga_gruppo.setVisibility(View.VISIBLE);
-                            row_gruppo.setText(item.getGruppo());
+                            String nome_gruppo=database.selectNomegruppo(item.getGruppo());
+                            if(nome_gruppo!=null) row_gruppo.setText(nome_gruppo);
+                            else row_gruppo.setText(item.getGruppo());
                         }
                         row_stato.setText("Terminata");
                     }
@@ -533,16 +582,168 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 }
             };
             list_in_corso.setAdapter(adapter);
-            database.insertPrenotazioniGruppi(lista_prenotazioni,strMatricola);
+            database.insertPrenotazioniGruppi(lista_prenotazioni);
         }
     }
+
+    //////CALENDARIO
+    public void sincronizza() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
+            } else
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
+        } else dialog_pick_calendar(get_account_from_calendar());
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(PrenotazioniAttiveActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
+            if (requestCode == 1) dialog_pick_calendar(get_account_from_calendar());
+        } else
+            MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari", false).show();
+
+    }
+
+    public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
+        final Dialog dialog = new Dialog(PrenotazioniAttiveActivity.this);
+        dialog.setTitle("Seleziona account");
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.dialog_seleziona_calendario);
+        ListView lv_account = dialog.findViewById(R.id.lv_account);
+        Button conferma = dialog.findViewById(R.id.btn_account_conferma);
+        Button indietro = dialog.findViewById(R.id.btn_account_indietro);
+
+        ArrayAdapter<CalendarAccount> adapter_calendar = new ArrayAdapter<CalendarAccount>(PrenotazioniAttiveActivity.this, R.layout.row_layout_dialog_calendario, lista_account) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final CalendarAccount item = getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_dialog_calendario, parent, false);
+                CheckBox check_cal = convertView.findViewById(R.id.check_account);
+                check_cal.setText(item.getName());
+                check_cal.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked == true) array_list_account.add(item);
+                        else {
+                            if (array_list_account.contains(item)) array_list_account.remove(item);
+                        }
+                    }
+                });
+                return convertView;
+            }
+        };
+        lv_account.setAdapter(adapter_calendar);
+
+        conferma.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (array_list_account.size() == 0)
+                    MyToast.makeText(getApplicationContext(), "Selezionare un account", true).show();
+                else {
+                    boolean sync_success = write_event();
+                    if (sync_success == true)
+                        MyToast.makeText(getApplicationContext(), "Sincronizzazione effettuata", true).show();
+                    else
+                        MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare", false).show();
+                    dialog.dismiss();
+                    array_list_account.clear();
+                }
+            }
+        });
+
+        indietro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                array_list_account.clear();
+            }
+        });
+        dialog.show();
+        return;
+    }
+
+
+    public ArrayList<CalendarAccount> get_account_from_calendar() {
+        ArrayList<CalendarAccount> lista = new ArrayList<CalendarAccount>();
+        @SuppressLint("MissingPermission") Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, CalendarContract.Calendars.VISIBLE + " = 1", null, null);
+        while (cursor.moveToNext()) {
+            String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
+            long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+            String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
+            String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
+            if (name.contains("Holidays") || name.contains("Festività") || name.equals("Contacts")) continue;
+            lista.add(new CalendarAccount(id, name, accountName, type));
+        }
+        return lista;
+    }
+
+
+    @SuppressLint("MissingPermission")
+    public boolean write_event() {
+        for (CalendarAccount c : array_list_account) {
+            ContentResolver cr = getContentResolver();
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_inizio = null;
+            Date date_fine = null;
+            try {
+                date_inizio = df.parse(p.getOrario_prenotazione());
+                date_fine = df.parse(p.getOrario_fine_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (date_inizio == null || date_fine == null) return false;
+
+            Calendar cal_begin = Calendar.getInstance();
+            cal_begin.setTime(date_inizio);
+
+            Calendar cal_end = Calendar.getInstance();
+            cal_end.setTime(date_fine);
+
+            Calendar beginTime = Calendar.getInstance();
+            beginTime.set(2020, 4, 26, 8, 30);
+
+            Calendar endTime = Calendar.getInstance();
+            endTime.set(2020, 4, 26, 20, 30);
+
+            ContentValues values = new ContentValues();
+            values.put(CalendarContract.Events.DTSTART, cal_begin.getTimeInMillis());
+            values.put(CalendarContract.Events.DTEND, cal_end.getTimeInMillis());
+            values.put(CalendarContract.Events.TITLE, "StudyAround - Prenotazione");
+            values.put(CalendarContract.Events.DESCRIPTION, p.getAula()+" Tavolo "+p.getNum_tavolo());
+            values.put(CalendarContract.Events.CALENDAR_ID, c.getId());
+            values.put(CalendarContract.Events.EVENT_TIMEZONE, "Europe/Rome\n");
+            values.put(CalendarContract.Events.EVENT_LOCATION, strNomeUniversita);
+            values.put(CalendarContract.Events.GUESTS_CAN_INVITE_OTHERS, "1");
+            values.put(CalendarContract.Events.GUESTS_CAN_SEE_GUESTS, "1");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+            Uri uri=cr.insert(CalendarContract.Events.CONTENT_URI, values);
+            int eventID = (int) Long.parseLong(uri.getLastPathSegment());
+            database.insertEventoCalendario(p.getId_prenotazione(), (int) c.getId(),eventID);
+        }
+        return true;
+    }
+
+    public void delete_event(CalendarEvent event){
+        ContentResolver cr = getContentResolver();
+        Uri deleteUri = null;
+        deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, (long) event.getId_event());
+        cr.delete(deleteUri, null, null);
+    }
+
+
+
 
 //MENU IN ALTO
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestisci Gruppi");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
         return true;
     }
@@ -552,6 +753,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
+            editor.putString("email", null);
             editor.putString("matricola", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);
@@ -562,7 +764,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putString("universita", null);
             editor.putString("nome_universita", null);
             editor.putString("last_update", null);
-            editor.putString("inizio", null);
+            editor.putString("ingresso", null);
             editor.putString("pausa", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);

@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#19bf6f</color>
-    <color name="colorPrimaryDark">#0E8E50</color>
-    <color name="colorAccent">#20e887</color>
-    <color name="intestazione">#19BF6F</color>
-    <color name="button_text">#FFFFFF</color>
+    <color name="button_text">#224734</color>
+    <color name="colorPrimaryDark">#387758</color>
+    <color name="colorPrimary">#4ABC84</color>
+    <color name="intestazione">#4ABC84</color>
+    <color name="colorAccent">#78FFBD</color>
     <color name="verde_trasparente">#bfe3c3</color>
     <color name="grigio_chiaro">#E3E5E6</color>
+    <color name="background_liste">#F6F4F4</color>
     <color name="bianco">#FFFFFF</color>
-    <color name="giallo">#FFF6A7</color>
-    <color name="background_liste">#F4F4F4</color>
-    <color name="rosso">#FFB3B3</color>
+    <color name="giallo">#DDD05A</color>
 </resources>

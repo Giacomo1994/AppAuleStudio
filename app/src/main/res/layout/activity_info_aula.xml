@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".InfoAulaActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context=".InfoAulaActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -227,8 +228,9 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="Avvisami quando si libera un posto"
+            android:textColor="@color/button_text"
             android:visibility="gone" />
 
         <Button
@@ -238,8 +240,9 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="Prenota Posto"
+            android:textColor="@color/button_text"
             android:visibility="gone" />
 
         <Button
@@ -249,8 +252,9 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="Prenota per Gruppo"
+            android:textColor="@color/button_text"
             android:visibility="gone" />
     </LinearLayout>
 
