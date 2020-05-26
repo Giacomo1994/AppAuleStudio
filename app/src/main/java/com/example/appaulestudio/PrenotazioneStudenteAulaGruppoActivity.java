@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,7 +53,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
-    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula, txt_errore, txt_prova;
+    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula, txt_errore;
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner, linear_activity;
@@ -88,7 +90,6 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         linear_spinner=findViewById(R.id.linear_spinner_studgruppo);
         linear_activity=findViewById(R.id.ll_studgruppo);
         spinner=findViewById(R.id.spinner_tavoli_studgruppo);
-        txt_prova=findViewById(R.id.txt_prova_gr);
 
 
         slot=new LinkedList<String>();
@@ -380,9 +381,10 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 urlConnection.setDoInput(true);
 
                 String slots=getSlotIntermedi();
-                if(slot==null) return "Tavolo non più disponibile";
+                if(slot==null) return "Errore: il tavolo non è più disponibile per l'orario indicato!";
 
                 String parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") +
+                        "&universita=" + URLEncoder.encode(strUniversita, "UTF-8") +
                         "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
                         "&tavolo=" + URLEncoder.encode(""+tavolo.getNum_tavolo(), "UTF-8") +
                         "&posti_tavolo=" + URLEncoder.encode(""+tavolo.getPosti_totali(), "UTF-8") +
@@ -418,33 +420,52 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            if(result.equals("Impossibile prenotare")){ //qualcuno ha occupato il tavolo al posto tuo
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
+            else if(result.equals("Errore: il tavolo non è più disponibile per l'orario indicato!") || result.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato")){
+                MyToast.makeText(getApplicationContext(), result, false).show();
                 finish();
                 return;
             }
-            if(result.equals("ER")){
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Hai già una prenotazione attiva nell'orario specificato!", false).show();
+            else{
+                int id_prenotazione=Integer.parseInt(result);
+                create_alarm(id_prenotazione);
+                database.insertPrenotazione(id_prenotazione,data+" "+inizio, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+                Intent i=new Intent(PrenotazioneStudenteAulaGruppoActivity.this,PrenotazioniAttiveActivity.class);
+                MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
+                startActivity(i);
                 finish();
-                return;
-            }
-            if(result.equals("OPS")){
-                MyToast.makeText(getApplicationContext(), "OPS! Si è verificato un problema! Riprova!", false).show();
-                finish();
-                return;
             }
 
-            txt_prova.setText(result);
 
 
-            /*int id_prenotazione=Integer.parseInt(result);
-            create_alarm(id_prenotazione);
-            database.insertPrenotazione(id_prenotazione,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
-            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
-            Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
-            startActivity(i);
-            finish();*/
         }
+    }
+
+    public void create_alarm(int id_prenotazione){
+        //cancel_alarm(id_prenotazione);
+        String myTime = data+" "+inizio;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = null;
+        try {
+            d = df.parse(myTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.SECOND,ingresso-300);
+
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("alarm_time",strOra);
+        editor.commit();
     }
 
     public void initDateTime(){
