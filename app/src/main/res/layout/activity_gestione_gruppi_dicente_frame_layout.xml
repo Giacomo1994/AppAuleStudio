@@ -26,7 +26,6 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:alpha="100"
-            android:background="#F6F4F4"
             android:divider="#F6F4F4"
             android:dividerHeight="10dp"
             android:paddingTop="10dp" />

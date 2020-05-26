@@ -18,6 +18,13 @@
         android:textSize="22sp" />
 
     <TextView
+        android:id="@+id/codiceGruppo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView" />
+
+    <TextView
         android:id="@+id/dataScadenza"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

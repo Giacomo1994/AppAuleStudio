@@ -8,6 +8,7 @@
     <color name="verde_trasparente">#bfe3c3</color>
     <color name="grigio_chiaro">#E3E5E6</color>
     <color name="bianco">#FFFFFF</color>
-    <color name="giallo">#DDD05A</color>
-    <color name="background_liste">#F6F4F4</color>
+    <color name="giallo">#FFF6A7</color>
+    <color name="background_liste">#F4F4F4</color>
+    <color name="rosso">#FFB3B3</color>
 </resources>
