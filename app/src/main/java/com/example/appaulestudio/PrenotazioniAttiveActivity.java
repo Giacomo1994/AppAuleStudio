@@ -146,8 +146,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 //creazione alarm
     public String create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa);
-        else if(inizio==true){
+        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa); //allarme per pausa
+        else if(inizio==true){ //allarme per ingresso
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
             try {
@@ -158,7 +158,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             cal_allarme.setTime(date_allarme);
             cal_allarme.add(Calendar.SECOND, ingresso);
         }
-        else{
+        else{ //allarme per scadenza prenotazione
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
             try {
@@ -468,7 +468,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
-        //offline
+            list_cronologia.setAdapter(null);
+            list_in_corso.setAdapter(null);
+            //offline
             if(array_prenotazioni==null){
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
@@ -484,6 +486,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Prenotazione item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
+                        TableLayout table_riga=convertView.findViewById(R.id.row_table);
                         TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
                         TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
                         TableRow riga_fine= convertView.findViewById(R.id.riga_ora_fine);
@@ -493,6 +496,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
                         riga_stato.setVisibility(View.GONE);
                         riga_fine.setVisibility(View.GONE);
+                        table_riga.setBackgroundResource(R.drawable.forma_dialog);
                         row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
 

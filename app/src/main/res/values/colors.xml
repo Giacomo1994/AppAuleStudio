@@ -10,4 +10,5 @@
     <color name="background_liste">#F6F4F4</color>
     <color name="bianco">#FFFFFF</color>
     <color name="giallo">#DDD05A</color>
+    <color name="rosso">#FF0000</color>
 </resources>
