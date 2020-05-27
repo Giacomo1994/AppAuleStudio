@@ -296,9 +296,6 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getNome());
-                editor.putString("ingresso", ""+universita.getIngresso());
-                editor.putString("pausa", ""+universita.getPausa());
-                editor.putString("slot", ""+universita.getSlot());
                 editor.putString("email",user.getEmail());
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("password",user.getPassword());
@@ -306,6 +303,9 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("cognome", user.getCognome());
                 editor.putString("token", token);
                 if(user.isStudente()==true) {
+                    editor.putString("ingresso", ""+universita.getIngresso());
+                    editor.putString("pausa", ""+universita.getPausa());
+                    editor.putString("slot", ""+universita.getSlot());
                     editor.putBoolean("studente", true);
                     Intent i=new Intent(MainActivity.this, Home.class);
                     i.putExtra("start_from_login",true);
