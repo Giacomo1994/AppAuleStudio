@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_liste"
     android:orientation="vertical"
     tools:context=".HomeDocente">
 
@@ -16,7 +17,9 @@
     <ListView
         android:id="@+id/elencoCorsi2"
         android:layout_width="match_parent"
-        android:layout_height="450dp">
+        android:layout_height="450dp"
+        android:divider="@color/background_liste"
+        android:dividerHeight="15dp">
 
     </ListView>
 

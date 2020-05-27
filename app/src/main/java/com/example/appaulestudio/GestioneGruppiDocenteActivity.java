@@ -64,7 +64,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     static final String URL_AGGIORNA_GRUPPO="http://pmsc9.altervista.org/progetto/aggiorna_gruppo.php";
     static final String URL_ELIMINA_COMPONENTI="http://pmsc9.altervista.org/progetto/elimina_componenti_da_gruppo.php";
     static final String URL_ELIMINA_GRUPPO="http://pmsc9.altervista.org/progetto/elimina_gruppo.php";
-    TextView output,titoloAttivi,titoloInScad,titoloScaduti;
+    TextView output;
+    TextView titoloAttivi,titoloInScad,titoloScaduti;
     Boolean booleanAttivi, booleanInScadenza, booleanScaduti;
     String mes2; String gio2;
     String mes, gio;
@@ -82,7 +83,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     int anno,mese,giorno;
     double oreUpdateNumerico; String dataUpdate, oreUpdate;
     ArrayAdapter adapterComponenti;
-    TextView nomeGruppo, dataScadenza, oreRimanenti, numeroPartecipanti;
+    TextView nomeGruppo, dataScadenza, oreRimanenti, numeroPartecipanti, codiceGruppo;
     String codiceUniversita, nomeDocente, matricolaDocente, cognomeDocente, password;
     LinearLayout rowGruppiDocente;
     Intent intent;
@@ -267,6 +268,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         String dataFra2sett=an2+"-"+mes2+"-"+gio2;
         //output.append("fra2"+dataFra2sett);
         for(Gruppo g:gruppi) {
+
             if (g.getData_scadenza().compareTo(dataOggi) < 0) {
                 //è scaduto
                 scaduti++;
@@ -326,11 +328,14 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     nomeGruppo = convertView.findViewById(R.id.nomeGruppo);
                     dataScadenza = convertView.findViewById(R.id.dataScadenza);
                     oreRimanenti = convertView.findViewById(R.id.oreRimanenti);
+                    codiceGruppo=convertView.findViewById(R.id.codiceGruppo);
                     rowGruppiDocente = convertView.findViewById(R.id.rowGruppiDocente);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
-                    rowGruppiDocente.setBackgroundResource(R.drawable.forma_lista_gruppi_docente);
+                    codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
+                    //rowGruppiDocente.setBackgroundResource(R.drawable.forma_lista_gruppi_docente);
+                    rowGruppiDocente.setBackgroundResource(R.color.bianco);
                     return convertView;
                 }
             };
@@ -350,11 +355,15 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     nomeGruppo = convertView.findViewById(R.id.nomeGruppo);
                     dataScadenza = convertView.findViewById(R.id.dataScadenza);
                     oreRimanenti = convertView.findViewById(R.id.oreRimanenti);
+                    codiceGruppo=convertView.findViewById(R.id.codiceGruppo);
                     rowGruppiDocente = convertView.findViewById(R.id.rowGruppiDocente);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
-                    rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scadenza);
+                    codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
+
+                    //rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scadenza);
+                    rowGruppiDocente.setBackgroundResource(R.color.giallo);
                     return convertView;
                 }
             };
@@ -375,10 +384,14 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     dataScadenza = convertView.findViewById(R.id.dataScadenza);
                     oreRimanenti = convertView.findViewById(R.id.oreRimanenti);
                     rowGruppiDocente = convertView.findViewById(R.id.rowGruppiDocente);
+                    codiceGruppo=convertView.findViewById(R.id.codiceGruppo);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
-                    rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scaduti);
+                    codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
+
+                    //rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scaduti);
+                    rowGruppiDocente.setBackgroundResource(R.color.rosso);
                     return convertView;
                 }
             };
@@ -451,7 +464,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             intent.putExtra("bundle", bundle);
             startActivityForResult(intent, 3);*/
             //devo cancellare il gruppo
-            output.setText("hai cliccato elimina"+gruppoSelezionato.getCodice_gruppo());
+            //output.setText("hai cliccato elimina"+gruppoSelezionato.getCodice_gruppo());
             new eliminaGruppoIntero().execute();
             onResume();
 
@@ -515,8 +528,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
                         @Override
                         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                            output.setText("");
-                            output.append(componenti.length + "COMPONENTI");
+                            //output.setText("");
+                            //output.append(componenti.length + "COMPONENTI");
                             array_copia = array_dinamico;
                             studente = compoundButton.getText().toString();
 
@@ -526,8 +539,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                                 //tolgo lo studente
 
                                 array_dinamico = rimuoviUser(array_copia, studente);
-                                output.append(array_dinamico.length + "SELEZIONATI");
-                                output.append(+array_dinamico.length + "/" + componenti.length + "\n");
+                                //output.append(array_dinamico.length + "SELEZIONATI");
+                                //output.append(+array_dinamico.length + "/" + componenti.length + "\n");
                                 if (array_dinamico.length == 0) {
 
                                     Toast.makeText(getApplicationContext(), "Non ci sono piu componenti nel gruppo",
@@ -545,18 +558,16 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                             //se lo inserisce
                             else {
                                 array_dinamico = aggiungiUser(array_copia, studente);
-                                output.setText("");
-                                output.append("\ninserisco " + array_dinamico.length + "SELE\n");
-                                output.append(+array_dinamico.length + "/" + componenti.length);
-                                for (User s : array_dinamico) {
-                                    output.append(s.getMatricola());
-                                }
+                                //output.setText("");
+                                //output.append("\ninserisco " + array_dinamico.length + "SELE\n");
+                                //output.append(+array_dinamico.length + "/" + componenti.length);
+
                             }
                             User[] prova = null;
                             prova = creaArrayEliminati(componenti, array_dinamico);
                             if (prova != null) {
                                 for (int c = 0; c < prova.length; c++) {
-                                    output.append(prova[c].getMatricola());
+                                    //output.append(prova[c].getMatricola());
                                 }
                             }
                         }
@@ -597,6 +608,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                         numero = Double.parseDouble(n);
                         DecimalFormat twoDForm = new DecimalFormat("#.##");
                         numeroTroncato = Double.valueOf(twoDForm.format(numero));
+                        //output.setText(numero+" "+numeroTroncato);
                     }
                     catch(NumberFormatException e){
                         Toast.makeText(getApplicationContext(),"Errore formato numero", Toast.LENGTH_SHORT).show();
@@ -610,8 +622,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 //SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
                 dataUpdate=nuovaScadenza.getText().toString().trim();
 
-                output.setText("");
-                output.append(gruppoSelezionato.getCodice_gruppo()+" "+oreUpdate+" "+dataUpdate);
+                //output.setText("");
+                //output.append(gruppoSelezionato.getCodice_gruppo()+" "+oreUpdate+" "+dataUpdate);
                 //aggiorna db
                 if(!dataUpdate.equals(gruppoSelezionato.getData_scadenza()) || !n.equals("")) {
                     new aggiornaGruppi().execute();
@@ -669,7 +681,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             public void onDateSet(DatePicker datePicker, int i, int m, int d) {
                 Calendar newDate = Calendar.getInstance();
                 newDate.set(i, m, d);
-                output.setText(newDate.toString());
+                //output.setText(newDate.toString());
                 anno=newDate.get(Calendar.YEAR);
                 mese=newDate.get(Calendar.MONTH)+1;
                 giorno=newDate.get(Calendar.DAY_OF_MONTH);
@@ -771,7 +783,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
             if (array_gruppi.length==0) {
                 Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Nessun gruppo disponibile</b></font>"), Toast.LENGTH_LONG).show();
-                output.setText("");
+                //output.setText("");
                 return;
             }
             gruppi=array_gruppi;
@@ -855,7 +867,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             componenti=array_componenti;
             array_dinamico=componenti;
             if(componenti!=null) {
-                output.setText(componenti[0].getNome());
+                //output.setText(componenti[0].getNome());
                 creaDialogGruppo();
             }
             //iniazializzo l'arrau degli effettivi partecipanti

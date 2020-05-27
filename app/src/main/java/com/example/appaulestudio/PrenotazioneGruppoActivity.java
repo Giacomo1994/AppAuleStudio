@@ -2,6 +2,7 @@ package com.example.appaulestudio;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -14,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.sip.SipSession;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -52,6 +54,7 @@ import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -71,6 +74,9 @@ import java.util.Locale;
         json_data.getString("password"),
         json_data.getBoolean("studente"));*/
 public class PrenotazioneGruppoActivity extends AppCompatActivity {
+    LocalTime fascia830, fascia10, fascia1130,fascia13, fascia1430,fascia16,fascia1730,fascia19;
+    LocalTime primaFascia, ultimaFascia;
+    LocalTime fascia8, inizioGiorno;
     public DatePickerDialog.OnDateSetListener listener;
     String[] dateDisponibili;
     TextView txtDataMostrata;
@@ -192,6 +198,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             }
         });
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -226,6 +233,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivityForResult(i, 100);
             finish();
         }
@@ -266,6 +274,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initUI(){
         array_gruppo=null;
         piantaAula=findViewById(R.id.piantaAula);
@@ -279,6 +288,13 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         nomeAula=findViewById(R.id.nomeAula);
         output=findViewById(R.id.output);
         piantaAula=findViewById(R.id.piantaAula);
+        primaFascia=null;ultimaFascia=null;
+        fascia830=LocalTime.parse("08:30:00");
+        fascia10=LocalTime.parse("10:00:00");fascia1130=LocalTime.parse("11:30:00");
+        fascia13=LocalTime.parse("13:00:00");fascia1430=LocalTime.parse("14:30:00");
+        fascia16=LocalTime.parse("16:00:00");fascia1730=LocalTime.parse("17:30:00");
+        fascia19=LocalTime.parse("19:00:00");
+        //fascia8 = LocalTime.of(5, 30);
 
         intent =getIntent();
         Bundle bundle=intent.getBundleExtra("dati");
@@ -402,22 +418,83 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             }
         });
 
+
         btnCercaDisponibilita=findViewById(R.id.btnCercaDisponibilita);
-        //ora ho gruppo, componenti, data
-        //devo cercare la disponibilità per fasce orarie
+        btnCercaDisponibilita.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(giornoSelezionatoInt>0) {
+                    fasceOrarie(giornoSelezionatoInt);
+                }
+                output.setText(primaFascia+" "+ultimaFascia);
+                //ora ho gruppo, componenti, data e fascie orarie
+                //devo fare un task asincrono che conta i posti liberi e li confronta con quelli richiesti
+                //per ogni fascia oraria
+            }
+        });
+    }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void fasceOrarie(int indice){
+        LocalTime oraApertura, oraChiusura;
+        oraApertura=LocalTime.parse(orariUfficiali.get(indice).getApertura());
+        oraChiusura=LocalTime.parse(orariUfficiali.get(indice).getChiusura());
+        //primaFascia indica orario di inizio delle fascie, ultimaFascia induca l orari odi fine dell ultimafascia
+        //ci sono 7 fasce orarie
+        if(oraApertura.compareTo(fascia830)<=0){
+            primaFascia=fascia830;
+        }
+        else if(oraApertura.compareTo(fascia10)<=0){
+            primaFascia=fascia10;
+        }
+        else if(oraApertura.compareTo(fascia1130)<=0){
+            primaFascia=fascia1130;
+        }
+        else if(oraApertura.compareTo(fascia13)<=0){
+            primaFascia=fascia13;
+        }
+        else if(oraApertura.compareTo(fascia1430)<=0){
+            primaFascia=fascia1430;
+        }
+        else if(oraApertura.compareTo(fascia16)<=0){
+            primaFascia=fascia16;
+        }
+        else if(oraApertura.compareTo(fascia1730)<=0){
+            primaFascia=fascia1730;
+        }
 
-
+        if(oraChiusura.compareTo(fascia19)>=0) {
+            ultimaFascia=fascia19;
+        }
+        else if(oraChiusura.compareTo(fascia1730)>=0){
+            ultimaFascia=fascia1730;
+        }
+        else if(oraChiusura.compareTo(fascia16)>=0){
+            ultimaFascia=fascia16;
+        }
+        else if(oraChiusura.compareTo(fascia1430)>=0){
+            ultimaFascia=fascia1430;
+        }
+        else if(oraChiusura.compareTo(fascia13)>=0){
+            ultimaFascia=fascia13;
+        }
+        else if(oraChiusura.compareTo(fascia1130)>=0){
+            ultimaFascia=fascia1130;
+        }
+        else if(oraChiusura.compareTo(fascia10)>=0){
+            ultimaFascia=fascia10;
+        }
     }
     public void mostraData(int indiceGiorno){
         //ho array di date e orari
         orariUfficiali.get(indiceGiorno).getData();
         txtDataMostrata.setText(orariUfficiali.get(indiceGiorno).getData());
         if(orariUfficiali.get(indiceGiorno).getApertura()==null){
-            txtStatoAula.setText("L'aula risulta chiusa nel giorno selezionato");
+            txtStatoAula.setText("L'aula è chiusa");
         }
         else{
-            txtStatoAula.setText("L'aula risulta aperta nel giorno selezionato");
+            txtStatoAula.setText("L'aula apre alle "+orariUfficiali.get(indiceGiorno).getApertura()+
+                    " e chiude alle "+orariUfficiali.get(indiceGiorno).getChiusura());
         }
         if(indiceGiorno==0){
             btnIndietro.setVisibility(View.GONE);

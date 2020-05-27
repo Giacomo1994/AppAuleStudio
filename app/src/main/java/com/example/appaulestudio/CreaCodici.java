@@ -88,7 +88,7 @@ public class CreaCodici extends AppCompatActivity {
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
     Corso corso=null;
-    Button creaCodici, salvaPdf, btnDailogPdf;
+    Button creaCodici, salvaPdf, btnDailogPdf, getBtnDailogPdfAnnulla;
     CalendarView calendario;
     int anno;
     int mese;
@@ -133,6 +133,7 @@ public class CreaCodici extends AppCompatActivity {
         });*/
         calendario= findViewById(R.id.calendario);
         textnome = findViewById(R.id.textnome);
+        textnome.setText("");
         //btnScadenza= findViewById(R.id.btnScadenza);
        /* btnScadenza.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -150,15 +151,15 @@ public class CreaCodici extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onSelectedDayChange(@NonNull CalendarView calendarView, int year, int month, int day) {
-                textnome.setText("");
+                //textnome.setText("");
                 anno=year;
                 mese=month+1;
                 giorno=day;
-                textnome.append(anno+" "+mese+" "+giorno);
+                //textnome.append(anno+" "+mese+" "+giorno);
                 dataStringa=""+anno+"-"+mese+"-"+giorno;
                 try{
                     date=formatter.parse(dataStringa);
-                    textnome.append(anno+" "+mese+" "+giorno);
+                    //textnome.append(anno+" "+mese+" "+giorno);
                 }
                 catch(ParseException e) {
                     return;
@@ -251,7 +252,7 @@ public class CreaCodici extends AppCompatActivity {
                 for(j=0; j<gruppiIntero; j++){
                     String nuovoCodice=creaCodice();
                     codici[j]=  nuovoCodice;
-                    textnome.append("codice "+j+" "+codici[j]+ " ");
+                    //textnome.append("codice "+j+" "+codici[j]+ " ");
 
                     if(j>0) { //controllo che non ci siano duecodici uguali
                         for (k = 0; k < j; k++) {
@@ -276,6 +277,7 @@ public class CreaCodici extends AppCompatActivity {
         dialogPdf.setTitle("Crea Pdf");
         dialogPdf.setCancelable(true);
         dialogPdf.setContentView(R.layout.dialog_crea_pdf);
+        getBtnDailogPdfAnnulla=dialogPdf.findViewById(R.id.btnDialogPdfAnnulla);
         btnDailogPdf=dialogPdf.findViewById(R.id.btnDialogPdf);
         dialogPdf.show();
         btnDailogPdf.setOnClickListener(new View.OnClickListener() {
@@ -299,6 +301,20 @@ public class CreaCodici extends AppCompatActivity {
 
                 }
                 dialogPdf.cancel();
+                dialogPdf.cancel();
+                Intent i=new Intent(CreaCodici.this, HomeDocente.class);
+                startActivity(i);
+                finish();
+
+            }
+        });
+        getBtnDailogPdfAnnulla.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogPdf.cancel();
+                Intent i=new Intent(CreaCodici.this, HomeDocente.class);
+                startActivity(i);
+                finish();
             }
         });
 
@@ -324,6 +340,7 @@ public class CreaCodici extends AppCompatActivity {
             String mText="";
             mText+="Scadenza gruppi: "+dataStringa+"\n"+"Numero di partecipanti per ogni gruppo: "+partecipanti+
                     "\nOre assegnate a ciascun gruppo: "+ore+"\n";
+            //mText="cioa";
             int i=1;
             for(String s:codici){
                 mText+="Gruppo"+i+"-"+nomeGruppo+" codice: "+s+"\n";
@@ -627,7 +644,7 @@ public class CreaCodici extends AppCompatActivity {
             for(Corso c: array_corso){
                 s +=" "+ c.getCodiceCorso()+" "+c.getNomeCorso();
             }
-            textnome.setText(s);
+            //textnome.setText(s);
 
 
             /*adapter=new ArrayAdapter<String>(CreaCodici.this, R.layout.spinner_materie);
