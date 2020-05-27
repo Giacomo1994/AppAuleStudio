@@ -519,6 +519,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         //online
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
+                if(p.getStato()==1 && p.getIn_corso().equals("futura") && !p.getGruppo().equals("null")){
+                    String orario_alarm=create_alarm(p,true,false);
+                    database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+                }
                 lista_prenotazioni.add(p);
             }
             Collections.sort(lista_prenotazioni);
