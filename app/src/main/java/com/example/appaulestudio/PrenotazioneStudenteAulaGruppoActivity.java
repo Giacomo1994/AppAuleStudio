@@ -49,6 +49,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_tavoli.php";
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_prenotazioni.php";
     static final String URL_PRENOTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_prenota.php";
+    String FIRST_SLOT="08:30:00";
 
     SubsamplingScaleImageView imgView;
     Spinner spinner;
@@ -132,7 +133,6 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 new prenota().execute();
             }
         });
-
     }
 
 
@@ -427,8 +427,9 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             }
             else{
                 int id_prenotazione=Integer.parseInt(result);
-                create_alarm(id_prenotazione);
+                String orario_alarm=create_alarm(id_prenotazione);
                 database.insertPrenotazione(id_prenotazione,data+" "+inizio, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+                database.insertAlarm(id_prenotazione,orario_alarm);
                 Intent i=new Intent(PrenotazioneStudenteAulaGruppoActivity.this,PrenotazioniAttiveActivity.class);
                 MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
                 startActivity(i);
@@ -440,7 +441,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
     }
 
-    public void create_alarm(int id_prenotazione){
+    public String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data+" "+inizio;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -458,14 +459,11 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
         String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("alarm_time",strOra);
-        editor.commit();
+        return strOra;
     }
 
     public void initDateTime(){
@@ -500,31 +498,45 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     public void getSlot(){
         slot.clear();
-        String string_start="";
-        String date_now =new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(Calendar.getInstance().getTime());
-        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
 
-        if(!date_now.equals(data)) string_start=apertura;
-        else if(time_now.compareTo(apertura)>0 && time_now.compareTo(chiusura)<0) string_start=time_now;
-        else string_start=apertura;
-        slot.add(string_start);
-
-        Calendar calendar_start=Calendar.getInstance();
-        try { calendar_start.setTime(new SimpleDateFormat("HH:mm:ss", Locale.ITALY).parse(apertura)); }
+        Calendar cc=Calendar.getInstance();
+        try { cc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+FIRST_SLOT)); }
         catch (ParseException e) {}
 
-        while (true) {
-            String s=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(calendar_start.getTime());
-            if(s.compareTo(string_start)<0){
-                calendar_start.add(Calendar.MINUTE, slot_min);
+        Calendar calendar_apertura=Calendar.getInstance();
+        try { calendar_apertura.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+apertura)); }
+        catch (ParseException e) {}
+
+        Calendar calendar_chiusura=Calendar.getInstance();
+        try { calendar_chiusura.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+chiusura)); }
+        catch (ParseException e) {}
+
+        Calendar calendar_now=Calendar.getInstance();
+        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(calendar_now.getTime());
+
+        Calendar calendar_start=null;
+        if(calendar_now.after(calendar_apertura) && calendar_now.before(calendar_chiusura)){
+            slot.add(time_now);
+            calendar_start=calendar_now;
+        }
+        else{
+            slot.add(apertura);
+            calendar_start=calendar_apertura;
+        }
+
+           while (true) {
+            String s=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(cc.getTime());
+            if(cc.compareTo(calendar_start)<=0){
+                cc.add(Calendar.MINUTE, slot_min);
                 continue;
             }
-            else if(s.compareTo(chiusura)<=0){
+            else if(cc.compareTo(calendar_chiusura)<=0){
                 slot.add(s);
-                calendar_start.add(Calendar.MINUTE, slot_min);
+                cc.add(Calendar.MINUTE, slot_min);
             }
             else break;
         }
+
     }
 
     public String getSlotIntermedi(){
@@ -532,25 +544,36 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         String result=null;
         if(inizio.equals("A prenotazione confermata")){
             String time_now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
-            if(time_now.compareTo(inizio)>=0) return result;
+            if(time_now.compareTo(fine)>=0) return result;
             else inizio = time_now;
         }
-        Calendar calendar_apertura=Calendar.getInstance();
-        try { calendar_apertura.setTime(new SimpleDateFormat("HH:mm:ss", Locale.ITALY).parse(apertura)); }
+
+        Calendar cc=Calendar.getInstance();
+        try { cc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+FIRST_SLOT)); }
         catch (ParseException e) {}
 
+        Calendar calendar_inizio=Calendar.getInstance();
+        try { calendar_inizio.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+inizio)); }
+        catch (ParseException e) {}
+
+        Calendar calendar_fine=Calendar.getInstance();
+        try { calendar_fine.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY).parse(data+" "+fine)); }
+        catch (ParseException e) {}
+
+
         while (true) {
-            String s=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(calendar_apertura.getTime());
-            if(s.compareTo(inizio)<=0){
-                calendar_apertura.add(Calendar.MINUTE, slot_min);
+            String s=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(cc.getTime());
+            if(cc.compareTo(calendar_inizio)<=0){
+                cc.add(Calendar.MINUTE, slot_min);
                 continue;
             }
             else if(s.compareTo(fine)<0){
                 slotIntermedi.add(s);
-                calendar_apertura.add(Calendar.MINUTE, slot_min);
+                cc.add(Calendar.MINUTE, slot_min);
             }
             else break;
         }
+
         if(slotIntermedi.size()==0) result = "void";
         else{
             result="";

@@ -10,11 +10,41 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class SqliteManager {
     private SqliteHelper dbHelper;
     public SqliteManager(Context ctx) {
         dbHelper=new SqliteHelper(ctx);
+    }
+
+//ALARM_TRIGGER
+    public void insertAlarm(int id_prenotazione, String orario_alarm){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="INSERT OR REPLACE INTO alarm_trigger (id_prenotazione, orario_alarm) "+
+                "VALUES (" +id_prenotazione + ", '" + orario_alarm + "')";
+        db.execSQL(sql);
+    }
+    public void deleteAlarm(int id_prenotazione){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="DELETE FROM alarm_trigger WHERE id_prenotazione="+id_prenotazione;
+        db.execSQL(sql);
+    }
+
+    public LinkedList<AlarmClass> getAlarms(){
+        LinkedList<AlarmClass> allarmi=new LinkedList<AlarmClass>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM alarm_trigger";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return null;
+        for(int i=0; i<cursor.getCount();i++) {
+            cursor.moveToPosition(i);
+            int id_prenotazione = cursor.getInt(cursor.getColumnIndex("id_prenotazione"));
+            String orario_alarm = cursor.getString(cursor.getColumnIndex("orario_alarm"));
+            allarmi.add(new AlarmClass(id_prenotazione,orario_alarm));
+        }
+        db.close();
+        return allarmi;
     }
 
 

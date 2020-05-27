@@ -159,7 +159,7 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrbbero non essere aggiornati.",false).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrebbero non essere aggiornati",false).show();
                 ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
                 if(arrayList_gruppo==null || arrayList_gruppo.size()==0)
                     MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
@@ -294,6 +294,7 @@ public class GroupActivity extends AppCompatActivity {
                 }
             });
             if(componenti==null){
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrebbero non essere aggiornati",false).show();
                 eti_componenti.setVisibility(View.GONE);
                 return;
             }
@@ -314,7 +315,7 @@ public class GroupActivity extends AppCompatActivity {
     public void iscrizione_gruppo(View v){
         Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
         startActivity(i);
-        finish();
+        //finish();
     }
 
 

@@ -58,6 +58,11 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"ore_disponibili\"\tREAL,\n" +
                 "\t\"data_scadenza\"\tTEXT)";
         db.execSQL(sql4);
+
+        String sql5 = "CREATE TABLE \"alarm_trigger\" (\n" +
+                "\t\"id_prenotazione\"\tINTEGER PRIMARY KEY,\n" +
+                "\t\"orario_alarm\"\tTEXT)";
+        db.execSQL(sql5);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
