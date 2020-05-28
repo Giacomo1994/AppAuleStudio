@@ -303,9 +303,12 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("cognome", user.getCognome());
                 editor.putString("token", token);
                 if(user.isStudente()==true) {
+                    editor.putString("latitudine", ""+universita.getLatitudine());
+                    editor.putString("longitudine", ""+universita.getLongitudine());
                     editor.putString("ingresso", ""+universita.getIngresso());
                     editor.putString("pausa", ""+universita.getPausa());
                     editor.putString("slot", ""+universita.getSlot());
+                    //editor.putString("inizio_slot", universita.getInizioSlot());
                     editor.putBoolean("studente", true);
                     Intent i=new Intent(MainActivity.this, Home.class);
                     i.putExtra("start_from_login",true);

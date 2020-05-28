@@ -53,6 +53,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class Home extends AppCompatActivity{
     static final String URL_AULE_DINAMICHE="http://pmsc9.altervista.org/progetto/home_info_dinamiche_aule.php";
@@ -522,6 +523,11 @@ public class Home extends AppCompatActivity{
                     editor.putString("slot", null);
                     editor.putBoolean("studente", true);
                     editor.putBoolean("logged", false);
+                    editor.putString("latitudine", null);
+                    editor.putString("longitudine", null);
+                    editor.putString("inizio_slot", null);
+                    editor.putString("last_update", null);
+
                     editor.commit();
                     Intent i = new Intent(Home.this, MainActivity.class);
                     startActivityForResult(i, 100);
@@ -563,9 +569,13 @@ public class Home extends AppCompatActivity{
                 editor.putBoolean("logged", false);
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
+                editor.putString("latitudine", null);
+                editor.putString("longitudine", null);
                 editor.putString("ingresso", null);
                 editor.putString("pausa", null);
                 editor.putString("slot", null);
+                editor.putString("inizio_slot", null);
+                editor.putString("last_update", null);
                 editor.commit();
                 Intent i = new Intent(this, MainActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

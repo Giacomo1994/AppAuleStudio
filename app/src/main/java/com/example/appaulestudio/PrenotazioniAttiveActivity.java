@@ -789,8 +789,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("email", null);
             editor.putString("matricola", null);
+            editor.putString("email", null);
             editor.putString("nome", null);
             editor.putString("cognome", null);
             editor.putString("password", null);
@@ -799,9 +799,13 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putBoolean("logged", false);
             editor.putString("universita", null);
             editor.putString("nome_universita", null);
+            editor.putString("latitudine", null);
+            editor.putString("longitudine", null);
             editor.putString("ingresso", null);
             editor.putString("pausa", null);
             editor.putString("slot", null);
+            editor.putString("inizio_slot", null);
+            editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
