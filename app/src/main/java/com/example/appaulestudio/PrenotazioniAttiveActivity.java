@@ -125,16 +125,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
 
-//String strAlarm=settings.getString("alarm_time", null);
-//if(strAlarm!=null) MyToast.makeText(getApplicationContext(),strAlarm,true).show();
-//else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
-
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
 
-        LinkedList<AlarmClass> allarmi_attivi=database.getAlarms();
-        if(allarmi_attivi!=null)
-            MyToast.makeText(getApplicationContext(),""+allarmi_attivi.get(0).getId_prenotazione()+" "+allarmi_attivi.get(0).getOrario_alarm(),true).show();
+        //LinkedList<AlarmClass> allarmi_attivi=database.getAlarms();
+        //if(allarmi_attivi!=null)
+            //MyToast.makeText(getApplicationContext(),""+allarmi_attivi.get(0).getId_prenotazione()+" "+allarmi_attivi.get(0).getOrario_alarm(),true).show();
     }
 
     @Override
