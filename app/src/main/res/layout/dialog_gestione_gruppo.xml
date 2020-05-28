@@ -107,7 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="OK" />
 
         <Button
@@ -115,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="ANULLA" />
     </LinearLayout>
 

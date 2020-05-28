@@ -3,11 +3,13 @@
     <color name="button_text">#224734</color>
     <color name="colorPrimaryDark">#387758</color>
     <color name="colorPrimary">#4ABC84</color>
+    <color name="colorPrimaryChiaro">#744ABC84</color>
     <color name="intestazione">#4ABC84</color>
     <color name="colorAccent">#78FFBD</color>
     <color name="verde_trasparente">#bfe3c3</color>
     <color name="grigio_chiaro">#E3E5E6</color>
     <color name="background_liste">#F6F4F4</color>
     <color name="bianco">#FFFFFF</color>
-    <color name="giallo">#DDD05A</color>
+    <color name="rosso">#FFC7C7</color>
+    <color name="giallo">#F8F1B3</color>
 </resources>

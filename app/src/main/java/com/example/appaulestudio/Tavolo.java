@@ -1,10 +1,13 @@
 package com.example.appaulestudio;
 
+import java.time.LocalTime;
+
 public class Tavolo {
     private String id_aula;
     private int num_tavolo;
     private int posti_totali;
     private int posti_liberi;
+    private String fasciaOraria;
 
     public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi) {
         this.id_aula = id_aula;
@@ -12,6 +15,14 @@ public class Tavolo {
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
     }
+    public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
+        this.id_aula = id_aula;
+        this.num_tavolo = numero_tavolo;
+        this.posti_totali = posti_totali;
+        this.posti_liberi = posti_liberi;
+        this.fasciaOraria=fasciaOraria;
+    }
+
 
     public String getId_aula() {
         return id_aula;

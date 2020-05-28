@@ -75,7 +75,7 @@ import java.util.Locale;
         json_data.getBoolean("studente"));*/
 public class PrenotazioneGruppoActivity extends AppCompatActivity {
     LocalTime fascia830, fascia10, fascia1130,fascia13, fascia1430,fascia16,fascia1730,fascia19;
-    LocalTime primaFascia, ultimaFascia;
+    LocalTime primaFascia, ultimaFascia,fasciaQuery;
     LocalTime fascia8, inizioGiorno;
     public DatePickerDialog.OnDateSetListener listener;
     String[] dateDisponibili;
@@ -86,7 +86,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     Button btnCercaDisponibilita;
     String studente;
     ArrayAdapter adapterComponenti;
-    String risultato; int n;
+    String risultato,risultato2; int n;
     Button btnGruppo, btnComponenti, btncheckComponenti;
     ListView listacomponenti;
     TextView gruppoSelezionato;
@@ -100,11 +100,13 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     TextView txtOreResidue;
     SubsamplingScaleImageView piantaAula;
     ArrayList<Orario_Ufficiale> orariUfficiali;
-    String nomeStudente, matricolaStudente,codiceUniversita;
+    String nomeStudente, matricolaStudente,codiceUniversita, cognomeStudente;
     Aula aula;
     Intent intent;
+    ArrayList<Tavolo> tavoli;
     static final String URL_GRUPPI_DA_MATRICOLA="http://pmsc9.altervista.org/progetto/gruppi_da_matricola.php";
     static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
+    static final String URL_PRENOTAZIONI_FUTURE="http://pmsc9.altervista.org/progetto/prenotazioni_gruppi_future.php";
     GridView grigliaGruppi;
     Gruppo[] array_gruppo;
     User[] array_componenti;
@@ -277,6 +279,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void initUI(){
         array_gruppo=null;
+        tavoli=new ArrayList<Tavolo>();
         piantaAula=findViewById(R.id.piantaAula);
 
         provaGruppo=new Gruppo("h37cg76f0a",
@@ -302,9 +305,10 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         nomeAula.setText(aula.getNome());
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         nomeStudente=settings.getString("nome", null);
+        cognomeStudente=settings.getString("cognome",null);
         matricolaStudente=settings.getString("matricola", null);
         codiceUniversita=settings.getString("universita", null);
-        setTitle(nomeStudente);
+        setTitle(nomeStudente+" "+cognomeStudente);
         orariUfficiali=bundle.getParcelableArrayList("orari");
         Collections.sort(orariUfficiali);
 
@@ -425,11 +429,16 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(giornoSelezionatoInt>0) {
                     fasceOrarie(giornoSelezionatoInt);
+                    //while(!fasciaQuery.isAfter(ultimaFascia)) {
+                        new prendiPrenotazioni().execute();
+                     //   fasciaQuery.plusMinutes(90);
+                   // }
                 }
-                output.setText(primaFascia+" "+ultimaFascia);
+                output.setText(primaFascia+" "+ultimaFascia+" "+fascia830.toString());
                 //ora ho gruppo, componenti, data e fascie orarie
                 //devo fare un task asincrono che conta i posti liberi e li confronta con quelli richiesti
                 //per ogni fascia oraria
+
             }
         });
     }
@@ -441,49 +450,50 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         oraChiusura=LocalTime.parse(orariUfficiali.get(indice).getChiusura());
         //primaFascia indica orario di inizio delle fascie, ultimaFascia induca l orari odi fine dell ultimafascia
         //ci sono 7 fasce orarie
-        if(oraApertura.compareTo(fascia830)<=0){
+        if(!oraApertura.isAfter(fascia830)){
             primaFascia=fascia830;
         }
-        else if(oraApertura.compareTo(fascia10)<=0){
+        else if(!oraApertura.isAfter(fascia10)){
             primaFascia=fascia10;
         }
-        else if(oraApertura.compareTo(fascia1130)<=0){
+        else if(!oraApertura.isAfter(fascia1130)){
             primaFascia=fascia1130;
         }
-        else if(oraApertura.compareTo(fascia13)<=0){
+        else if(!oraApertura.isAfter(fascia13)){
             primaFascia=fascia13;
         }
-        else if(oraApertura.compareTo(fascia1430)<=0){
+        else if(!oraApertura.isAfter(fascia1430)){
             primaFascia=fascia1430;
         }
-        else if(oraApertura.compareTo(fascia16)<=0){
+        else if(!oraApertura.isAfter(fascia16)){
             primaFascia=fascia16;
         }
-        else if(oraApertura.compareTo(fascia1730)<=0){
+        else if(!oraApertura.isAfter(fascia1730)){
             primaFascia=fascia1730;
         }
 
-        if(oraChiusura.compareTo(fascia19)>=0) {
+        if(!oraChiusura.isBefore(fascia19)) {
             ultimaFascia=fascia19;
         }
-        else if(oraChiusura.compareTo(fascia1730)>=0){
+        else if(!oraChiusura.isBefore(fascia1730)){
             ultimaFascia=fascia1730;
         }
-        else if(oraChiusura.compareTo(fascia16)>=0){
+        else if(!oraChiusura.isBefore(fascia16)){
             ultimaFascia=fascia16;
         }
-        else if(oraChiusura.compareTo(fascia1430)>=0){
+        else if(!oraChiusura.isBefore(fascia1430)){
             ultimaFascia=fascia1430;
         }
-        else if(oraChiusura.compareTo(fascia13)>=0){
+        else if(!oraChiusura.isBefore(fascia13)){
             ultimaFascia=fascia13;
         }
-        else if(oraChiusura.compareTo(fascia1130)>=0){
+        else if(!oraChiusura.isBefore(fascia1130)){
             ultimaFascia=fascia1130;
         }
-        else if(oraChiusura.compareTo(fascia10)>=0){
+        else if(!oraChiusura.isBefore(fascia10)){
             ultimaFascia=fascia10;
         }
+        fasciaQuery=primaFascia;
     }
     public void mostraData(int indiceGiorno){
         //ho array di date e orari
@@ -697,7 +707,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
 
 
                 JSONArray jArrayCorsi = new JSONArray(result);
-                risultato=result;
+                risultato= result;
                 if(risultato==null){
                     array_gruppo=null;
                     return array_gruppo;
@@ -856,6 +866,74 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     }*/
 
 
+
+    private class prendiPrenotazioni extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                URL url = new URL(URL_PRENOTAZIONI_FUTURE);
+                //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
+
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                String parametri = "id_aula="+URLEncoder.encode(aula.getIdAula(), "UTF-8")+
+                        "&data_orario="+URLEncoder.encode(orariUfficiali.get(giornoSelezionatoInt).getData()+
+                        " "+fasciaQuery.toString()+":00", "UTF-8");
+
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri); //passo i parametri
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream is = urlConnection.getInputStream();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                String result = sb.toString();
+                risultato2=result;
+
+
+                JSONArray jArray = new JSONArray(result);
+
+
+
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject json_data = jArray.getJSONObject(i);
+                    int posti_liberi=json_data.getInt("posti_totali")-json_data.getInt("posti_occupati");
+                    Tavolo t= new Tavolo(aula.getIdAula(),json_data.getInt("tavolo"),json_data.getInt("posti_totali"),
+                            posti_liberi, fasciaQuery.toString());
+                    //if(t.getPosti_liberi()>=array_dinamico.length) tavoli.add(t);
+                    tavoli.add(t);
+                }
+                return result;
+
+            } catch (Exception e) {
+                MyToast.makeText(getApplicationContext(), "Errore nel caricamento", MyToast.LENGTH_LONG).show();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(tavoli!=null){
+                output.append(tavoli.toString());
+            }
+            output.append("\n"+risultato2+"\n"+orariUfficiali.get(giornoSelezionatoInt).getData()+" "+fasciaQuery.toString()+":00");
+
+        }
+
+    }
 }
 
 

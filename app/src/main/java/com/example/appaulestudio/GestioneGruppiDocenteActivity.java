@@ -50,9 +50,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
@@ -98,6 +101,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     Gruppo gruppoSelezionato;
     String studente;
     Date date=null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -218,11 +222,14 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     }*/
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
-        Date date= new Date();
+        Date date2= new Date();
+        Date dateToday=new Date();
         Calendar c= Calendar.getInstance();
         Calendar c2=Calendar.getInstance();
-        c2.setTime(date);
+        //c2.setTime(date);
         c2.add(Calendar.DAY_OF_MONTH, 14);
+        //c2.setTime(date2);
+        //c.setTime(dateToday);
         int an,me,gi;
         int an2,me2,gi2;
 
