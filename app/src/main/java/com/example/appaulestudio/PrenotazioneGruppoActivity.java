@@ -912,7 +912,8 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                     JSONObject json_data = jArray.getJSONObject(i);
                     int posti_liberi=json_data.getInt("posti_totali")-json_data.getInt("posti_occupati");
                     Tavolo t= new Tavolo(aula.getIdAula(),json_data.getInt("tavolo"),json_data.getInt("posti_totali"),
-                            posti_liberi, fasciaQuery.toString());
+                            posti_liberi);
+                    t.setFasciaOraria(fasciaQuery.toString());
                     //if(t.getPosti_liberi()>=array_dinamico.length) tavoli.add(t);
                     tavoli.add(t);
                 }
