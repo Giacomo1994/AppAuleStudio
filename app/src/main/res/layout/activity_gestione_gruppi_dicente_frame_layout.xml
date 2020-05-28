@@ -17,7 +17,8 @@
             android:id="@+id/txtTitoloAttivi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textSize="20sp" />
 
         <ListView
             android:id="@+id/listaAttivi"
@@ -42,7 +43,8 @@
             android:id="@+id/txtTitoloInScad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textSize="20sp" />
 
         <ListView
             android:id="@+id/listaInScadenza"
@@ -68,7 +70,8 @@
             android:id="@+id/txtTitoloScaduti"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textSize="20sp" />
 
         <ListView
             android:id="@+id/listaScaduti"

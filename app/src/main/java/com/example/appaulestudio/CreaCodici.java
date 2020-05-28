@@ -39,6 +39,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfDocument;
@@ -100,6 +101,7 @@ public class CreaCodici extends AppCompatActivity {
     Date date=null;
     SimpleDateFormat formatter;
     View.OnClickListener listener;
+    Dialog dialogPdf;
     //int current_year, current_month, current_day;
     static final String URL_CORSI= "http://pmsc9.altervista.org/progetto/richiedi_corsi_from_docente.php";
     //static final String URL_CONTROLLO_CODICI ="http://pmsc9.altervista.org/progetto/controllo_codici_gruppi.php";
@@ -273,7 +275,7 @@ public class CreaCodici extends AppCompatActivity {
     }
 
     public void dialogPdfCodici(){
-        final Dialog dialogPdf= new Dialog(CreaCodici.this);
+        dialogPdf= new Dialog(CreaCodici.this);
         dialogPdf.setTitle("Crea Pdf");
         dialogPdf.setCancelable(true);
         dialogPdf.setContentView(R.layout.dialog_crea_pdf);
@@ -300,11 +302,7 @@ public class CreaCodici extends AppCompatActivity {
                     savePdf();
 
                 }
-                dialogPdf.cancel();
-                dialogPdf.cancel();
-                Intent i=new Intent(CreaCodici.this, HomeDocente.class);
-                startActivity(i);
-                finish();
+
 
             }
         });
@@ -335,21 +333,23 @@ public class CreaCodici extends AppCompatActivity {
             PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
             //apri per scrivere
             mDoc.open();
+            //mDoc.add(new Chunk(""));
             //openPdfFile(mDoc);
             //scegli il testo da inserire
             String mText="";
             mText+="Scadenza gruppi: "+dataStringa+"\n"+"Numero di partecipanti per ogni gruppo: "+partecipanti+
                     "\nOre assegnate a ciascun gruppo: "+ore+"\n";
-            //mText="cioa";
             int i=1;
             for(String s:codici){
                 mText+="Gruppo"+i+"-"+nomeGruppo+" codice: "+s+"\n";
                 i++;
             }
-            // aggiungi autore opzionale e altre cose
-            mDoc.addAuthor("App Aule Studio");
+            //String mText="cioa";
             //aggiungi paragrafo
             mDoc.add(new Paragraph(mText));
+            // aggiungi autore opzionale e altre cose
+            mDoc.addAuthor("App Aule Studio");
+
             //chiudi il doc
             mDoc.close();
             //mostra messaggio
@@ -361,7 +361,10 @@ public class CreaCodici extends AppCompatActivity {
             Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
 
         }
-
+        dialogPdf.cancel();
+        Intent i=new Intent(CreaCodici.this, HomeDocente.class);
+        startActivity(i);
+        finish();
     }
 
     @Override

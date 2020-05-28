@@ -169,7 +169,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_weight="1"
-            android:background="@drawable/forma_griglia_gruppi"
+            android:background="@drawable/button_layout"
             android:text="VAI" />
     </LinearLayout>
 
