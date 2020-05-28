@@ -147,16 +147,16 @@ public class InfoAulaActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();
                 }
-                /*else{
+                else{
                     Intent i= new Intent(InfoAulaActivity.this,
-                            PrenotazioneSingoloInGruppoActivty.class);
+                            PrenotazioneStudenteAulaGruppoActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putParcelable("aula", aula);
                     bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
                     i.putExtra("dati", bundle);
                     startActivity(i);
                     finish();
-                }*/
+                }
             }
         });
 

@@ -164,7 +164,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     JSONObject json_data = jArray.getJSONObject(i);
                     array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
                             json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
-                            json_data.getInt("ingresso"), json_data.getInt("pausa"));
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"), json_data.getInt("slot"));
                 }
                 return array_universita;
             } catch (Exception e) {

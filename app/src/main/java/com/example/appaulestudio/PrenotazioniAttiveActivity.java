@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Locale;
 // PRENOTAZIONI MOSTRATE (si connessione)
     //tutte le prenotazioni in corso e future
@@ -124,19 +125,29 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
 
-String strAlarm=settings.getString("alarm_time", null);
-if(strAlarm!=null) MyToast.makeText(getApplicationContext(),strAlarm,true).show();
-else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
+//String strAlarm=settings.getString("alarm_time", null);
+//if(strAlarm!=null) MyToast.makeText(getApplicationContext(),strAlarm,true).show();
+//else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
 
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
+
+        LinkedList<AlarmClass> allarmi_attivi=database.getAlarms();
+        if(allarmi_attivi!=null)
+            MyToast.makeText(getApplicationContext(),""+allarmi_attivi.get(0).getId_prenotazione()+" "+allarmi_attivi.get(0).getOrario_alarm(),true).show();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        new getPrenotazioni().execute();
     }
 
 //creazione alarm
-    public void create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
+    public String create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa);
-        else if(inizio==true){
+        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa); //allarme per pausa
+        else if(inizio==true){ //allarme per ingresso
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
             try {
@@ -147,7 +158,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             cal_allarme.setTime(date_allarme);
             cal_allarme.add(Calendar.SECOND, ingresso);
         }
-        else{
+        else{ //allarme per scadenza prenotazione
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date_allarme = null;
             try {
@@ -162,14 +173,11 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
 
         String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("alarm_time",strTarget);
-        editor.commit();
+        return strTarget;
     }
 
 //rimozione alarm
@@ -177,13 +185,8 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.cancel(pendingIntent);
-
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("alarm_time",null);
-        editor.commit();
     }
 
 // RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
@@ -215,7 +218,31 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                         return;
                     }
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
+                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                    d.setCancelable(false);
+                    d.setContentView(R.layout.dialog_qr_code);
+                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                    TextView txt_qr= d.findViewById(R.id.et_qr);
+                    Button btn_yes=d.findViewById(R.id.btn_yes_qr);
+                    Button btn_no=d.findViewById(R.id.btn_no_qr);
+                    txt_qr.setText(entrata_uscita+" "+nome_aula);
+                    btn_yes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new doOperazione().execute();
+                            d.dismiss();
+                        }
+                    });
+                    btn_no.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            d.dismiss();
+                        }
+                    });
+                    d.show();
+
+
+                    /*AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
                     builder.setTitle(entrata_uscita+" "+nome_aula);
                     builder.setMessage("Vuoi procedere?");
                     //click listener for alert dialog buttons --> Se sì esegui task asincrono
@@ -236,7 +263,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                     builder.setPositiveButton("Si", dialogClickListener);
                     builder.setNegativeButton("No",dialogClickListener);
                     AlertDialog dialog = builder.create();
-                    dialog.show();
+                    dialog.show();*/
                 } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
             }
         } else super.onActivityResult(requestCode, resultCode, data);
@@ -370,21 +397,28 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             else MyToast.makeText(getApplicationContext(), result, true).show();
 
             if(richiesta==0 && result.equals("Accesso consentito")){
-                create_alarm(p, false, false);
+                String orario_alarm=create_alarm(p, false, false);
+                database.insertAlarm(p.getId_prenotazione(),orario_alarm);
                 new doRichiestaTornello().execute();
             }
-            else if(richiesta==1 && result.equals("Prenotazione terminata")) cancel_alarm(p);
+            else if(richiesta==1 && result.equals("Prenotazione terminata")){
+                cancel_alarm(p);
+                database.deleteAlarm(p.getId_prenotazione());
+            }
             else if(richiesta==2 && result.equals("Pausa iniziata")){
-                create_alarm(p, false,true);
+                String orario_alarm=create_alarm(p, false,true);
+                database.insertAlarm(p.getId_prenotazione(),orario_alarm);
                 new doRichiestaTornello().execute();
             }
             else if(richiesta==3 && result.equals("Prenotazione terminata")){
                 cancel_alarm(p);
+                database.deleteAlarm(p.getId_prenotazione());
                 new doRichiestaTornello().execute();
             }
             else if(richiesta==4 && result.equals("Cancellazione avvenuta con successo")){
+                cancel_alarm(p);
                 database.deletePrenotazione(p.getId_prenotazione());
-                if(p.getGruppo().equals("null")) cancel_alarm(p);
+                database.deleteAlarm(p.getId_prenotazione());
                 ArrayList<CalendarEvent> eventi=database.getEventiFromPrenotazione(p.getId_prenotazione());
                 if(eventi!=null){
                     for(CalendarEvent ev:eventi){
@@ -395,9 +429,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             }
             else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
 
-            Intent i=new Intent(PrenotazioniAttiveActivity.this,PrenotazioniAttiveActivity.class);
-            startActivity(i);
-            finish();
+            new getPrenotazioni().execute();
         }
     }
 
@@ -460,7 +492,9 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
 
         @Override
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
-        //offline
+            list_cronologia.setAdapter(null);
+            list_in_corso.setAdapter(null);
+            //offline
             if(array_prenotazioni==null){
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
@@ -476,6 +510,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Prenotazione item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_prenotazioni_attive_activity, parent, false);
+                        TableLayout table_riga=convertView.findViewById(R.id.row_table);
                         TableRow riga_gruppo= convertView.findViewById(R.id.riga_gruppo);
                         TableRow riga_stato= convertView.findViewById(R.id.riga_stato);
                         TableRow riga_fine= convertView.findViewById(R.id.riga_ora_fine);
@@ -485,6 +520,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
 
                         riga_stato.setVisibility(View.GONE);
                         riga_fine.setVisibility(View.GONE);
+                        table_riga.setBackgroundResource(R.drawable.forma_dialog);
                         row_luogo.setText(item.getAula()+", Tavolo "+item.getNum_tavolo());
                         row_inizio.setText(item.getOrario_prenotazione().substring(8,10)+"/"+item.getOrario_prenotazione().substring(5,7)+" ore "+item.getOrario_prenotazione().substring(11,16));
 
@@ -507,6 +543,10 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
         //online
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
+                if(p.getStato()==1 && p.getIn_corso().equals("futura") && !p.getGruppo().equals("null")){
+                    String orario_alarm=create_alarm(p,true,false);
+                    database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+                }
                 lista_prenotazioni.add(p);
             }
             Collections.sort(lista_prenotazioni);
@@ -766,6 +806,7 @@ else MyToast.makeText(getApplicationContext(),"No alarm",false).show();
             editor.putString("last_update", null);
             editor.putString("ingresso", null);
             editor.putString("pausa", null);
+            editor.putString("slot", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

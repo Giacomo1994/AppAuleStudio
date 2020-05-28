@@ -104,8 +104,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         setTitle(strNome+" "+strCognome);
 
         //scarica piantina aula
-        new load_image().execute();
-
+        load_image task_image= (load_image) new load_image().execute();
         //prende tavoli disponibili
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();
@@ -197,16 +196,12 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            if(result.equals("OPS")){
-                MyToast.makeText(getApplicationContext(), "OPS! Si è verificato un problema! Riprova!", false).show();
-                finish();
-                return;
-            }
 
 
             int id_prenotazione=Integer.parseInt(result);
-            create_alarm(id_prenotazione);
+            String orario_alarm=create_alarm(id_prenotazione);
             database.insertPrenotazione(id_prenotazione,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+            database.insertAlarm(id_prenotazione,orario_alarm);
             MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
             Intent i=new Intent(PrenotazioneStudenteActivity.this,PrenotazioniAttiveActivity.class);
             startActivity(i);
@@ -215,7 +210,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     }
 
 //creazione alarm
-    public void create_alarm(int id_prenotazione){
+    public String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -233,14 +228,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
         alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
 
         String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("alarm_time",strOra);
-        editor.commit();
+        return strOra;
     }
 
 
