@@ -116,6 +116,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         intent = getIntent();
         bundle=intent.getBundleExtra("bundle");
         aula=bundle.getParcelable("aula");
+        orari_default= (HashMap<Integer, Orario>) bundle.getSerializable("orari");
         infoAula_nome.setText(aula.getNome());
         infoAula_luogo.setText(aula.getLuogo());
         if(aula.getGruppi()==0) infoAula_gruppi.setText("Disponibile per i gruppi");
@@ -328,7 +329,6 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            orari_default=database.readOrariAula(aula.getIdAula());
             if(orari_default==null){
                 MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare gli orari!", false).show();
                 return;

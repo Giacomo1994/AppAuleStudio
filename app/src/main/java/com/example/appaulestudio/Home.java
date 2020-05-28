@@ -53,13 +53,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 public class Home extends AppCompatActivity{
     static final String URL_AULE_DINAMICHE="http://pmsc9.altervista.org/progetto/home_info_dinamiche_aule.php";
     static final String URL_ORARI_DEFAULT="http://pmsc9.altervista.org/progetto/home_orari_default.php";
     static final String URL_LAST_UPDATE="http://pmsc9.altervista.org/progetto/home_lastUpdate.php";
-    static final String URL_TEMPI="http://pmsc9.altervista.org/progetto/home_tempi_universita.php";
+    static final String URL_TEMPI="http://pmsc9.altervista.org/progetto/home_dati_universita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
 
@@ -71,6 +72,7 @@ public class Home extends AppCompatActivity{
     Button mappa;
     ProgressBar bar;
     Aula[] array_aule=null;
+    boolean from_login=true;
 
     Intent intent;
     String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
@@ -99,32 +101,52 @@ public class Home extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         //inizializzo variabili
-            initUI();
+        initUI();
         //inizializzo oggetto database
-            database=new SqliteManager(Home.this);
+        database=new SqliteManager(Home.this);
         //se apro l'app ed accedo direttamente alla home, controllo se l'utente è ok
-            intent=getIntent();
-            if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==false){
-                new checkUtente().execute();
-            }
+        intent=getIntent();
+        if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==false){
+            new checkUtente().execute();
+            from_login=false;
+        }
+        else if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==true){
+            from_login=true;
+        }
+        else from_login=false;
+
         //task asincrono
         new listaAule().execute();
 
         //listener listview
-            elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Aula a= (Aula) parent.getItemAtPosition(position);
                     Intent intent=new Intent(Home.this,InfoAulaActivity.class);
                     Bundle bundle=new Bundle();
                     bundle.putParcelable("aula",a);
+                    HashMap<Integer,Orario> orari_aula=database.readOrariAula(a.getIdAula());
+                    bundle.putSerializable("orari",orari_aula);
                     intent.putExtra("bundle", bundle);
                     startActivityForResult(intent, 3);
                 }
-            });
+        });
+
+        mappa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List aule_list= Arrays.asList(array_aule);
+                ArrayList<Aula> aule_array_list=new ArrayList<Aula>();
+                aule_array_list.addAll(aule_list);
+                Intent intent_to_map = new Intent(Home.this,MapActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putParcelableArrayList("aule",aule_array_list);
+                intent_to_map.putExtra("bundle_aule",bundle);
+                startActivity(intent_to_map);
+            }
+        });
     }
-
-
 
 
 //se non c'è connessione mostra nella listview i dati da SQLITE
@@ -225,9 +247,8 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(String result) {
             if(result==null) return;
             else {
-                MyToast.makeText(getApplicationContext(),"AGGIORNAMENTO SQLITE",true).show();
                 new aggiornaSQLITE().execute();
-                new aggiornaPreferenzeTempi().execute();
+                if(from_login==false)new aggiornaPreferenzeUniversita().execute();
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("last_update", result);
@@ -237,7 +258,7 @@ public class Home extends AppCompatActivity{
     }
 
     //controllo ultimo aggiornamento aule --> Se non coincide con quello salvato nell preferenze allora aggiorno i dati su SQLITE (task asincrono successivo)
-    private class aggiornaPreferenzeTempi extends AsyncTask<Void, Void, Integer[]> {
+    private class aggiornaPreferenzeUniversita extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voide) {
             try {
@@ -275,11 +296,13 @@ public class Home extends AppCompatActivity{
                 is.close();
                 result = sb.toString();
                 jArrayLastUpdate = new JSONArray(result);
-                Integer[] tempi= new Integer[2];
+                Integer[] ar_prefs= new Integer[2];
                 JSONObject data = jArrayLastUpdate.getJSONObject(0);
-                tempi[0]=data.getInt("ingresso");
-                tempi[1]=data.getInt("pausa");
-                return tempi;
+                ar_prefs[0]=data.getInt("ingresso");
+                ar_prefs[1]=data.getInt("pausa");
+                ar_prefs[2]=data.getInt("slot");
+                //ar_prefs[3]=data.getInt("inizio_slot");
+                return ar_prefs;
             } catch (Exception e) {
                 return null;
             }
@@ -291,6 +314,8 @@ public class Home extends AppCompatActivity{
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("ingresso", ""+result[0]);
                 editor.putString("pausa", ""+result[1]);
+                editor.putString("slot", ""+result[2]);
+                //editor.putString("inizio_slot", ""+result[3]);
                 editor.commit();
             }
         }
@@ -533,7 +558,7 @@ public class Home extends AppCompatActivity{
                     startActivityForResult(i, 100);
                     finish();
                 }
-                else MyToast.makeText(getApplicationContext(), "USER OK!", true).show();
+//else MyToast.makeText(getApplicationContext(), "USER OK!", true).show();
             }
         }
 
