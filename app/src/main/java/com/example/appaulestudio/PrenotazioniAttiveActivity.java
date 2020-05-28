@@ -218,7 +218,31 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                         return;
                     }
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
+                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                    d.setCancelable(false);
+                    d.setContentView(R.layout.dialog_qr_code);
+                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                    TextView txt_qr= d.findViewById(R.id.et_qr);
+                    Button btn_yes=d.findViewById(R.id.btn_yes_qr);
+                    Button btn_no=d.findViewById(R.id.btn_no_qr);
+                    txt_qr.setText(entrata_uscita+" "+nome_aula);
+                    btn_yes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new doOperazione().execute();
+                            d.dismiss();
+                        }
+                    });
+                    btn_no.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            d.dismiss();
+                        }
+                    });
+                    d.show();
+
+
+                    /*AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
                     builder.setTitle(entrata_uscita+" "+nome_aula);
                     builder.setMessage("Vuoi procedere?");
                     //click listener for alert dialog buttons --> Se sì esegui task asincrono
@@ -239,7 +263,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                     builder.setPositiveButton("Si", dialogClickListener);
                     builder.setNegativeButton("No",dialogClickListener);
                     AlertDialog dialog = builder.create();
-                    dialog.show();
+                    dialog.show();*/
                 } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
             }
         } else super.onActivityResult(requestCode, resultCode, data);

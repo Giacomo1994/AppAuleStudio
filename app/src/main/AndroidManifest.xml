@@ -22,7 +22,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PrenotazioneStudenteAulaGruppoActivity"></activity>
+        <activity android:name=".MapActivity"></activity>
+        <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
         <activity android:name=".PrenotazioneGruppoActivity" />
         <activity android:name=".GroupActivity" />
         <activity android:name=".GestioneGruppiDocenteActivity" />
