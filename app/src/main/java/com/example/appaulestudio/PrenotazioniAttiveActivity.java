@@ -799,7 +799,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             editor.putBoolean("logged", false);
             editor.putString("universita", null);
             editor.putString("nome_universita", null);
-            editor.putString("last_update", null);
             editor.putString("ingresso", null);
             editor.putString("pausa", null);
             editor.putString("slot", null);

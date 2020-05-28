@@ -51,60 +51,36 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class Home extends AppCompatActivity{
     static final String URL_AULE_DINAMICHE="http://pmsc9.altervista.org/progetto/home_info_dinamiche_aule.php";
     static final String URL_ORARI_DEFAULT="http://pmsc9.altervista.org/progetto/home_orari_default.php";
-    static final String URL_AULE_STATICHE="http://pmsc9.altervista.org/progetto/home_info_statiche_aule.php";
     static final String URL_LAST_UPDATE="http://pmsc9.altervista.org/progetto/home_lastUpdate.php";
     static final String URL_TEMPI="http://pmsc9.altervista.org/progetto/home_tempi_universita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login_studente.php";
 
-    FrameLayout fl;
-    LinearLayout frameLista, frameMappa;
+
+    LinearLayout frameLista;
     ArrayAdapter adapter;
     ListView elencoAule;
     TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
     ImageView immagine_home;
-    Button mappa,lista;
+    Button mappa;
     ProgressBar bar;
+    Aula[] array_aule=null;
 
     Intent intent;
     String strUniversita, strMatricola, strPassword, strNome, strToken, strCognome;
     SqliteManager database;
 
     protected void initUI(){
-         fl= findViewById(R.id.fl);
+
          elencoAule= findViewById(R.id.elencoAule);
          frameLista = findViewById(R.id.frameLista);
-         frameMappa = findViewById(R.id.frameMappa);
          mappa= findViewById(R.id.mappa);
-         lista = findViewById(R.id.lista);
          bar=findViewById(R.id.bar);
-         frameLista.setVisibility(fl.VISIBLE);
-         frameMappa.setVisibility(fl.GONE);
-
-        //passo da lista a mappa
-        mappa.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                frameLista.setVisibility(fl.GONE);
-                frameMappa.setVisibility(fl.VISIBLE);
-            }
-
-        });
-        //passo da mappa a lista
-        lista.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                frameMappa.setVisibility(fl.GONE);
-                frameLista.setVisibility(fl.VISIBLE);
-                bar.setVisibility(ProgressBar.VISIBLE);
-                new listaAule().execute();
-            }
-
-        });
 
          //prendo preferenze
          SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -132,8 +108,6 @@ public class Home extends AppCompatActivity{
             }
         //task asincrono
         new listaAule().execute();
-        new check_last_update().execute();
-
 
         //listener listview
             elencoAule.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -150,6 +124,8 @@ public class Home extends AppCompatActivity{
     }
 
 
+
+
 //se non c'è connessione mostra nella listview i dati da SQLITE
     public void mostraOffline(){
         ArrayList<Aula> aule=database.readListaAule();
@@ -157,6 +133,8 @@ public class Home extends AppCompatActivity{
             MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare aule!", false).show();
             return;
         }
+        array_aule = new Aula[aule.size()];
+        array_aule = aule.toArray(array_aule);
 
         adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
             @Override
@@ -334,30 +312,6 @@ public class Home extends AppCompatActivity{
                 JSONArray jArrayAule;
                 JSONArray jArrayOrariDefault;
 
-                url = new URL(URL_AULE_STATICHE);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-                parametri = "codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8"); //imposto parametri da passare
-                dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();
-                urlConnection.connect();
-                is = urlConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                is.close();
-                result = sb.toString();
-                jArrayAule = new JSONArray(result);
-
                 url = new URL(URL_ORARI_DEFAULT);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
@@ -382,14 +336,7 @@ public class Home extends AppCompatActivity{
                 result = sb.toString();
                 jArrayOrariDefault = new JSONArray(result);
 
-                Aula[] array_aula = new Aula[jArrayAule.length()];
-                for (int i = 0; i < jArrayAule.length(); i++) {
-                    JSONObject json_data = jArrayAule.getJSONObject(i);
-                    array_aula[i] = new Aula(json_data.getString("id"), json_data.getString("nome"),
-                            json_data.getString("luogo"), json_data.getDouble("latitudine"),
-                            json_data.getDouble("longitudine"), json_data.getInt("gruppi"),
-                            json_data.getInt("posti_totali"), 0, json_data.getString("servizi"));
-                }
+                Aula[] array_aula=array_aule;
                 for (int i = 0; i < jArrayOrariDefault.length(); i++) {
                     JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
                     String id = json_data.getString("id_aula");
@@ -406,7 +353,8 @@ public class Home extends AppCompatActivity{
             }
         }
         protected void onPostExecute(Aula[] array_aula) {
-            database.writeAuleOrari(array_aula);
+            if(array_aula==null) return;
+            else database.writeAuleOrari(array_aula);
         }
     }
 
@@ -459,10 +407,12 @@ public class Home extends AppCompatActivity{
         @Override
         protected void onPostExecute(Aula[] array_aula) {
             bar.setVisibility(ProgressBar.GONE);
+            array_aule=array_aula;
             if (array_aula == null) {
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
                 mostraOffline();
             } else {
+                new check_last_update().execute();
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
@@ -570,7 +520,6 @@ public class Home extends AppCompatActivity{
                     editor.putString("ingresso", null);
                     editor.putString("pausa", null);
                     editor.putString("slot", null);
-                    editor.putString("last_update", null);
                     editor.putBoolean("studente", true);
                     editor.putBoolean("logged", false);
                     editor.commit();
@@ -614,7 +563,6 @@ public class Home extends AppCompatActivity{
                 editor.putBoolean("logged", false);
                 editor.putString("universita", null);
                 editor.putString("nome_universita", null);
-                editor.putString("last_update", null);
                 editor.putString("ingresso", null);
                 editor.putString("pausa", null);
                 editor.putString("slot", null);

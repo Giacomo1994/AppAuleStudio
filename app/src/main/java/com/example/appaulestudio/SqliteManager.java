@@ -86,10 +86,13 @@ public class SqliteManager {
             return;
         }
         for(Gruppo g:gruppi){
-            String sql="INSERT OR REPLACE INTO gruppi_offline "+
+            String sql="INSERT OR IGNORE INTO gruppi_offline "+
                     "VALUES ('" + g.getCodice_gruppo() + "', '" + g.getNome_gruppo() +"', '" + g.getNome_corso() +"', '"
                     + g.getNome_docente() +"', '" + g.getCognome_docente() +"', " + g.getOre_disponibili() +", '" + g.getData_scadenza() +"')";
+
+            String sql1="UPDATE gruppi_offline set ore_disponibili="+g.getOre_disponibili()+", data_scadenza='"+g.getData_scadenza()+"' where codice_gruppo='"+g.getCodice_gruppo()+"'";
             db.execSQL(sql);
+            db.execSQL(sql1);
         }
     }
 
@@ -222,6 +225,7 @@ public class SqliteManager {
             }
         }
     }
+
 
     public ArrayList<Aula> readListaAule(){
         SQLiteDatabase db = dbHelper.getReadableDatabase();

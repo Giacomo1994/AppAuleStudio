@@ -63,9 +63,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 public class InfoAulaActivity extends AppCompatActivity {
-    static final String URL_ORARI_SETTIMANA_DEFAULT="http://pmsc9.altervista.org/progetto/infoaula_orariDefault.php";
+    //static final String URL_ORARI_SETTIMANA_DEFAULT="http://pmsc9.altervista.org/progetto/infoaula_orariDefault.php";
     static final String URL_ORARI_SETTIMANA_SPECIALI="http://pmsc9.altervista.org/progetto/infoaula_orariSpeciali.php";
-    static final String URL_CHECK_APERTA="http://pmsc9.altervista.org/progetto/infoaula_checkAperta.php";
+    //static final String URL_CHECK_APERTA="http://pmsc9.altervista.org/progetto/infoaula_checkAperta.php";
     static final String URL_CHECK_POSTI="http://pmsc9.altervista.org/progetto/infoaula_checkPosti.php";
     static final String URL_RICHIEDI_NOTIFICA="http://pmsc9.altervista.org/progetto/infoaula_richiedi_notifica.php";
 
@@ -81,6 +81,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     LinkedList<Orario_Ufficiale> orari_giusti;
     ProgressBar bar;
     String strNome, strCognome, strMatricola, strUniversita;
+    boolean connesso=false;
 
     SqliteManager database;
 
@@ -131,7 +132,6 @@ public class InfoAulaActivity extends AppCompatActivity {
         setTitle(strNome+" "+strCognome);
 
         database=new SqliteManager(InfoAulaActivity.this);
-        new check_aperta().execute();
         new mostra_orari().execute();
         getServizi();
 
@@ -168,54 +168,6 @@ public class InfoAulaActivity extends AppCompatActivity {
         });
     }
 
-    private class richiedi_notifica extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                URL url = new URL(URL_RICHIEDI_NOTIFICA);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-
-                String parametri = "aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8")
-                        + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")
-                        + "&universita=" + URLEncoder.encode(strUniversita, "UTF-8");
-                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();
-                //leggo stringa di ritorno da file php
-                urlConnection.connect();
-                InputStream input = urlConnection.getInputStream();
-                byte[] buffer = new byte[1024];
-                int numRead = 0;
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                while ((numRead = input.read(buffer)) != -1) {
-                    baos.write(buffer, 0, numRead);
-                }
-                input.close();
-                String stringaRicevuta = new String(baos.toByteArray());
-                return stringaRicevuta;
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        protected void onPostExecute(String result) {
-            if(result==null || !result.equals("OK")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile procedere con la richiesta!", false).show();
-                finish();
-                return;
-            }
-            MyToast.makeText(getApplicationContext(), "Richiesta avvenuta con successo, ti avviseremo quando si libera un posto!", true).show();
-            Intent i=new Intent(InfoAulaActivity.this,Home.class);
-            startActivity(i);
-            finish();
-        }
-    }
-
 // METODO --> mostra servizi, presi da aula passata con intent
     public  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
@@ -243,8 +195,6 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
             layout.addView(text);
         }
-
-
     }
 
 // ASYNC TASK-->Chiamato quando l'aula è aperta
@@ -300,14 +250,20 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(Integer[] result) {
             bar.setVisibility(View.GONE);
-            if(result==null) return;
+            if(result==null){
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
+                btnNotifica.setVisibility(View.GONE);
+                btnPrenotazionePosto.setVisibility(View.GONE);
+                btnPrenotazioneGruppo.setVisibility(View.GONE);
+                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
+                return;
+            }
             infoAula_posti.setText("Posti Totali: "+result[0]+ " - "+"Posti Liberi: "+result[1]);
             if(aula.getGruppi()==0)btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
             else btnPrenotazioneGruppo.setVisibility(View.GONE);
             if(result[1]==0){
                 btnNotifica.setVisibility(View.VISIBLE);
                 btnPrenotazionePosto.setVisibility(View.GONE);
-
             }
             else{
                 btnPrenotazionePosto.setVisibility(View.VISIBLE);
@@ -331,31 +287,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArrayOrariSpeciali;
-                JSONArray jArrayOrariDefault;
-
-                url = new URL(URL_ORARI_SETTIMANA_DEFAULT);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1500);
-                urlConnection.setConnectTimeout(1000);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
-                dos = new DataOutputStream(urlConnection.getOutputStream());
-                dos.writeBytes(parametri);
-                dos.flush();
-                dos.close();
-                urlConnection.connect();
-                is = urlConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                is.close();
-                result = sb.toString();
-                jArrayOrariDefault = new JSONArray(result);
 
                 url = new URL(URL_ORARI_SETTIMANA_SPECIALI);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -381,11 +312,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                 result = sb.toString();
                 jArrayOrariSpeciali = new JSONArray(result);
 
-                orari_default=new HashMap<Integer, Orario>();
-                for (int i = 0; i < jArrayOrariDefault.length(); i++) {
-                    JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
-                    orari_default.put(json_data.getInt("giorno"),new Orario(json_data.getString("apertura"),json_data.getString("chiusura")));
-                }
 
                 orari_speciali=new LinkedList<Orario_Speciale>();
                 for (int i = 0; i < jArrayOrariSpeciali.length(); i++) {
@@ -402,22 +328,30 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
-            if(result==null) {
-                orari_default=mostra_orari_offline();
-                orari_speciali=null;
-                if(orari_default==null){
-                    MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare gli orari!", false).show();
-                    return;
-                }
+            orari_default=database.readOrariAula(aula.getIdAula());
+            if(orari_default==null){
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare gli orari!", false).show();
+                return;
             }
+            if(result==null){
+                orari_speciali=null;
+                connesso=false;
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
+                bar.setVisibility(View.GONE);
+                btnNotifica.setVisibility(View.GONE);
+                btnPrenotazionePosto.setVisibility(View.GONE);
+                btnPrenotazioneGruppo.setVisibility(View.GONE);
+                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
+            }
+            else connesso=true;
             stampa_orari(orari_default,orari_speciali);
         }
     }
 
 // METODO --> RITORNA GLI ORARI PRESI DA SQLITE
-    public HashMap<Integer,Orario> mostra_orari_offline(){
+    /*public HashMap<Integer,Orario> mostra_orari_offline(){
         return database.readOrariAula(aula.getIdAula());
-    }
+    }*/
 
 //METODO --> STAMPA IN UI TABELLA ORARI
     public void stampa_orari(HashMap<Integer,Orario> orari_default,LinkedList<Orario_Speciale> orari_speciali){
@@ -466,6 +400,17 @@ public class InfoAulaActivity extends AppCompatActivity {
             Collections.sort(orari_ufficiali);
             orari_giusti=orari_ufficiali;
 
+            if(connesso==true && checkAulaAperta()==true){
+                new check_posti().execute();
+            }
+            else if(connesso==true && checkAulaAperta()==false){
+                bar.setVisibility(View.GONE);
+                btnPrenotazionePosto.setVisibility(View.VISIBLE);
+                if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
+                btnNotifica.setVisibility(View.GONE);
+                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
+            }
+
             String inizio=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[0])).substring(0,5);
             String fine=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[6])).substring(0,5);
             infoAula_output.setText("Orari da " + inizio + " a " + fine);
@@ -489,80 +434,72 @@ public class InfoAulaActivity extends AppCompatActivity {
         }catch (Exception e){}
     }
 
-//ASYNC TASK --> controlla se l'aula è attualmente aperta
-//              se è aperta viene chiamato il task asincrono checkposti()
-//              se è chiusa vengono mostrati solo i pulsanti "prenota posto" e "prenota per gruppo" e vengono mostrati solo i posti totali
-//              se non c'è connessione non vengono mostrati i pulsanti e vengono mostrati solo i posti totali
-    private class check_aperta extends AsyncTask<Void, Void, String> {
+    public boolean checkAulaAperta(){
+        Calendar c=Calendar.getInstance();
+        Date d=c.getTime();
+        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
+        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
+        for(Orario_Ufficiale uf:orari_giusti){
+            if(uf.getData().equals(date_now)){
+                if(uf.getApertura()==null || time_now.compareTo(uf.getApertura())<0 || time_now.compareTo(uf.getChiusura())>0) return false;
+                else return true;
+            }
+        }
+        return false;
+    }
+
+    private class richiedi_notifica extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
             try {
-                URL url;
-                HttpURLConnection urlConnection;
-                String parametri;
-                DataOutputStream dos;
-                InputStream is;
-                BufferedReader reader;
-                StringBuilder sb;
-                String line;
-                String result;
-                JSONArray jArray;
-
-                url = new URL(URL_CHECK_APERTA);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(2000);
-                urlConnection.setConnectTimeout(2000);
+                URL url = new URL(URL_RICHIEDI_NOTIFICA);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
-                dos = new DataOutputStream(urlConnection.getOutputStream());
+
+                String parametri = "aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8")
+                        + "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")
+                        + "&universita=" + URLEncoder.encode(strUniversita, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
+                //leggo stringa di ritorno da file php
                 urlConnection.connect();
-                is = urlConnection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
                 }
-                is.close();
-                result = sb.toString();
-                jArray = new JSONArray(result);
-                if(jArray.length()==0) return "Chiusa";
-                else return "Aperta";
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
             } catch (Exception e) {
                 return null;
             }
         }
         protected void onPostExecute(String result) {
-            if(result==null) { //non c'è connessione
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
-                infoAula_posti.setText("Posti Totali: " + aula.getPosti_totali());
-                btnPrenotazionePosto.setVisibility(View.GONE);
-                btnPrenotazioneGruppo.setVisibility(View.GONE);
-                btnNotifica.setVisibility(View.GONE);
-                bar.setVisibility(View.GONE);
+            if(result==null || !result.equals("OK")){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile procedere con la richiesta!", false).show();
+                finish();
+                return;
             }
-            else if(result.equals("Chiusa")){ //è chiusa
-                infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
-                btnPrenotazionePosto.setVisibility(View.VISIBLE);
-                if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
-                btnNotifica.setVisibility(View.GONE);
-                bar.setVisibility(View.GONE);
-            }
-            else if(result.equals("Aperta")){ //è aperta
-                new check_posti().execute();
-            }
+            MyToast.makeText(getApplicationContext(), "Richiesta avvenuta con successo, ti avviseremo quando si libera un posto!", true).show();
+            Intent i=new Intent(InfoAulaActivity.this,Home.class);
+            startActivity(i);
+            finish();
         }
     }
 
 //ON RESTART --> rieseguo i task che richiedono un continuo aggiornamento --> Aula aperta/chiusa e posti disponibili
-    protected void onRestart() {
+    /*protected void onRestart() {
         super.onRestart();
         bar.setVisibility(View.VISIBLE);
         new check_aperta().execute();
-    }
+    }*/
 }
