@@ -20,13 +20,13 @@ public class Tavolo implements Comparable<Tavolo>{
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
     }
-    public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
+    /*public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
         this.id_aula = id_aula;
         this.num_tavolo = numero_tavolo;
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
         this.fasciaOraria=fasciaOraria;
-    }
+    }*/
 
 
     public String getId_aula() {
@@ -78,7 +78,13 @@ public class Tavolo implements Comparable<Tavolo>{
         this.fine_disponibilita = fine_disponibilita;
     }
 
+    public String getFasciaOraria() {
+        return fasciaOraria;
+    }
 
+    public void setFasciaOraria(String fasciaOraria) {
+        this.fasciaOraria = fasciaOraria;
+    }
 
     @Override
     public String toString() {
