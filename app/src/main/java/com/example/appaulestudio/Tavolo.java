@@ -1,5 +1,7 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.Nullable;
+
 import java.time.LocalTime;
 
 public class Tavolo implements Comparable<Tavolo>{
@@ -8,26 +10,23 @@ public class Tavolo implements Comparable<Tavolo>{
     private int posti_totali;
     private int posti_liberi;
     private String fasciaOraria;
-    private String fine_disponibilita;
+
     private String inizio_disponibilita;
+    private String fine_disponibilita;
 
     public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi) {
         this.id_aula = id_aula;
         this.num_tavolo = numero_tavolo;
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
-        fine_disponibilita=null;
-        inizio_disponibilita=null;
     }
-    /*public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
+    public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
         this.id_aula = id_aula;
         this.num_tavolo = numero_tavolo;
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
         this.fasciaOraria=fasciaOraria;
-        fine_disponibilita=null;
-        inizio_disponibilita=null;
-    }*/
+    }
 
 
     public String getId_aula() {
@@ -62,12 +61,13 @@ public class Tavolo implements Comparable<Tavolo>{
         this.posti_liberi = posti_liberi;
     }
 
-    public String getFasciaOraria() {
-        return fasciaOraria;
+
+    public String getInizio_disponibilita() {
+        return inizio_disponibilita;
     }
 
-    public void setFasciaOraria(String fasciaOraria) {
-        this.fasciaOraria = fasciaOraria;
+    public void setInizio_disponibilita(String inizio_disponibilita) {
+        this.inizio_disponibilita = inizio_disponibilita;
     }
 
     public String getFine_disponibilita() {
@@ -78,18 +78,15 @@ public class Tavolo implements Comparable<Tavolo>{
         this.fine_disponibilita = fine_disponibilita;
     }
 
-    public String getInizio_disponibilita() {
-        return inizio_disponibilita;
-    }
 
-    public void setInizio_disponibilita(String inizio_disponibilita) {
-        this.inizio_disponibilita = inizio_disponibilita;
-    }
 
     @Override
     public String toString() {
         return "Tavolo " + num_tavolo;
     }
+
+
+
     @Override
     public int compareTo(Tavolo o) {
         if(!fine_disponibilita.equals(o.getFine_disponibilita())) return fine_disponibilita.compareTo(o.getFine_disponibilita());
