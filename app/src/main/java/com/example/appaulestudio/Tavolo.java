@@ -1,13 +1,18 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.Nullable;
+
 import java.time.LocalTime;
 
-public class Tavolo {
+public class Tavolo implements Comparable<Tavolo>{
     private String id_aula;
     private int num_tavolo;
     private int posti_totali;
     private int posti_liberi;
     private String fasciaOraria;
+
+    private String inizio_disponibilita;
+    private String fine_disponibilita;
 
     public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi) {
         this.id_aula = id_aula;
@@ -56,8 +61,36 @@ public class Tavolo {
         this.posti_liberi = posti_liberi;
     }
 
+
+    public String getInizio_disponibilita() {
+        return inizio_disponibilita;
+    }
+
+    public void setInizio_disponibilita(String inizio_disponibilita) {
+        this.inizio_disponibilita = inizio_disponibilita;
+    }
+
+    public String getFine_disponibilita() {
+        return fine_disponibilita;
+    }
+
+    public void setFine_disponibilita(String fine_disponibilita) {
+        this.fine_disponibilita = fine_disponibilita;
+    }
+
+
+
     @Override
     public String toString() {
         return "Tavolo " + num_tavolo;
+    }
+
+
+
+    @Override
+    public int compareTo(Tavolo o) {
+        if(!fine_disponibilita.equals(o.getFine_disponibilita())) return fine_disponibilita.compareTo(o.getFine_disponibilita());
+        else if(num_tavolo>o.getNum_tavolo()) return 1;
+        else return -1;
     }
 }
