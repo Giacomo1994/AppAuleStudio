@@ -95,6 +95,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     ArrayAdapter<Prenotazione> adapter;
 
     SqliteManager database;
+    Intent intent_ricevuto;
     IntentIntegrator qrScan;
     public Prenotazione p=null;
     public int richiesta=-1;
@@ -114,6 +115,19 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         qrScan = new IntentIntegrator(this);
+        intent_ricevuto=getIntent();
+        if(intent_ricevuto.getAction()!=null && intent_ricevuto.getAction().equals("salva_prenotazione")){
+           int id_prenotazione_intent=intent_ricevuto.getIntExtra("id_prenotazione",-1);
+           String orario_prenotazione_intent=intent_ricevuto.getStringExtra("orario_prenotazione");
+           String nome_aula_intent=intent_ricevuto.getStringExtra("nome_aula");
+           int tavolo_intent=intent_ricevuto.getIntExtra("tavolo",-1);
+           String gruppo_intent=intent_ricevuto.getStringExtra("gruppo");
+           String orario_alarm_intent=intent_ricevuto.getStringExtra("orario_alarm");
+           database.insertPrenotazione(id_prenotazione_intent,orario_prenotazione_intent, nome_aula_intent, tavolo_intent, gruppo_intent);
+           database.insertAlarm(id_prenotazione_intent,orario_alarm_intent);
+           MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
+        }
+
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);

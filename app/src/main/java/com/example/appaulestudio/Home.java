@@ -146,6 +146,7 @@ public class Home extends AppCompatActivity{
                 startActivity(intent_to_map);
             }
         });
+
     }
 
 

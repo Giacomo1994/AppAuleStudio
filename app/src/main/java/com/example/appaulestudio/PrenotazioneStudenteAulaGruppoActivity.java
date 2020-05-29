@@ -428,10 +428,18 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             else{
                 int id_prenotazione=Integer.parseInt(result);
                 String orario_alarm=create_alarm(id_prenotazione);
-                database.insertPrenotazione(id_prenotazione,data+" "+inizio, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
-                database.insertAlarm(id_prenotazione,orario_alarm);
+                //database.insertPrenotazione(id_prenotazione,data+" "+inizio, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
+                //database.insertAlarm(id_prenotazione,orario_alarm);
+                //MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
                 Intent i=new Intent(PrenotazioneStudenteAulaGruppoActivity.this,PrenotazioniAttiveActivity.class);
-                MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
+                i.setAction("salva_prenotazione");
+                i.putExtra("id_prenotazione", id_prenotazione);
+                i.putExtra("orario_prenotazione", data+" "+inizio);
+                i.putExtra("nome_aula", aula.getNome());
+                i.putExtra("tavolo", tavolo.getNum_tavolo());
+                i.putExtra("gruppo", "null");
+                i.putExtra("orario_alarm", orario_alarm);
+                startActivity(i);
                 startActivity(i);
                 finish();
             }
