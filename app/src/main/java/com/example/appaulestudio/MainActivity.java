@@ -34,27 +34,12 @@ public class MainActivity extends AppCompatActivity {
     RadioButton radioStudente,radioDocente;
 
     Universita universita=null;
-    String matricola, password, token;
+    String matricola, password, token=null;
     boolean isStudente;
     boolean studentePassato;
+    boolean is_logged=false, is_studente=false;
 
     private void initUI(){
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        boolean logged=settings.getBoolean("logged", false);
-        boolean is_studente = settings.getBoolean("studente", false);
-        if(logged==true&&is_studente==true){
-            Intent i=new Intent(MainActivity.this, Home.class);
-            i.putExtra("start_from_login",false);
-            startActivityForResult(i,-1);
-            return;
-        }
-        if(logged==true&&is_studente==false){
-            Intent i=new Intent(MainActivity.this, HomeDocente.class);
-            i.putExtra("from_login",false);
-            startActivityForResult(i,23);
-            return;
-        }
-
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);
         spinner=findViewById(R.id.log_spinner);
         txtMatricola=findViewById(R.id.log_matricola);
@@ -99,9 +84,6 @@ public class MainActivity extends AppCompatActivity {
         txt_toRegistrazione.setText(ss);
         txt_toRegistrazione.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //riempi universita
-        new riempiUniversita().execute();
-
         //funzione bottone
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
+
         //ottengo token da Firebase
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
             @Override
@@ -138,23 +121,44 @@ public class MainActivity extends AppCompatActivity {
                 token = instanceIdResult.getToken(); //salvo token in variabile globale
             }
         });
+
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        is_logged=settings.getBoolean("logged", false);
+        is_studente = settings.getBoolean("studente", false);
+        if(is_logged==true&&is_studente==true){
+            Intent i=new Intent(MainActivity.this, Home.class);
+            i.putExtra("start_from_login",false);
+            startActivityForResult(i,-1);
+            return;
+        }
+        if(is_logged==true&&is_studente==false){
+            Intent i=new Intent(MainActivity.this, HomeDocente.class);
+            i.putExtra("from_login",false);
+            startActivityForResult(i,23);
+            return;
+        }
+
+        new riempiUniversita().execute();
+
     }
+
 
     protected void onResume() {
         super.onResume();
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        boolean logged=settings.getBoolean("logged", false);
 
-        if(logged==true) finish();
-        else{
-            new riempiUniversita().execute();
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
-                @Override
-                public void onSuccess(InstanceIdResult instanceIdResult) {
-                    token = instanceIdResult.getToken(); //salvo token in variabile globale
-                }
-            });
-        }
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                token = instanceIdResult.getToken(); //salvo token in variabile globale
+            }
+        });
+
+        new riempiUniversita().execute();
+
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        is_logged=settings.getBoolean("logged", false);
+
+        if(is_logged==true) finish();
     }
 
 //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
