@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/forma_dialog"
     android:orientation="vertical"
     android:padding="10dp">
 
@@ -11,17 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
-        android:background="@color/grigio_chiaro"
         android:gravity="center_horizontal"
         android:text="PDF"
-        android:textSize="24sp" />
+        android:textColor="@color/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/txtDialogPdf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
         android:text="Vuoi scaricare un Pdf con i codici appena creati?"
         android:textSize="18sp" />

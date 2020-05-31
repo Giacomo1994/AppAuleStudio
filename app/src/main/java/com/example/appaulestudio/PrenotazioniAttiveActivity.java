@@ -186,7 +186,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         registerForContextMenu(list_in_corso);
     }
 
-
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -430,7 +429,21 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
                 ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni();
                 if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
-                    MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
+                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                    d.setCancelable(false);
+                    d.setContentView(R.layout.dialog_warning);
+                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                    Button btn=d.findViewById(R.id.btn_dialog_warning);
+                    btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent i = new Intent(PrenotazioniAttiveActivity.this, Home.class);
+                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(i);
+                            d.dismiss();
+                        }
+                    });
+                    d.show();
                     return;
                 }
                 Collections.sort(prenotazioni_offline, Collections.<Prenotazione>reverseOrder());
@@ -484,8 +497,21 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             Collections.sort(lista_prenotazioni);
 
             if(lista_prenotazioni.size()==0){
-                MyToast.makeText(getApplicationContext(),"Non ci sono prenotazioni!", false).show();
-                database.insertPrenotazioniGruppi(lista_prenotazioni);
+                final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                d.setCancelable(false);
+                d.setContentView(R.layout.dialog_warning);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                Button btn=d.findViewById(R.id.btn_dialog_warning);
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(PrenotazioniAttiveActivity.this, Home.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(i);
+                        d.dismiss();
+                    }
+                });
+                d.show();
                 return;
             }
             adapter = new ArrayAdapter<Prenotazione>(PrenotazioniAttiveActivity.this, R.layout.row_layout_prenotazioni_attive_activity, lista_prenotazioni) {
@@ -860,7 +886,5 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         return true;
     }
-
-
 
 }

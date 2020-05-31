@@ -25,6 +25,7 @@
         android:layout_marginTop="1dp"
         android:layout_marginRight="20dp"
         android:text="@string/Conferma_iscrizione"
+        android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -114,6 +115,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:width="100dp"
+            android:background="@drawable/button_layout"
             android:text="Conferma" />
 
         <Button
@@ -121,6 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:width="100dp"
+            android:background="@drawable/button_layout"
             android:text="Annulla" />
     </LinearLayout>
 

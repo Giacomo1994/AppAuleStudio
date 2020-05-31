@@ -169,14 +169,11 @@ public class SqliteManager {
         for(Prenotazione pren:prenotazioni){
             if(!pren.getGruppo().equals("null")) pren_gruppi.add(pren);
         }
-        String sql0="DELETE FROM prenotazioni_offline where gruppo!='null' ";
         for(Prenotazione p: pren_gruppi){
             String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, orario_prenotazione, nome_aula, tavolo, gruppo) "+
                     "VALUES (" +p.getId_prenotazione() + ", '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
             db.execSQL(sql);
-            sql0+="AND gruppo!='" + p.getGruppo() + "' ";
         }
-        db.execSQL(sql0);
 
     }
 

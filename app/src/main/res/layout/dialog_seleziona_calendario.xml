@@ -12,7 +12,9 @@
         android:layout_marginBottom="5dp"
         android:gravity="center_horizontal"
         android:text="Seleziona Account"
-        android:textSize="24sp" />
+        android:textColor="@color/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <ListView
         android:id="@+id/lv_account"
