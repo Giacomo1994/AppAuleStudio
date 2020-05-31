@@ -102,25 +102,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     String studente;
     Date date=null;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gestione_gruppi_dicente_frame_layout);
-        intent=getIntent();
-        bundle=intent.getBundleExtra("bundle");
-        corso=bundle.getParcelable("corso");
-
-        initUI();
-
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        new prendiGruppi().execute();
-    }
-
     private void initUI(){
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
@@ -132,9 +113,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         titoloAttivi=findViewById(R.id.txtTitoloAttivi);
         titoloInScad=findViewById(R.id.txtTitoloInScad);
         titoloScaduti=findViewById(R.id.txtTitoloScaduti);
-        titoloAttivi.setText("Corso: "+corso.getNomeCorso());
-        titoloInScad.setText("Corso: "+corso.getNomeCorso());
-        titoloScaduti.setText("Corso: "+corso.getNomeCorso());
+        titoloAttivi.setText(corso.getNomeCorso());
+        titoloInScad.setText(corso.getNomeCorso());
+        titoloScaduti.setText(corso.getNomeCorso());
         setTitle(nomeDocente+" "+cognomeDocente);
         output=findViewById(R.id.output);
         //listaGruppi=findViewById(R.id.listaGruppi);
@@ -162,7 +143,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
         //passo da lista a mappa
         btnInScadenza.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
                 btnInScadenza.setBackgroundResource(R.color.grigio_chiaro);
                 btnAttivi.setBackgroundResource(R.color.background_liste);
@@ -177,7 +157,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
         });
         btnAttivi.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
                 btnAttivi.setBackgroundResource(R.color.grigio_chiaro);
                 btnInScadenza.setBackgroundResource(R.color.background_liste);
@@ -206,30 +185,31 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             }
 
         });
+    }
 
-        //mostraGruppi();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_gestione_gruppi_dicente_frame_layout);
+        intent=getIntent();
+        bundle=intent.getBundleExtra("bundle");
+        corso=bundle.getParcelable("corso");
 
+        initUI();
 
     }
 
-    /*public boolean contiene(Gruppo[] gruppi, String s){
-        for(Gruppo g: gruppi){
-            if(g.getNome_gruppo().contains(s)){
-                return true;
-            }
-        }
-        return false;
-    }*/
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new prendiGruppi().execute();
+    }
+
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
-        Date date2= new Date();
-        Date dateToday=new Date();
         Calendar c= Calendar.getInstance();
         Calendar c2=Calendar.getInstance();
-        //c2.setTime(date);
         c2.add(Calendar.DAY_OF_MONTH, 14);
-        //c2.setTime(date2);
-        //c.setTime(dateToday);
         int an,me,gi;
         int an2,me2,gi2;
 
@@ -240,81 +220,40 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         an2= c2.get(Calendar.YEAR);
         me2= c2.get(Calendar.MONTH)+1;
         gi2= c2.get(Calendar.DAY_OF_MONTH);
-        int annoTra2settimane, mesetra2settimane,giornoTra2settimane;
 
 
-        if(me<=9){
-            mes="0"+me;
-        }
-        else {
-            mes = me + "";
-        }
-        if(gi<=9){
-            gio="0"+gi;
-        }
-        else {
-            gio = gi + "";
-        }
+        if(me<=9) mes="0"+me;
+        else mes = me + "";
+        if(gi<=9)gio="0"+gi;
+        else  gio = gi + "";
         String dataOggi=an+"-"+mes+"-"+gio;
 
-        if(me2<=9){
-            mes2="0"+me2;
-        }
-        else {
-            mes2 = me2 + "";
-        }
-
-        if(gi2<=9){
-            gio2="0"+gi2;
-        }
-        else {
-            gio2 = gi2 + "";
-        }
-        //SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
-
+        if(me2<=9)mes2="0"+me2;
+        else mes2 = me2 + "";
+        if(gi2<=9) gio2="0"+gi2;
+        else gio2 = gi2 + "";
         String dataFra2sett=an2+"-"+mes2+"-"+gio2;
-        //output.append("fra2"+dataFra2sett);
+
         for(Gruppo g:gruppi) {
+            if (g.getData_scadenza().compareTo(dataOggi) < 0) scaduti++;
+            else if (g.getData_scadenza().compareTo(dataOggi) == 0 || (g.getData_scadenza().compareTo(dataOggi) > 0 && g.getData_scadenza().compareTo(dataFra2sett) <= 0)) inScadenza++;
+            else attivi++;
+        }
+        if(attivi!=0) gruppiAttivi = new Gruppo[attivi];
+        if(scaduti!=0) gruppiScaduti = new Gruppo[scaduti];
+        if(inScadenza!=0) gruppiInScadenza = new Gruppo[inScadenza];
 
-            if (g.getData_scadenza().compareTo(dataOggi) < 0) {
-                //è scaduto
-                scaduti++;
-                //rowGruppiDocente.setBackgroundColor(R.drawable.forma_lista_gruppi_docente);
-            } else if (g.getData_scadenza().compareTo(dataOggi) == 0
-                    || (g.getData_scadenza().compareTo(dataOggi) > 0 &&
-                    g.getData_scadenza().compareTo(dataFra2sett) <= 0)) {
-                //scade oggi
-                inScadenza++;
-            } else {
-                //è valido
-                attivi++;
-
-            }
-        }
-        if(attivi!=0) {
-            gruppiAttivi = new Gruppo[attivi];
-        }
-        if(scaduti!=0) {
-            gruppiScaduti = new Gruppo[scaduti];
-        }
-        if(inScadenza!=0) {
-            gruppiInScadenza = new Gruppo[inScadenza];
-        }
         int scadutiAggiunti=0, attiviAggiunti=0, inScadenzaAggiunti=0;
         for(Gruppo g:gruppi) {
             if (g.getData_scadenza().compareTo(dataOggi) < 0) {
-                //è scaduto
-                gruppiScaduti[scadutiAggiunti]=g; scadutiAggiunti++;
-                //rowGruppiDocente.setBackgroundColor(R.drawable.forma_lista_gruppi_docente);
-            } else if (g.getData_scadenza().compareTo(dataOggi) == 0
-                    || (g.getData_scadenza().compareTo(dataOggi) > 0 &&
-                    g.getData_scadenza().compareTo(dataFra2sett) <= 0)) {
-                //scade oggi
+                gruppiScaduti[scadutiAggiunti]=g;
+                scadutiAggiunti++;
+            }
+            else if (g.getData_scadenza().compareTo(dataOggi) == 0 || (g.getData_scadenza().compareTo(dataOggi) > 0 && g.getData_scadenza().compareTo(dataFra2sett) <= 0)) {
                 gruppiInScadenza[inScadenzaAggiunti]=g; inScadenzaAggiunti++;
-            } else {
-                //è valido
+            }
+            else {
                 gruppiAttivi[attiviAggiunti]=g; attiviAggiunti++;
-
             }
         }
         mostraGruppi();
@@ -342,7 +281,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
                     //rowGruppiDocente.setBackgroundResource(R.drawable.forma_lista_gruppi_docente);
-                    rowGruppiDocente.setBackgroundResource(R.color.bianco);
                     return convertView;
                 }
             };
@@ -368,9 +306,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
-
-                    //rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scadenza);
-                    rowGruppiDocente.setBackgroundResource(R.color.giallo);
                     return convertView;
                 }
             };
@@ -396,9 +331,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
                     oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
-
-                    //rowGruppiDocente.setBackgroundResource(R.drawable.lista_gruppi_scaduti);
-                    rowGruppiDocente.setBackgroundResource(R.color.rosso);
                     return convertView;
                 }
             };
@@ -409,8 +341,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 gruppoSelezionato=gruppiAttivi[i];
-                //output.setText(gruppoSelezionato.getNome_gruppo());
-                //creaDialogGruppo();
                 new prendiUtenti().execute();
 
             }
@@ -419,8 +349,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 gruppoSelezionato=gruppiInScadenza[i];
-                //output.setText(gruppoSelezionato.getNome_gruppo());
-                //creaDialogGruppo();
                 new prendiUtenti().execute();
 
             }
@@ -429,8 +357,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 gruppoSelezionato=gruppiScaduti[i];
-                //output.setText(gruppoSelezionato.getNome_gruppo());
-                //creaDialogGruppo();
                 new prendiUtenti().execute();
 
             }
@@ -438,59 +364,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
     }
 
-    //MENU CONTESTUALE
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Gruppo g;
-        if(booleanAttivi==true) {
-            g = (Gruppo) listaAttivi.getItemAtPosition(info.position);
-        }
-        else if(booleanInScadenza==true){
-            g = (Gruppo) listaInScadenza.getItemAtPosition(info.position);
-        }
-        else{
-            g=(Gruppo) listaScaduti.getItemAtPosition(info.position);
-        }
-        gruppoSelezionato=g;
-        //if(a.getPosti_liberi()<0) return; //se  non c'è connessione non posso fare nulla
-
-        menu.add(Menu.FIRST, 1, Menu.FIRST,"Elimina gruppo");
-
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        if(item.getItemId()==1){
-            /*Aula a= (Aula) elencoAule.getItemAtPosition(info.position);
-            Intent intent=new Intent(Home.this,InfoAulaActivity.class);
-            Bundle bundle=new Bundle();
-            bundle.putParcelable("aula",a);
-            bundle.putParcelable("orario",a.getOrario());
-            intent.putExtra("bundle", bundle);
-            startActivityForResult(intent, 3);*/
-            //devo cancellare il gruppo
-            //output.setText("hai cliccato elimina"+gruppoSelezionato.getCodice_gruppo());
-            new eliminaGruppoIntero().execute();
-            onResume();
-
-        }
-        return true;
-    }
-
-
-
-
-
-
-
-
     public void creaDialogGruppo(){
         gestisciGruppoDialog = new Dialog(GestioneGruppiDocenteActivity.this);
         gestisciGruppoDialog.setTitle("Gestione Gruppo");
         gestisciGruppoDialog.setCancelable(true);
         gestisciGruppoDialog.setContentView(R.layout.dialog_gestione_gruppo);
+        gestisciGruppoDialog.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         nomeGruppoDialog=gestisciGruppoDialog.findViewById(R.id.nomeGruppo);
         listastudenti=gestisciGruppoDialog.findViewById(R.id.listaStudenti);
         oreDaAggiungere=gestisciGruppoDialog.findViewById(R.id.oreDaAggiungere);
@@ -543,33 +422,14 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
                             //se lo toglie
                             if (b == false) {
-                                //tolgo lo studente
-
                                 array_dinamico = rimuoviUser(array_copia, studente);
-                                //output.append(array_dinamico.length + "SELEZIONATI");
-                                //output.append(+array_dinamico.length + "/" + componenti.length + "\n");
                                 if (array_dinamico.length == 0) {
-
                                     Toast.makeText(getApplicationContext(), "Non ci sono piu componenti nel gruppo",
                                             Toast.LENGTH_LONG).show();
                                 }
-                            /*else {
-                                //output.setText("");
-                                for (User s : array_dinamico) {
-                                    output.append(s.getMatricola());
-                                }
-                            }*/
-
-
                             }
-                            //se lo inserisce
-                            else {
-                                array_dinamico = aggiungiUser(array_copia, studente);
-                                //output.setText("");
-                                //output.append("\ninserisco " + array_dinamico.length + "SELE\n");
-                                //output.append(+array_dinamico.length + "/" + componenti.length);
+                            else array_dinamico = aggiungiUser(array_copia, studente);
 
-                            }
                             User[] prova = null;
                             prova = creaArrayEliminati(componenti, array_dinamico);
                             if (prova != null) {
@@ -578,12 +438,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                                 }
                             }
                         }
-
                     });
                     return convertView;
-
                 }
-
             };
             listastudenti.setAdapter(adapterComponenti);
         }
@@ -624,14 +481,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 }
                 oreUpdateNumerico=gruppoSelezionato.getOre_disponibili()+numeroTroncato;
                 oreUpdate=""+oreUpdateNumerico;
-                //prendi nuova data scadenza
 
-                //SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
                 dataUpdate=nuovaScadenza.getText().toString().trim();
 
-                //output.setText("");
-                //output.append(gruppoSelezionato.getCodice_gruppo()+" "+oreUpdate+" "+dataUpdate);
-                //aggiorna db
                 if(!dataUpdate.equals(gruppoSelezionato.getData_scadenza()) || !n.equals("")) {
                     new aggiornaGruppi().execute();
                 }
@@ -651,6 +503,39 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 gestisciGruppoDialog.cancel();
             }
         });
+    }
+
+    public void scegliData(){
+        DatePickerDialog StartTime;
+        try {
+            Date newDate= new SimpleDateFormat("yyyy-MM-dd").parse(gruppoSelezionato.getData_scadenza());
+            final Calendar newCalendar = Calendar.getInstance();
+            newCalendar.setTime(newDate);
+            StartTime = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker datePicker, int i, int m, int d) {
+                    Calendar newDate = Calendar.getInstance();
+                    newDate.set(i, m, d);
+
+                    anno=newDate.get(Calendar.YEAR);
+                    mese=newDate.get(Calendar.MONTH)+1;
+                    giorno=newDate.get(Calendar.DAY_OF_MONTH);
+
+                    String meseStringa=""+mese;
+                    String giornoStringa=""+giorno;
+                    if(mese<=9){
+                        meseStringa="0"+mese;
+                    }
+                    if(giorno<=9){
+                        giornoStringa="0"+giorno;
+                    }
+                    nuovaScadenza.setText(anno+"-"+meseStringa+"-"+giornoStringa);
+                }
+            },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+            StartTime.show();
+
+        } catch (ParseException e) { }
 
     }
 
@@ -679,48 +564,74 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void scegliData(){
-        DatePickerDialog StartTime;
-        final Calendar newCalendar = Calendar.getInstance();
-        StartTime = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int i, int m, int d) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(i, m, d);
-                //output.setText(newDate.toString());
-                anno=newDate.get(Calendar.YEAR);
-                mese=newDate.get(Calendar.MONTH)+1;
-                giorno=newDate.get(Calendar.DAY_OF_MONTH);
-                //SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
-                //String s=anno+"-"+mese +"-"+giorno;
-//                try {
-//                    date = formatter.parse(s);
-//                }
-//                catch(Exception e){
-//
-//                }
-                String meseStringa=""+mese;
-                String giornoStringa=""+giorno;
-                if(mese<=9){
-                    meseStringa="0"+mese;
+    public User[] rimuoviUser(User[] array_passato, String matricola){
+        String matricolaUtente="";
+        //dovrebbe essere sempre uno perchè la matricola è univoca
+        int elementiDaRimuovere=0;
+        for(int i=0; i<array_passato.length; i++){
+            matricolaUtente=array_passato[i].getMatricola();
+            if(matricola.equals(matricolaUtente)){
+                elementiDaRimuovere++;
+            }
+        }
+        if(elementiDaRimuovere==0){
+            return array_passato;
+        }
+        else{
+            int elementiRimasti=array_passato.length-elementiDaRimuovere;
+            User[] array_presenti= new User[elementiRimasti];
+            int i=0;
+            int j=0;
+            for (i = 0; i < array_passato.length; i++) {
+                matricolaUtente = array_passato[i].getMatricola();
+                if (matricola.equals(matricolaUtente)) {
+                    j--;
+                } else {
+                    array_presenti[j] = array_passato[i];
                 }
-                if(giorno<=9){
-                    giornoStringa="0"+giorno;
-                }
-                nuovaScadenza.setText(anno+"-"+meseStringa+"-"+giornoStringa);
+                j++;
             }
 
-            /*public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(year, monthOfYear, dayOfMonth);
-            }*/
-        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
-        StartTime.show();
+            return array_presenti;
+        }
+
     }
 
+    public User[] aggiungiUser(User[] array_passato, String matricola){
+        String matricolaAggiungere=matricola;
+        //controllo che non ci sia(dovrebbe essere impossibile)
+        for(int i=0; i<array_passato.length;i++){
+            String matricolaUtente=array_passato[i].getMatricola();
+            if(matricolaAggiungere.equals(matricolaUtente)){
+                return array_passato;
 
+            }
+        }
+        User[] array_presenti= new User[array_passato.length+1];
+        for(int i=0; i<array_passato.length;i++){
+            array_presenti[i]=array_passato[i];
+        }
+        for(User s:componenti){
+            if(s.getMatricola()==matricolaAggiungere){
+                array_presenti[array_presenti.length-1]=s;
+                return array_presenti;
+            }
+        }
 
+        return null;
+
+    }
+
+    public boolean contiene(User[] array_partecipanti, User s){
+        //boolean contiene=false;
+        String matricola=s.getMatricola();
+        for(int i=0; i<array_partecipanti.length;i++){
+            if(matricola.equals(array_partecipanti[i].getMatricola())){
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 
@@ -758,14 +669,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 }
                 is.close();
                 String result = sb.toString();
-
-
-
                 JSONArray jArrayCorsi = new JSONArray(result);
-
                 Gruppo[] array_gruppi = new Gruppo[jArrayCorsi.length()];
-
-                int n=array_gruppi.length;
                 for (int i = 0; i < jArrayCorsi.length(); i++) {
                     JSONObject json_data = jArrayCorsi.getJSONObject(i);
                     array_gruppi[i] = new Gruppo(json_data.getString("codice_gruppo"),
@@ -776,10 +681,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                             json_data.getDouble("ore_disponibili"),
                             json_data.getString("data_scadenza"));
                 }
-
                 return array_gruppi;
-
-
             } catch (Exception e) {
                 return null;
             }
@@ -787,10 +689,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Gruppo[] array_gruppi) {
-
+            if (array_gruppi==null) {
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false).show();
+                return;
+            }
             if (array_gruppi.length==0) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Nessun gruppo disponibile</b></font>"), Toast.LENGTH_LONG).show();
-                //output.setText("");
+                MyToast.makeText(getApplicationContext(), "Non ci sono gruppi disponibili", false).show();
                 return;
             }
             gruppi=array_gruppi;
@@ -800,33 +704,25 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         }
     }
 
-
-
-
     private class prendiUtenti extends AsyncTask<Void, Void, User[]> {
 
         @Override
         protected User[] doInBackground(Void... voids) {
             try {
                 URL url = new URL(URL_COMPONENTI_DA_GRUPPO);
-                //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
-
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-
                 String parametri = "codice_gruppo="+URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8");
-
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri); //passo i parametri
                 dos.flush();
                 dos.close();
                 urlConnection.connect();
                 InputStream is = urlConnection.getInputStream();
-
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line = null;
@@ -835,14 +731,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 }
                 is.close();
                 String result = sb.toString();
-
-
-
                 JSONArray jArrayCorsi = new JSONArray(result);
-
                 User[] array_componenti = new User[jArrayCorsi.length()];
-
-
                 for (int i = 0; i < jArrayCorsi.length(); i++) {
                     JSONObject json_data = jArrayCorsi.getJSONObject(i);
                     array_componenti[i] = new User(json_data.getString("matricola"),
@@ -853,116 +743,31 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                             json_data.getString("password"),
                             true);
                 }
-
                 return array_componenti;
-
-
             } catch (Exception e) {
                 return null;
             }
         }
-
         @Override
         protected void onPostExecute(User[] array_componenti) {
             super.onPostExecute(array_componenti);
             if (array_componenti == null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Gruppo senza iscritti</b></font>"), Toast.LENGTH_LONG).show();
                 componenti=array_componenti;
                 creaDialogGruppo();
                 return;
             }
             componenti=array_componenti;
             array_dinamico=componenti;
-            if(componenti!=null) {
-                //output.setText(componenti[0].getNome());
-                creaDialogGruppo();
-            }
-            //iniazializzo l'arrau degli effettivi partecipanti
-
+            if(componenti!=null) creaDialogGruppo();
         }
     }
-
-
-
-
-    public User[] rimuoviUser(User[] array_passato, String matricola){
-        String matricolaUtente="";
-        //dovrebbe essere sempre uno perchè la matricola è univoca
-        int elementiDaRimuovere=0;
-        for(int i=0; i<array_passato.length; i++){
-            matricolaUtente=array_passato[i].getMatricola();
-            if(matricola.equals(matricolaUtente)){
-                elementiDaRimuovere++;
-            }
-        }
-        if(elementiDaRimuovere==0){
-            return array_passato;
-        }
-        else{
-            int elementiRimasti=array_passato.length-elementiDaRimuovere;
-            User[] array_presenti= new User[elementiRimasti];
-            int i=0;
-            int j=0;
-            for (i = 0; i < array_passato.length; i++) {
-                matricolaUtente = array_passato[i].getMatricola();
-                if (matricola.equals(matricolaUtente)) {
-                    j--;
-                } else {
-                    array_presenti[j] = array_passato[i];
-                }
-                j++;
-            }
-
-            return array_presenti;
-        }
-
-    }
-    public User[] aggiungiUser(User[] array_passato, String matricola){
-        String matricolaAggiungere=matricola;
-        //controllo che non ci sia(dovrebbe essere impossibile)
-        for(int i=0; i<array_passato.length;i++){
-            String matricolaUtente=array_passato[i].getMatricola();
-            if(matricolaAggiungere.equals(matricolaUtente)){
-                return array_passato;
-
-            }
-        }
-        User[] array_presenti= new User[array_passato.length+1];
-        for(int i=0; i<array_passato.length;i++){
-            array_presenti[i]=array_passato[i];
-        }
-        for(User s:componenti){
-            if(s.getMatricola()==matricolaAggiungere){
-                array_presenti[array_presenti.length-1]=s;
-                return array_presenti;
-            }
-        }
-
-        return null;
-
-    }
-    //serve per far checkare le caselle selezionate quando riapro lo scegli gruppo
-    public boolean contiene(User[] array_partecipanti, User s){
-        //boolean contiene=false;
-        String matricola=s.getMatricola();
-        for(int i=0; i<array_partecipanti.length;i++){
-            if(matricola.equals(array_partecipanti[i].getMatricola())){
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     private class aggiornaGruppi extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... strings) {
             try {
                 URL url;
-                //vincoli sul radiobutton per chiamare registrazione studente vs docente
-
                 url = new URL(URL_AGGIORNA_GRUPPO);
-
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
@@ -976,7 +781,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
-                //leggo stringa di ritorno da file php
                 urlConnection.connect();
                 InputStream input = urlConnection.getInputStream();
                 byte[] buffer = new byte[1024];
@@ -998,17 +802,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             if(result.equals("Gruppo aggiornato")==false){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("Errore nel caricamento"),Toast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(),"Errore nel caricamento",false).show();
                 return;
             }
-            else{
-                Toast.makeText(getApplicationContext(), Html.fromHtml("Data e ore aggiornate con successo"),Toast.LENGTH_LONG).show();
-
-            }
+            else MyToast.makeText(getApplicationContext(), result,true).show();
         }
     }
-
-
 
     private class eliminaComponenti extends AsyncTask<Void, Void, String> {
 
@@ -1016,7 +815,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             try {
                 URL url = new URL(URL_ELIMINA_COMPONENTI);
-
                 for (int c=0; c<array_eliminati.length; c++) {
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(3000);
@@ -1026,7 +824,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     urlConnection.setDoInput(true);
                     String parametri = "codice_gruppo=" +URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8")+
                             "&matricola_studente="+URLEncoder.encode(array_eliminati[c].getMatricola(), "UTF-8");
-
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri); //passo i parametri
                     dos.flush();
@@ -1041,25 +838,20 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     }
                     input.close();
                     String result = new String(baos.toByteArray());
-
                 }
                 return null;
 
             } catch (Exception e) {
-                Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                MyToast.makeText(getApplicationContext(),e.getMessage(),false).show();
                 return null;
             }
         }
 
         @Override
         protected void onPostExecute(String s) {
-            //super.onPostExecute(s);
-            Toast.makeText(getApplicationContext(),"Componenti aggiornati",Toast.LENGTH_SHORT).show();
-
+            MyToast.makeText(getApplicationContext(),"Componenti aggiornati",false).show();
         }
     }
-
-
 
     private class eliminaGruppoIntero extends AsyncTask<Void, Void, String> {
 
@@ -1067,8 +859,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             try {
                 URL url = new URL(URL_ELIMINA_GRUPPO);
-
-
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
@@ -1076,7 +866,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 String parametri = "codice_gruppo=" +URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8");
-
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri); //passo i parametri
                 dos.flush();
@@ -1091,10 +880,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 }
                 input.close();
                 String result = new String(baos.toByteArray());
-
-
                 return result;
-
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
                 return null;
@@ -1103,17 +889,43 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            //super.onPostExecute(s);
-            if(!s.equals("Gruppo eliminato")){
-                Toast.makeText(getApplicationContext(),"Qualcosa è andato storto",Toast.LENGTH_SHORT).show();
-
-            }
-            Toast.makeText(getApplicationContext(),"Gruppo eliminato definitvamente",Toast.LENGTH_SHORT).show();
+            if(!s.equals("Gruppo eliminato")) MyToast.makeText(getApplicationContext(),"Qualcosa è andato storto",false).show();
+            else MyToast.makeText(getApplicationContext(),"Gruppo eliminato definitvamente",false).show();
 
         }
     }
 
 
+    //MENU CONTESTUALE
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        Gruppo g;
+        if(booleanAttivi==true) {
+            g = (Gruppo) listaAttivi.getItemAtPosition(info.position);
+        }
+        else if(booleanInScadenza==true){
+            g = (Gruppo) listaInScadenza.getItemAtPosition(info.position);
+        }
+        else{
+            g=(Gruppo) listaScaduti.getItemAtPosition(info.position);
+        }
+        gruppoSelezionato=g;
+        //if(a.getPosti_liberi()<0) return; //se  non c'è connessione non posso fare nulla
 
+        menu.add(Menu.FIRST, 1, Menu.FIRST,"Elimina gruppo");
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if(item.getItemId()==1){
+            new eliminaGruppoIntero().execute();
+            onResume();
+
+        }
+        return true;
+    }
 
 }

@@ -49,7 +49,6 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_tavoli.php";
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_prenotazioni.php";
     static final String URL_PRENOTA="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_gruppi_prenota.php";
-    String FIRST_SLOT="08:30:00";
 
     SubsamplingScaleImageView imgView;
     Spinner spinner;
@@ -71,7 +70,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     String data=null, giorno=null, apertura=null, chiusura=null;
     String inizio=null, fine=null;
-    String strMatricola, strNome, strCognome, strUniversita;
+    String strMatricola, strNome, strCognome, strUniversita, FIRST_SLOT;
     int ingresso, pausa, slot_min;
     boolean aperta=false;
     Tavolo tavolo;
@@ -113,6 +112,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         ingresso=Integer.parseInt(settings.getString("ingresso", null));
         pausa=Integer.parseInt(settings.getString("pausa", null));
         slot_min=Integer.parseInt(settings.getString("slot", null));
+        FIRST_SLOT=settings.getString("first_slot", null);
         setTitle(strNome+" "+strCognome);
 
         initDateTime(); //ok

@@ -17,12 +17,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Aula:" />
+            android:text="Aula:"
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/row_aula_tavolo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
     </TableRow>
 
     <TableRow
@@ -35,12 +37,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Inizio:" />
+            android:text="Inizio:"
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/row_inizio"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
     </TableRow>
 
     <TableRow
@@ -53,12 +57,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Fine:" />
+            android:text="Fine:"
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/row_fine"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
     </TableRow>
 
     <TableRow
@@ -71,12 +77,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Gruppo:" />
+            android:text="Gruppo:"
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/row_gruppo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
     </TableRow>
 
     <TableRow
@@ -89,12 +97,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Stato:" />
+            android:text="Stato:"
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/row_stato"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
     </TableRow>
 
 </TableLayout>

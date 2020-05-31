@@ -25,6 +25,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.text.Html;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -93,6 +97,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     LinearLayout ll_in_corso,ll_cronologia;
     ListView list_in_corso, list_cronologia;
     ArrayAdapter<Prenotazione> adapter;
+    TextView txt_legenda;
 
     SqliteManager database;
     Intent intent_ricevuto;
@@ -111,7 +116,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ll_cronologia=findViewById(R.id.prenCronologia_ll);
         list_in_corso=findViewById(R.id.list_inCorso);
         list_cronologia=findViewById(R.id.list_cronologia);
+        txt_legenda=findViewById(R.id.text_legenda);
         array_list_account = new ArrayList<CalendarAccount>();
+
 
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         qrScan = new IntentIntegrator(this);
@@ -139,13 +146,36 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         setTitle(strNome+" "+strCognome);
 
+        String stringa="Legenda";
+        SpannableString ss=new SpannableString(stringa);
+
+        ClickableSpan clickableSpan1 = new ClickableSpan() {
+            @Override
+            public void onClick(View view) {
+                final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                d.setCancelable(false);
+                d.setContentView(R.layout.dialog_legenda);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                Button btn=d.findViewById(R.id.button_legenda);
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        d.dismiss();
+                    }
+                });
+                d.show();
+            }
+        };
+
+        ss.setSpan(clickableSpan1, 0,7,  Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        txt_legenda.setText(ss);
+        txt_legenda.setMovementMethod(LinkMovementMethod.getInstance());
+
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
-
-        //LinkedList<AlarmClass> allarmi_attivi=database.getAlarms();
-        //if(allarmi_attivi!=null)
-            //MyToast.makeText(getApplicationContext(),""+allarmi_attivi.get(0).getId_prenotazione()+" "+allarmi_attivi.get(0).getOrario_alarm(),true).show();
     }
+
 
     @Override
     protected void onRestart() {
@@ -153,131 +183,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         new getPrenotazioni().execute();
     }
 
-//creazione alarm
-    public String create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
-        Calendar cal_allarme = Calendar.getInstance();
-        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa); //allarme per pausa
-        else if(inizio==true){ //allarme per ingresso
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date_allarme = null;
-            try {
-                date_allarme = df.parse(prenotazione.getOrario_prenotazione());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.SECOND, ingresso);
-        }
-        else{ //allarme per scadenza prenotazione
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date_allarme = null;
-            try {
-                date_allarme = df.parse(prenotazione.getOrario_fine_prenotazione());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            cal_allarme.setTime(date_allarme);
-            cal_allarme.add(Calendar.SECOND, -300);
-        }
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
-
-        String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
-        return strTarget;
-    }
-
-//rimozione alarm
-    public void cancel_alarm(Prenotazione prenotazione){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
-        alarmManager.cancel(pendingIntent);
-    }
-
-// RISULTATO RITORNATO DA QR SCANNER --> apertura dialog oppure messaggio di errore
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                MyToast.makeText(getApplicationContext(),"Risultato non trovato!", false).show();
-            } else {
-                try {
-                    String s=result.getContents();
-                    int first=s.indexOf('"')+1;
-                    int second=s.lastIndexOf('"');
-                    String id_aula=s.substring(first,second);
-                    String nome_aula=database.getNomeAula(id_aula);
-                    String entrata_uscita=s.substring(0,first-1);
-
-                    if(!nome_aula.equals(p.getAula())){
-                        MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
-                        return;
-                    }
-                    if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
-                        return;
-                    }
-                    if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
-                        return;
-                    }
-
-                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
-                    d.setCancelable(false);
-                    d.setContentView(R.layout.dialog_qr_code);
-                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-                    TextView txt_qr= d.findViewById(R.id.et_qr);
-                    Button btn_yes=d.findViewById(R.id.btn_yes_qr);
-                    Button btn_no=d.findViewById(R.id.btn_no_qr);
-                    txt_qr.setText(entrata_uscita+" "+nome_aula);
-                    btn_yes.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new doOperazione().execute();
-                            d.dismiss();
-                        }
-                    });
-                    btn_no.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            d.dismiss();
-                        }
-                    });
-                    d.show();
-
-
-                    /*AlertDialog.Builder builder = new AlertDialog.Builder(PrenotazioniAttiveActivity.this);
-                    builder.setTitle(entrata_uscita+" "+nome_aula);
-                    builder.setMessage("Vuoi procedere?");
-                    //click listener for alert dialog buttons --> Se sì esegui task asincrono
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch(which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    new doOperazione().execute();
-                                    break;
-
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    dialog.dismiss();
-                                    break;
-                            }
-                        }
-                    };
-                    builder.setPositiveButton("Si", dialogClickListener);
-                    builder.setNegativeButton("No",dialogClickListener);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();*/
-                } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
-            }
-        } else super.onActivityResult(requestCode, resultCode, data);
-    }
 
 //CONTEXT MENU
     @Override
@@ -357,7 +262,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {}
     }
 
-//TASK ASINCRONO --> Operazione su prenotazione --> ritorna una stringa di errore o successo
+
+///////TASK ASINCRONO --> Operazione su prenotazione
     private class doOperazione extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -444,7 +350,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
 
-//SCARICO PRENOTAZIONI --> prenotazioni incorso, future o terminate nella giornata e le metto in list view --> Se non c'è connessione prendo i dati da sqlite
+//////TASK ASINCRONO --> scarico prenotazioni prenotazioni in corso, future o terminate nella giornata --> Se non c'è connessione prendo i dati da sqlite
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
         @Override
         protected Prenotazione[] doInBackground(Void... strings) {
@@ -502,10 +408,14 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Prenotazione[] array_prenotazioni) {
+            ll_in_corso.setVisibility(View.VISIBLE);
+            ll_cronologia.setVisibility(View.VISIBLE);
             list_cronologia.setAdapter(null);
             list_in_corso.setAdapter(null);
             //offline
             if(array_prenotazioni==null){
+                ll_in_corso.setVisibility(View.GONE);
+                ll_cronologia.setVisibility(View.VISIBLE);
                 MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
 
                 ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni();
@@ -551,6 +461,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             }
 
         //online
+            ll_cronologia.setVisibility(View.GONE);
+            ll_in_corso.setVisibility(View.VISIBLE);
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
                 if(p.getStato()==1 && p.getIn_corso().equals("futura") && !p.getGruppo().equals("null")){
@@ -636,7 +548,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
     }
 
-    //////CALENDARIO
+
+//////CALENDARIO
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
@@ -657,6 +570,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
     public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
+        if(lista_account==null || lista_account.size()==0){
+            MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare: non hai nessun account di calendario!",false).show();
+            return;
+        }
         final Dialog dialog = new Dialog(PrenotazioniAttiveActivity.this);
         dialog.setTitle("Seleziona account");
         dialog.setCancelable(false);
@@ -664,6 +581,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ListView lv_account = dialog.findViewById(R.id.lv_account);
         Button conferma = dialog.findViewById(R.id.btn_account_conferma);
         Button indietro = dialog.findViewById(R.id.btn_account_indietro);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
 
         ArrayAdapter<CalendarAccount> adapter_calendar = new ArrayAdapter<CalendarAccount>(PrenotazioniAttiveActivity.this, R.layout.row_layout_dialog_calendario, lista_account) {
             @Override
@@ -714,7 +632,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         return;
     }
 
-
     public ArrayList<CalendarAccount> get_account_from_calendar() {
         ArrayList<CalendarAccount> lista = new ArrayList<CalendarAccount>();
         @SuppressLint("MissingPermission") Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, CalendarContract.Calendars.VISIBLE + " = 1", null, null);
@@ -728,7 +645,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         return lista;
     }
-
 
     @SuppressLint("MissingPermission")
     public boolean write_event() {
@@ -773,6 +689,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             }
             Uri uri=cr.insert(CalendarContract.Events.CONTENT_URI, values);
             int eventID = (int) Long.parseLong(uri.getLastPathSegment());
+            values = new ContentValues();
+            values.put(CalendarContract.Reminders.MINUTES, 60);
+            values.put(CalendarContract.Reminders.EVENT_ID, (long)eventID);
+            values.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+            uri = cr.insert(CalendarContract.Reminders.CONTENT_URI, values);
+
             database.insertEventoCalendario(p.getId_prenotazione(), (int) c.getId(),eventID);
         }
         return true;
@@ -786,9 +708,110 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
 
+//////ALARM
+    public String create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
+        Calendar cal_allarme = Calendar.getInstance();
+        if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa); //allarme per pausa
+        else if(inizio==true){ //allarme per ingresso
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_allarme = null;
+            try {
+                date_allarme = df.parse(prenotazione.getOrario_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            cal_allarme.setTime(date_allarme);
+            cal_allarme.add(Calendar.SECOND, ingresso);
+        }
+        else{ //allarme per scadenza prenotazione
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date_allarme = null;
+            try {
+                date_allarme = df.parse(prenotazione.getOrario_fine_prenotazione());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            cal_allarme.setTime(date_allarme);
+            cal_allarme.add(Calendar.SECOND, -300);
+        }
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal_allarme.getTimeInMillis(), pendingIntent);
+
+        String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
+        return strTarget;
+    }
+
+    public void cancel_alarm(Prenotazione prenotazione){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        alarmManager.cancel(pendingIntent);
+    }
 
 
-//MENU IN ALTO
+//////QR SCANNER
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                MyToast.makeText(getApplicationContext(),"Risultato non trovato!", false).show();
+            } else {
+                try {
+                    String s=result.getContents();
+                    int first=s.indexOf('"')+1;
+                    int second=s.lastIndexOf('"');
+                    String id_aula=s.substring(first,second);
+                    String nome_aula=database.getNomeAula(id_aula);
+                    String entrata_uscita=s.substring(0,first-1);
+
+                    if(!nome_aula.equals(p.getAula())){
+                        MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
+                        return;
+                    }
+                    if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
+                        return;
+                    }
+                    if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
+                        return;
+                    }
+
+                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+                    d.setCancelable(false);
+                    d.setContentView(R.layout.dialog_qr_code);
+                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                    TextView txt_qr= d.findViewById(R.id.et_qr);
+                    Button btn_yes=d.findViewById(R.id.btn_yes_qr);
+                    Button btn_no=d.findViewById(R.id.btn_no_qr);
+                    txt_qr.setText(entrata_uscita+" "+nome_aula);
+                    btn_yes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new doOperazione().execute();
+                            d.dismiss();
+                        }
+                    });
+                    btn_no.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            d.dismiss();
+                        }
+                    });
+                    d.show();
+                } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
+            }
+        } else super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+//////OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
@@ -803,23 +826,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("matricola", null);
-            editor.putString("email", null);
-            editor.putString("nome", null);
-            editor.putString("cognome", null);
-            editor.putString("password", null);
-            editor.putString("token", null);
-            editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            editor.putString("latitudine", null);
-            editor.putString("longitudine", null);
-            editor.putString("ingresso", null);
-            editor.putString("pausa", null);
-            editor.putString("slot", null);
-            editor.putString("inizio_slot", null);
-            editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -96,7 +96,7 @@ public class Tavolo implements Comparable<Tavolo>{
     @Override
     public int compareTo(Tavolo o) {
         if(!fine_disponibilita.equals(o.getFine_disponibilita())) return fine_disponibilita.compareTo(o.getFine_disponibilita());
-        else if(num_tavolo>o.getNum_tavolo()) return 1;
-        else return -1;
+        else if(num_tavolo>o.getNum_tavolo()) return -1;
+        else return 1;
     }
 }

@@ -38,6 +38,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegistrazioneActivity extends AppCompatActivity {
+    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
+    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione.php";
+
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
     Button btn_registrazione;
@@ -48,10 +51,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
     String matricola,nome,cognome, email, password, password2;
     boolean isStudente;
 
-    static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
-    static final String URL_REGISTRAZIONE_STUDENTE="http://pmsc9.altervista.org/progetto/registrazione_studente.php";
-    static final String URL_REGISTRAZIONE_DOCENTE="http://pmsc9.altervista.org/progetto/registrazione_docente.php";
-    //inizializziamo l'intefaccia utente
     private void initUI(){
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
@@ -123,12 +122,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 }
                 else isStudente=false;
 
-                //inserisco il vincolo sul radiobutton nel metodo registraUtente
-                //registrazione utente
-                //if(radioStudente.isChecked()) new registraUtente().execute();
-
-                //else if(radioDocente.isChecked()) new registraDocente.execute();
-                new registraUtente().execute();
+                new checkUtenteFromUniversita().execute();
             }
         });
     }
@@ -164,7 +158,9 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     JSONObject json_data = jArray.getJSONObject(i);
                     array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
                             json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
-                            json_data.getInt("ingresso"), json_data.getInt("pausa"), json_data.getInt("slot"));
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"),
+                            json_data.getInt("slot"), json_data.getString("first_slot"),
+                            json_data.getString("url_registrazione"),json_data.getString("url_corsi"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -195,33 +191,75 @@ public class RegistrazioneActivity extends AppCompatActivity {
             });
         }
     }
+
+
+    private class checkUtenteFromUniversita extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... strings) {
+            try {
+                URL url=new URL(universita.getUrl_registrazione());
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "matricola=" + URLEncoder.encode(matricola, "UTF-8")
+                        + "&nome=" + URLEncoder.encode(nome, "UTF-8")
+                        + "&cognome=" + URLEncoder.encode(cognome, "UTF-8")
+                        + "&mail=" + URLEncoder.encode(email, "UTF-8")
+                        + "&password=" + URLEncoder.encode(password, "UTF-8")
+                        + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8"); //imposto parametri da passare
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                Log.e("SimpleHttpURLConnection", e.getMessage());
+                return "Impossibile connettersi";
+            } finally {
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(result.equals("Impossibile connettersi")) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false).show();
+            else if(result.equals("Permission granted")) new registraUtente().execute();
+            else MyToast.makeText(getApplicationContext(), "ERRORE: Non risulti iscritto all'università. Controlla i campi inseriti", false).show();
+        }
+    }
+
+
     //registra nella tabella utente il nuovo utente
     private class registraUtente extends AsyncTask<Void, Void, String> {
             @Override
             protected String doInBackground(Void... strings) {
                 try {
-                    URL url;
-                    //vincoli sul radiobutton per chiamare registrazione studente vs docente
-                    if(isStudente==true) {
-                         url = new URL(URL_REGISTRAZIONE_STUDENTE);
-                        //URL url = new URL("http://10.0.2.2/progetto/registrazione_studente.php");
-                    }
-                    else {
-                        url= new URL(URL_REGISTRAZIONE_DOCENTE);
-                        //URL url = new URL("http://10.0.2.2/progetto/registrazione_docente.php");
-                    }
+                    URL url = new URL(URL_REGISTRAZIONE);
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(1000);
                     urlConnection.setConnectTimeout(1500);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);
-                    String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8") + "&matricola=" +
-                            URLEncoder.encode(matricola, "UTF-8") + "&nome=" +
-                            URLEncoder.encode(nome, "UTF-8") + "&cognome=" +
-                            URLEncoder.encode(cognome, "UTF-8") + "&mail=" +
-                            URLEncoder.encode(email, "UTF-8") + "&password=" +
-                            URLEncoder.encode(password, "UTF-8"); //imposto parametri da passare
+                    String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
+                            + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
+                            + "&nome=" + URLEncoder.encode(nome, "UTF-8")
+                            + "&cognome=" + URLEncoder.encode(cognome, "UTF-8")
+                            + "&mail=" + URLEncoder.encode(email, "UTF-8")
+                            + "&password=" + URLEncoder.encode(password, "UTF-8")
+                            + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8"); //imposto parametri da passare
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri);
                     dos.flush();
@@ -247,19 +285,11 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(String result) {
-                if(result.equals("Utente registrato")==false){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#e00700' ><b>" + result + "</b></font>"),Toast.LENGTH_LONG).show();
-                    return;
-                }
+                if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), result, false).show();
                 else{
                     intent.putExtra("matricola", matricola);
                     intent.putExtra("password", password);
-                    //if(isStudente==true) {
-                        intent.putExtra("isStudente", isStudente);
-
-
-                    //}
-                    //else intent.putExtra("isStudente", "falso");
+                    intent.putExtra("isStudente", isStudente);
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                 }

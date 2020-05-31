@@ -4,7 +4,8 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F6F4F4">
+    android:background="#F6F4F4"
+    android:padding="10dp">
 
     <LinearLayout
         android:id="@+id/layoutAttivi"
@@ -17,8 +18,9 @@
             android:id="@+id/txtTitoloAttivi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="20sp" />
+            android:gravity="center_horizontal"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <ListView
             android:id="@+id/listaAttivi"
@@ -43,8 +45,9 @@
             android:id="@+id/txtTitoloInScad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="20sp" />
+            android:gravity="center_horizontal"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <ListView
             android:id="@+id/listaInScadenza"
@@ -70,8 +73,9 @@
             android:id="@+id/txtTitoloScaduti"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="20sp" />
+            android:gravity="center_horizontal"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <ListView
             android:id="@+id/listaScaduti"

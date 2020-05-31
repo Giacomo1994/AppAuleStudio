@@ -38,6 +38,7 @@ public class Gruppo implements Parcelable {
         codice_gruppo = in.readString();
         nome_gruppo = in.readString();
         codice_corso = in.readString();
+        nome_corso=in.readString();
         matricola_docente = in.readString();
         componenti_max = in.readInt();
         ore_disponibili = in.readInt();
@@ -146,6 +147,7 @@ public class Gruppo implements Parcelable {
         parcel.writeString(codice_gruppo);
         parcel.writeString(nome_gruppo);
         parcel.writeString(codice_corso);
+        parcel.writeString(nome_corso);
         parcel.writeString(matricola_docente);
         parcel.writeInt(componenti_max);
         parcel.writeDouble(ore_disponibili);

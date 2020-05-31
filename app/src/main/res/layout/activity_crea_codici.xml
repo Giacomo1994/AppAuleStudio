@@ -9,6 +9,7 @@
     android:isScrollContainer="true"
     android:orientation="vertical"
     android:overScrollMode="always"
+    android:padding="10dp"
     android:scrollbars="vertical"
     tools:context=".CreaCodici">
 
@@ -26,22 +27,32 @@
                 android:id="@+id/txtTitoloInScad"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="center_horizontal"
                 android:text="INSERISCI I DATI RICHIESTI"
-                android:textColor="#000000"
-                android:textSize="18sp" />
+                android:textColor="@color/colorPrimary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/materieDocente"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:spinnerMode="dialog" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textnome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:text="Seleziona corso: "
+                    android:textSize="18sp" />
+
+                <Spinner
+                    android:id="@+id/materieDocente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:spinnerMode="dialog" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/numeroPartecipanti"
@@ -49,7 +60,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="numero massimo di iscritti"
-                android:inputType="textPersonName" />
+                android:inputType="number"
+                android:numeric="integer" />
 
             <EditText
                 android:id="@+id/numeroOre"
@@ -57,7 +69,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="ore disponibili"
-                android:inputType="textPersonName" />
+                android:inputType="number"
+                android:numeric="integer" />
 
             <EditText
                 android:id="@+id/numeroGruppi"
@@ -65,7 +78,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="numero di gruppi"
-                android:inputType="textPersonName" />
+                android:inputType="number"
+                android:numeric="integer" />
 
             <EditText
                 android:id="@+id/txtNomeGruppo"
@@ -80,30 +94,33 @@
                 android:id="@+id/txtSpiegazione"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:text="*Se lesciato vuoto verrà assegnato ad ogni gruppo un nome formato da un numero progressivo e il nome del corso"
-                android:textSize="8sp" />
+                android:textSize="10sp" />
 
             <TextView
                 android:id="@+id/dataScadenza"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Selezionare la data di scadenza delle ore:" />
+                android:gravity="center_horizontal"
+                android:text="Selezionare la data scadenza dei gruppi"
+                android:textSize="18sp" />
 
             <CalendarView
                 android:id="@+id/calendario"
-                android:layout_width="301dp"
-                android:layout_height="294dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:verticalScrollbarPosition="defaultPosition"
                 android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
             <Button
                 android:id="@+id/btnCreaCodici"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/button_layout"
-                android:text="Genera i codici" />
+                android:text="Crea i gruppi" />
         </LinearLayout>
     </ScrollView>
 

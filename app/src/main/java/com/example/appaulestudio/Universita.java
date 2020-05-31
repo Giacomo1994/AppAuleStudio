@@ -8,15 +8,21 @@ public class Universita {
     private int ingresso;
     private int pausa;
     private int slot;
+    private String frist_slot;
+    private String url_registrazione;
+    private String url_corsi;
 
-    public Universita(String codice, String nome, double latitudine, double longitudine, int ingresso, int pausa, int slot) {
+    public Universita(String codice, String nome, double latitudine, double longitudine, int ingresso, int pausa, int slot, String frist_slot, String url_registrazione, String url_corsi) {
         this.codice = codice;
         this.nome = nome;
         this.latitudine = latitudine;
         this.longitudine = longitudine;
         this.ingresso = ingresso;
         this.pausa = pausa;
-        this.slot=slot;
+        this.slot = slot;
+        this.frist_slot = frist_slot;
+        this.url_registrazione = url_registrazione;
+        this.url_corsi = url_corsi;
     }
 
     public String getCodice() {
@@ -73,6 +79,30 @@ public class Universita {
 
     public void setSlot(int slot) {
         this.slot = slot;
+    }
+
+    public String getFirst_slot() {
+        return frist_slot;
+    }
+
+    public void setFirst_slot(String frist_slot) {
+        this.frist_slot = frist_slot;
+    }
+
+    public String getUrl_registrazione() {
+        return url_registrazione;
+    }
+
+    public void setUrl_registrazione(String url_registrazione) {
+        this.url_registrazione = url_registrazione;
+    }
+
+    public String getUrl_corsi() {
+        return url_corsi;
+    }
+
+    public void setUrl_corsi(String url_corsi) {
+        this.url_corsi = url_corsi;
     }
 
     @Override

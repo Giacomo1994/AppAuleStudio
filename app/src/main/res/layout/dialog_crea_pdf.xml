@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/bianco"
-    android:orientation="vertical">
+    android:background="@drawable/forma_dialog"
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/txtTitoloDialogPdf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:background="@color/grigio_chiaro"
-        android:text="PDF" />
+        android:gravity="center_horizontal"
+        android:text="PDF"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/txtDialogPdf"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Vuoi scaricare un Pdf\ncon i codici appena creati?" />
+        android:layout_marginBottom="5dp"
+        android:gravity="center_horizontal"
+        android:text="Vuoi scaricare un Pdf con i codici appena creati?"
+        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,6 +36,7 @@
             android:layout_width="50dp"
             android:layout_height="30dp"
             android:layout_gravity="left"
+            android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
             android:text="Annulla"

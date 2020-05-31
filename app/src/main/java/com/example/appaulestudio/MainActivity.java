@@ -22,8 +22,7 @@ import com.google.firebase.iid.InstanceIdResult;
 
 public class MainActivity extends AppCompatActivity {
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
-    static final String URL_LOGIN_STUDENTE="http://pmsc9.altervista.org/progetto/login_studente.php";
-    static final String URL_LOGIN_DOCENTE="http://pmsc9.altervista.org/progetto/login_docente.php";
+    static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login.php";
 
     ImageView studente_docente;
     TextView txt_toRegistrazione;
@@ -100,10 +99,8 @@ public class MainActivity extends AppCompatActivity {
                     isStudente=true;
                 }
                 else isStudente=false;
-                //sposto tutto nella funzione
-                //chiamo asyc task
-                //if(radioStudente.isChecked()) new checkUtente().execute();
-                new checkUtente().execute();
+
+                new loginUtente().execute();
             }
         });
 
@@ -125,39 +122,40 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         is_logged=settings.getBoolean("logged", false);
         is_studente = settings.getBoolean("studente", false);
+
+        //se non ho fatto logout reindirizzo a Home, altrimenti riempio spinner universita
         if(is_logged==true&&is_studente==true){
             Intent i=new Intent(MainActivity.this, Home.class);
             i.putExtra("start_from_login",false);
             startActivityForResult(i,-1);
             return;
         }
-        if(is_logged==true&&is_studente==false){
+        else if(is_logged==true&&is_studente==false){
             Intent i=new Intent(MainActivity.this, HomeDocente.class);
             i.putExtra("from_login",false);
             startActivityForResult(i,23);
             return;
         }
-
-        new riempiUniversita().execute();
+        else new riempiUniversita().execute();
 
     }
 
-
-    protected void onResume() {
-        super.onResume();
-
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 token = instanceIdResult.getToken(); //salvo token in variabile globale
             }
         });
-
         new riempiUniversita().execute();
+    }
 
+    protected void onResume() {
+        super.onResume();
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         is_logged=settings.getBoolean("logged", false);
-
         if(is_logged==true) finish();
     }
 
@@ -167,15 +165,12 @@ public class MainActivity extends AppCompatActivity {
         protected Universita[] doInBackground(Void... strings) {
             try {
                 URL url = new URL(URL_UNIVERSITA);
-                //URL url = new URL("http://10.0.2.2/progetto/listaUniversita.php");
-
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
                 urlConnection.connect();
-
                 InputStream is = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
@@ -184,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
                     sb.append(line + "\n");
                 }
                 is.close();
-
                 String result = sb.toString();
                 JSONArray jArray = new JSONArray(result);
                 Universita[] array_universita = new Universita[jArray.length()];
@@ -192,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject json_data = jArray.getJSONObject(i);
                     array_universita[i] = new Universita(json_data.getString("codice"), json_data.getString("nome"),
                             json_data.getDouble("latitudine"), json_data.getDouble("longitudine"),
-                            json_data.getInt("ingresso"), json_data.getInt("pausa"), json_data.getInt("slot"));
+                            json_data.getInt("ingresso"), json_data.getInt("pausa"),
+                            json_data.getInt("slot"), json_data.getString("first_slot"),
+                            json_data.getString("url_registrazione"),json_data.getString("url_corsi"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -204,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
-                MyToast.makeText(getApplicationContext(),"Errore: impossibile contattare il server!",false).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
                 return;
             }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -223,18 +219,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 //TASK ASINCRONO PER LOGIN UTENTE
-    private class checkUtente extends AsyncTask<Void, Void, User> {
+    private class loginUtente extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... strings) {
             try {
-                URL url;
-                if(isStudente==true) {
-                     url = new URL(URL_LOGIN_STUDENTE);
-                    //URL url = new URL("http://10.0.2.2/progetto/login_utente.php");
-                }
-                else{
-                    url=new URL(URL_LOGIN_DOCENTE);
-                }
+                URL url=new URL(URL_LOGIN);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
                 urlConnection.setConnectTimeout(1500);
@@ -244,13 +233,12 @@ public class MainActivity extends AppCompatActivity {
                 String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
                         + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
                         + "&password=" + URLEncoder.encode(password, "UTF-8")
-                        + "&token=" + URLEncoder.encode(token, "UTF-8");
+                        + "&token=" + URLEncoder.encode(token, "UTF-8")
+                        + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
                 dos.close();
-
-                //leggo stringa di ritorno da file php
                 urlConnection.connect();
                 InputStream is = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
@@ -260,14 +248,12 @@ public class MainActivity extends AppCompatActivity {
                     sb.append(line + "\n");
                 }
                 is.close();
-
                 String result = sb.toString();
                 JSONArray jArray = new JSONArray(result);
                 User user=null;
                 for (int i = 0; i < jArray.length(); i++) {
                     JSONObject json_data = jArray.getJSONObject(i);
                     if(isStudente==true) {
-
                         user = new User(json_data.getString("matricola"),
                                 json_data.getString("nome"),
                                 json_data.getString("cognome"),
@@ -284,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return user;
             } catch (Exception e) {
-                Log.e("log_tag", "Error " + e.toString());
                 return null;
             }
         }
@@ -300,20 +285,20 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("universita",universita.getCodice());
                 editor.putString("nome_universita",universita.getNome());
-                editor.putString("email",user.getEmail());
                 editor.putString("matricola",user.getMatricola());
-                editor.putString("password",user.getPassword());
                 editor.putString("nome", user.getNome());
                 editor.putString("cognome", user.getCognome());
                 editor.putString("token", token);
+                editor.putBoolean("logged", true);
                 if(user.isStudente()==true) {
                     editor.putString("latitudine", ""+universita.getLatitudine());
                     editor.putString("longitudine", ""+universita.getLongitudine());
                     editor.putString("ingresso", ""+universita.getIngresso());
                     editor.putString("pausa", ""+universita.getPausa());
                     editor.putString("slot", ""+universita.getSlot());
-                    //editor.putString("inizio_slot", universita.getInizioSlot());
+                    editor.putString("first_slot", universita.getFirst_slot());
                     editor.putBoolean("studente", true);
+                    editor.commit();
                     Intent i=new Intent(MainActivity.this, Home.class);
                     i.putExtra("start_from_login",true);
                     startActivityForResult(i,2);
@@ -321,13 +306,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else{
                     editor.putBoolean("studente", false);
+                    editor.putString("url_corsi", universita.getUrl_corsi());
+                    editor.commit();
                     Intent i=new Intent(MainActivity.this, HomeDocente.class);
                     i.putExtra("from_login",true);
                     startActivityForResult(i,3);
                     finish();
                 }
-                editor.putBoolean("logged", true);
-                editor.commit();
             }
         }
     }

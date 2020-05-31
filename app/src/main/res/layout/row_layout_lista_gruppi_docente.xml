@@ -2,40 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rowGruppiDocente"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="15dp"
-    android:layout_marginTop="20dp"
-    android:layout_marginRight="15dp"
-    android:layout_marginBottom="15dp"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:background="@drawable/layout_gruppo_complete"
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/nomeGruppo"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="TextView"
+        android:layout_marginBottom="5dp"
         android:textSize="22sp" />
 
     <TextView
         android:id="@+id/codiceGruppo"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="TextView" />
+        android:layout_marginBottom="5dp" />
 
     <TextView
         android:id="@+id/dataScadenza"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="TextView" />
+        android:layout_marginBottom="5dp" />
 
     <TextView
         android:id="@+id/oreRimanenti"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="TextView" />
+        android:layout_marginBottom="5dp" />
 
 </LinearLayout>

@@ -19,6 +19,7 @@ public class MapActivity extends AppCompatActivity {
         int ingresso=Integer.parseInt(settings.getString("ingresso", null));
         int pausa=Integer.parseInt(settings.getString("pausa", null));
         int slot=Integer.parseInt(settings.getString("slot", null));
-        MyToast.makeText(getApplicationContext(),""+latitudine+" "+longitudine+" "+ingresso+" "+pausa+" "+slot,true).show();
+        String first_slot=settings.getString("first_slot", null);
+        MyToast.makeText(getApplicationContext(),""+latitudine+" "+longitudine+" "+ingresso+" "+pausa+" "+slot+" "+first_slot,true).show();
     }
 }

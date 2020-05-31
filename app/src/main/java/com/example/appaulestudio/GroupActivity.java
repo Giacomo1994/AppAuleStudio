@@ -44,8 +44,8 @@ import java.util.Arrays;
 
 public class GroupActivity extends AppCompatActivity {
     static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
-    static final String URL_RICHIEDIGRUPPIFROMSTUDENTE="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
-    static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
+    static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
+    static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strPassword, strNome, strCognome,strCodiceGruppo;
     Gruppo g;
     SqliteManager database;
@@ -77,7 +77,7 @@ public class GroupActivity extends AppCompatActivity {
         new listaGruppi().execute();
     }
 
-    //MENU CONTESTUALE
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -87,7 +87,7 @@ public class GroupActivity extends AppCompatActivity {
         menu.add(Menu.FIRST,1,Menu.FIRST+1,"Abbandona gruppo");
         menu.add(Menu.FIRST,2,Menu.FIRST,"Dettagli gruppo");
     }
-    //ESCO DAL GRUPPO -> DEVO CANCELLARE LA MIA ISCRIZIONE DATA LA MIA MATRICOLA E OL CODICE DEL GRUPPO
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         if(item.getItemId()==1){
@@ -97,6 +97,12 @@ public class GroupActivity extends AppCompatActivity {
             new dettagliGruppo().execute();
         }
         return true;
+    }
+
+    public void iscrizione_gruppo(View v){
+        Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
+        startActivity(i);
+        //finish();
     }
 
     private class listaGruppi extends AsyncTask<Void, Void, Gruppo[]>{
@@ -113,7 +119,7 @@ public class GroupActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArrayGruppi;
-                url = new URL(URL_RICHIEDIGRUPPIFROMSTUDENTE); //passo la richiesta post che mi restituisce i corsi dal db
+                url = new URL(URL_GRUPPI); //passo la richiesta post che mi restituisce i corsi dal db
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
@@ -202,7 +208,7 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
-// Prendo da database remoto i componenti del gruppo. Se offline prendo i dati del gruppo da SQLITE
+// Prendo da database remoto i componenti del gruppo.
     private class dettagliGruppo extends AsyncTask<Void, Void, User[]> { //OK
         @Override
         protected User[] doInBackground(Void... voids) {
@@ -217,7 +223,7 @@ public class GroupActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArray;
-                url = new URL(URL_COMPONENTI_DA_GRUPPO);
+                url = new URL(URL_COMPONENTI);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
@@ -312,14 +318,7 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
-    public void iscrizione_gruppo(View v){
-        Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
-        startActivity(i);
-        //finish();
-    }
-
-
-//task asincrono per cancellare una riga dalla tabella iscrizione ovvero abbandonare un gruppo --> OK
+//Cancella da database l'iscrizione e da locale il gruppo
     private class abbandonaGruppo extends AsyncTask<Void, Void, String>{
         @Override
         protected String doInBackground(Void... strings) {
@@ -384,23 +383,7 @@ public class GroupActivity extends AppCompatActivity {
         if (item.getItemId() == 1) {
             SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("matricola", null);
-            editor.putString("email", null);
-            editor.putString("nome", null);
-            editor.putString("cognome", null);
-            editor.putString("password", null);
-            editor.putString("token", null);
-            editor.putBoolean("studente", true);
             editor.putBoolean("logged", false);
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            editor.putString("latitudine", null);
-            editor.putString("longitudine", null);
-            editor.putString("ingresso", null);
-            editor.putString("pausa", null);
-            editor.putString("slot", null);
-            editor.putString("inizio_slot", null);
-            editor.putString("last_update", null);
             editor.commit();
             Intent i = new Intent(this, MainActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

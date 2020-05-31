@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_liste"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context=".HomeDocente">
 
     <ImageView
@@ -17,7 +18,8 @@
     <ListView
         android:id="@+id/elencoCorsi2"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:divider="@color/background_liste"
         android:dividerHeight="15dp">
 
@@ -25,9 +27,11 @@
 
     <Button
         android:id="@+id/btnCreaCodici"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
         android:background="@drawable/button_layout"
-        android:text="CREA GRUPPI" />
+        android:padding="5dp"
+        android:text="CREA GRUPPI"
+        android:visibility="visible" />
 </LinearLayout>

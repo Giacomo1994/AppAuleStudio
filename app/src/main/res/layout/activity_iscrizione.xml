@@ -13,8 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="VUOI ISCRIVERTI AD UN GRUPPO?"
-        android:textSize="18sp" />
+        android:text="ISCRIVITI AD UN GRUPPO"
+        android:textColor="@color/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"

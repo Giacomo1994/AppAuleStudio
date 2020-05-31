@@ -13,6 +13,7 @@
         android:id="@+id/header_prenotazioni"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:text="Prenotazioni"
         android:textColor="@color/intestazione"
@@ -23,6 +24,7 @@
         android:id="@+id/prenInCorso_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <ListView
@@ -42,6 +44,7 @@
         android:id="@+id/prenCronologia_ll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <ListView
@@ -49,7 +52,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="#FAFAFA"
-            android:dividerHeight="10dp"/>
+            android:dividerHeight="10dp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_legenda"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:gravity="center_horizontal" />
 </LinearLayout>
 

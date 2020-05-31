@@ -18,7 +18,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"latitudine\"\tREAL,\n" +
                 "\t\"longitudine\"\tREAL,\n" +
                 "\t\"posti_totali\"\tINTEGER,\n" +
-                "\t\"posti_liberi\"\tINTEGER,\n" +
                 "\t\"flag_gruppi\"\tINTEGER,\n" +
                 "\t\"servizi\"\tTEXT,\n" +
                 "\tPRIMARY KEY(\"id\")\n" +

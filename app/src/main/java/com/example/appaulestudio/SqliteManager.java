@@ -21,10 +21,11 @@ public class SqliteManager {
 //ALARM_TRIGGER
     public void insertAlarm(int id_prenotazione, String orario_alarm){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql="INSERT OR REPLACE INTO alarm_trigger (id_prenotazione, orario_alarm) "+
+        String sql="INSERT OR IGNORE INTO alarm_trigger (id_prenotazione, orario_alarm) "+
                 "VALUES (" +id_prenotazione + ", '" + orario_alarm + "')";
         db.execSQL(sql);
     }
+
     public void deleteAlarm(int id_prenotazione){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="DELETE FROM alarm_trigger WHERE id_prenotazione="+id_prenotazione;
@@ -55,6 +56,7 @@ public class SqliteManager {
                 "VALUES (" +id_prenotazione + ", " + id_calendar +", " + id_evento +  ")";
         db.execSQL(sql);
     }
+
     public void deleteEventoCalendario(int id_prenotazione){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="DELETE FROM eventi_calendario where id_prenotazione="+id_prenotazione;
@@ -213,8 +215,8 @@ public class SqliteManager {
         db.execSQL(sql1);
         for (Aula a : array_aula) {
             String sql =
-                    "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali,posti_liberi, flag_gruppi, servizi) " +
-                            "VALUES ('" + a.getIdAula() + "', '" + a.getNome() + "', '" + a.getLuogo() + "', " + a.getLatitudine() + "," + a.getLongitudine() + "," + a.getPosti_totali() + "," + a.getPosti_liberi() + "," + a.getGruppi() + ",'" + a.getServizi() + "')";
+                    "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali, flag_gruppi, servizi) " +
+                            "VALUES ('" + a.getIdAula() + "', '" + a.getNome() + "', '" + a.getLuogo() + "', " + a.getLatitudine() + "," + a.getLongitudine() + "," + a.getPosti_totali() +  "," + a.getGruppi() + ",'" + a.getServizi() + "')";
             db.execSQL(sql);
         }
         for(Aula a : array_aula){
@@ -225,7 +227,6 @@ public class SqliteManager {
             }
         }
     }
-
 
     public ArrayList<Aula> readListaAule(){
         SQLiteDatabase db = dbHelper.getReadableDatabase();
