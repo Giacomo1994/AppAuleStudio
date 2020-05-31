@@ -15,8 +15,8 @@
 
         <ImageView
             android:id="@+id/row_image_home"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginTop="25dp"
             app:srcCompat="@android:drawable/star_big_on" />
     </LinearLayout>
