@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -74,6 +76,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     boolean aperta=false;
     Tavolo tavolo;
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +104,14 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
-        setTitle(strNome+" "+strCognome);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
 
         //scarica piantina aula
         load_image task_image= (load_image) new load_image().execute();

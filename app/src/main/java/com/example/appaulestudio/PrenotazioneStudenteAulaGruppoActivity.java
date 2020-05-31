@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -75,6 +77,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     boolean aperta=false;
     Tavolo tavolo;
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +116,14 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         pausa=Integer.parseInt(settings.getString("pausa", null));
         slot_min=Integer.parseInt(settings.getString("slot", null));
         FIRST_SLOT=settings.getString("first_slot", null);
-        setTitle(strNome+" "+strCognome);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
 
         initDateTime(); //ok
         new load_image().execute(); //ok

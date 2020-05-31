@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -36,14 +38,15 @@ public class IscrizioneActivity extends AppCompatActivity {
     final static String URL_ISCRIZIONE_GRUPPO= "http://pmsc9.altervista.org/progetto/iscrizione_al_gruppo.php";
 
     EditText codice_gruppo;
-    TextView text_dialog, output;
+    TextView output;
     Button annulla_dialog, conferma_dialog, iscriviti;
     ImageView close_dialog;
     String str_codice_gruppo, str_nome_gruppo, nomeProf, cognomeProf, nomeCorso;
-    String strUniversita, strMatricola, strPassword, strNome, strCognome;
+    String strUniversita, strMatricola, strNome, strCognome;
 
 
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,10 +58,16 @@ public class IscrizioneActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
-        strPassword=settings.getString("password", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        setTitle(""+strNome+" "+strCognome);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
 
         iscriviti.setOnClickListener(new View.OnClickListener() {
             @Override

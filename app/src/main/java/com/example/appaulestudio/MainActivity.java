@@ -1,7 +1,10 @@
 package com.example.appaulestudio;
 
 import androidx.appcompat.app.*;
+
+import android.annotation.SuppressLint;
 import android.app.*;
+import android.app.ActionBar;
 import android.content.*;
 import android.os.*;
 import android.text.*;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     boolean studentePassato;
     boolean is_logged=false, is_studente=false;
 
+    @SuppressLint("WrongConstant")
     private void initUI(){
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);
         spinner=findViewById(R.id.log_spinner);
@@ -47,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
         radioStudente=findViewById(R.id.radioButton);
         radioDocente=findViewById(R.id.radioDocente);
         studente_docente = findViewById(R.id.imageView9);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("StudyAround");
+        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
 
         //radio button
         if(radioStudente.isChecked()){

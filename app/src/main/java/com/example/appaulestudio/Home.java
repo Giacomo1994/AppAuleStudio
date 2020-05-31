@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -77,9 +79,10 @@ public class Home extends AppCompatActivity{
     int ready=-1, ready_update=-1;
 
     Intent intent;
-    String strUniversita, strMatricola, strNome, strToken, strCognome;
+    String strUniversita, strMatricola, strNome, strCognome;
     SqliteManager database;
 
+    @SuppressLint("WrongConstant")
     protected void initUI(){
          ll_start=findViewById(R.id.ll_start);
          ll_home=findViewById(R.id.ll_home);
@@ -94,9 +97,14 @@ public class Home extends AppCompatActivity{
          strMatricola=settings.getString("matricola", null);
          strNome=settings.getString("nome", null);
          strCognome=settings.getString("cognome", null);
-         strToken=settings.getString("token", null);
 
-         setTitle(strNome+" "+strCognome);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
     }
 
 

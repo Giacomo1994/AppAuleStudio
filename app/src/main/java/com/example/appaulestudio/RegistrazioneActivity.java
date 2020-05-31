@@ -2,6 +2,8 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,6 +54,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
     String matricola,nome,cognome, email, password, password2;
     boolean isStudente;
 
+    @SuppressLint("WrongConstant")
     private void initUI(){
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
@@ -61,21 +65,28 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_email=this.findViewById(R.id.reg_email);
         txt_password=this.findViewById(R.id.reg_password);
         txt_password2=this.findViewById(R.id.reg_password2);
-
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
-        intent=getIntent();
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("StudyAround");
+        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initUI();
+        intent=getIntent();
 
-        //riempio spinner con universita
         new riempiUniversita().execute();
 
-        //funzione di registrazione
         btn_registrazione.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

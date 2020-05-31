@@ -2,6 +2,7 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -46,7 +47,7 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
-    String strUniversita, strMatricola, strPassword, strNome, strCognome,strCodiceGruppo;
+    String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
@@ -62,10 +63,16 @@ public class GroupActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
-        strPassword=settings.getString("password", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-        setTitle(""+strNome+" "+strCognome);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
 
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);

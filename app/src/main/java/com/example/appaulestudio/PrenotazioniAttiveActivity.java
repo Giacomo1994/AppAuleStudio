@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -108,6 +109,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     int ingresso, pausa;
     ArrayList<CalendarAccount> array_list_account;
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,7 +146,15 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
-        setTitle(strNome+" "+strCognome);
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        //getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        txt_actionbar.setText(strNome+" "+strCognome);
+        //setTitle(strNome+" "+strCognome);
 
         String stringa="Legenda";
         SpannableString ss=new SpannableString(stringa);
