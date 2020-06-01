@@ -205,6 +205,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         new prendiGruppi().execute();
     }
 
+
+
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
         Calendar c= Calendar.getInstance();
@@ -896,7 +898,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     }
 
 
-    //MENU CONTESTUALE
+//MENU CONTESTUALE
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;

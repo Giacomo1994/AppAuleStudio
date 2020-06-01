@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -72,12 +74,12 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     String data=null, giorno=null, apertura=null, chiusura=null;
     String inizio=null, fine=null;
-    String strMatricola, strNome, strCognome, strUniversita, FIRST_SLOT;
+    String strMatricola, strNome, strCognome, strUniversita, strNomeUniversita, FIRST_SLOT;
     int ingresso, pausa, slot_min;
     boolean aperta=false;
     Tavolo tavolo;
 
-    @SuppressLint("WrongConstant")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,18 +114,12 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
+        strNomeUniversita=settings.getString("nome_universita", null);
         ingresso=Integer.parseInt(settings.getString("ingresso", null));
         pausa=Integer.parseInt(settings.getString("pausa", null));
         slot_min=Integer.parseInt(settings.getString("slot", null));
         FIRST_SLOT=settings.getString("first_slot", null);
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        txt_actionbar.setText(strNome+" "+strCognome);
+        action_bar();
 
         initDateTime(); //ok
         new load_image().execute(); //ok
@@ -141,6 +137,55 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new prenota().execute();
+            }
+        });
+    }
+
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Prenotazione");
+        final Dialog d = new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(PrenotazioneStudenteAulaGruppoActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
             }
         });
     }

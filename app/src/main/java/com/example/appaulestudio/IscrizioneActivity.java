@@ -42,11 +42,8 @@ public class IscrizioneActivity extends AppCompatActivity {
     Button annulla_dialog, conferma_dialog, iscriviti;
     ImageView close_dialog;
     String str_codice_gruppo, str_nome_gruppo, nomeProf, cognomeProf, nomeCorso;
-    String strUniversita, strMatricola, strNome, strCognome;
+    String strUniversita, strNomeUniversita, strMatricola, strNome, strCognome;
 
-
-
-    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,17 +54,11 @@ public class IscrizioneActivity extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
+        strNomeUniversita=settings.getString("nome_universita", null);
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        txt_actionbar.setText(strNome+" "+strCognome);
+        action_bar();
 
         iscriviti.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +74,54 @@ public class IscrizioneActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Iscrizione a gruppo");
+        final Dialog d = new Dialog(IscrizioneActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(IscrizioneActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
+    }
 
     private class get_info_dialog extends AsyncTask<Void, Void, String> {
         @Override

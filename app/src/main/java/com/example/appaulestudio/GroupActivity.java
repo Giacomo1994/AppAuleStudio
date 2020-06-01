@@ -2,6 +2,7 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -47,7 +48,7 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_ABBANDONA_GRUPPO= "http://pmsc9.altervista.org/progetto/abbandona_gruppo.php";
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
-    String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo;
+    String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo, strNomeUniversita;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
@@ -65,14 +66,8 @@ public class GroupActivity extends AppCompatActivity {
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        txt_actionbar.setText(strNome+" "+strCognome);
+        strNomeUniversita=settings.getString("nome_universita", null);
+        action_bar();
 
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);
@@ -84,6 +79,54 @@ public class GroupActivity extends AppCompatActivity {
         new listaGruppi().execute();
     }
 
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("I miei gruppi");
+        final Dialog d = new Dialog(GroupActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(GroupActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -378,7 +421,6 @@ public class GroupActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
         menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
@@ -387,15 +429,6 @@ public class GroupActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 1) {
-            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("logged", false);
-            editor.commit();
-            Intent i = new Intent(this, MainActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-        }
         if (item.getItemId() == 2) {
             Intent i = new Intent(this, Home.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

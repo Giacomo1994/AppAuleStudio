@@ -42,6 +42,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -109,7 +110,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     int ingresso, pausa;
     ArrayList<CalendarAccount> array_list_account;
 
-    @SuppressLint("WrongConstant")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,15 +147,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        //getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        txt_actionbar.setText(strNome+" "+strCognome);
-        //setTitle(strNome+" "+strCognome);
+        action_bar();
 
         String stringa="Legenda";
         SpannableString ss=new SpannableString(stringa);
@@ -192,47 +185,53 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         new getPrenotazioni().execute();
     }
 
-
-//CONTEXT MENU
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        ListView list=(ListView) v;
-        Prenotazione p= (Prenotazione) list.getItemAtPosition(info.position);
-        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
-
-        if(p.getIn_corso().equals("in_corso")){
-            if(p.getStato()==1 || p.getStato()==2){
-                menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
-                menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Le mie prenotazioni");
+        final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(PrenotazioniAttiveActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
             }
-            if(p.getStato()==0){
-                menu.add(Menu.FIRST, 2, Menu.FIRST,"Effettua pausa");
-                menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Termina prenotazione");
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
             }
-        }
-        else if(p.getIn_corso().equals("futura")){
-            menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
-            menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
-            //if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
-        }
-        else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
-            menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
-            menu.add(Menu.FIRST, 6, Menu.FIRST+1,"Esci dall'aula");
-        }
-    }
+        });
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        richiesta=item.getItemId();
-        p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-        //richiata =1,3,4,6 no scanner
-        if(richiesta==1 || richiesta==4) new doOperazione().execute();
-        else if(richiesta==8) sincronizza();
-        else qrScan.initiateScan();
-
-        return true;
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
     }
 
 //TASK ASINCRONO --> Richiesta accesso a tornello
@@ -270,7 +269,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {}
     }
-
 
 ///////TASK ASINCRONO --> Operazione su prenotazione
     private class doOperazione extends AsyncTask<Void, Void, String> {
@@ -357,7 +355,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             new getPrenotazioni().execute();
         }
     }
-
 
 //////TASK ASINCRONO --> scarico prenotazioni prenotazioni in corso, future o terminate nella giornata --> Se non c'è connessione prendo i dati da sqlite
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
@@ -584,7 +581,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
     }
 
-
 //////CALENDARIO
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
@@ -682,7 +678,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         return lista;
     }
 
-    @SuppressLint("MissingPermission")
     public boolean write_event() {
         for (CalendarAccount c : array_list_account) {
             ContentResolver cr = getContentResolver();
@@ -846,11 +841,51 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         } else super.onActivityResult(requestCode, resultCode, data);
     }
 
+//CONTEXT MENU
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ListView list=(ListView) v;
+        Prenotazione p= (Prenotazione) list.getItemAtPosition(info.position);
+        //Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>"+p.getId_aula()+"</b></font>"), Toast.LENGTH_SHORT).show();
+
+        if(p.getIn_corso().equals("in_corso")){
+            if(p.getStato()==1 || p.getStato()==2){
+                menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
+                menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
+            }
+            if(p.getStato()==0){
+                menu.add(Menu.FIRST, 2, Menu.FIRST,"Effettua pausa");
+                menu.add(Menu.FIRST, 3, Menu.FIRST+1,"Termina prenotazione");
+            }
+        }
+        else if(p.getIn_corso().equals("futura")){
+            menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
+            menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
+            //if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
+        }
+        else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
+            menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");
+            menu.add(Menu.FIRST, 6, Menu.FIRST+1,"Esci dall'aula");
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        richiesta=item.getItemId();
+        p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
+        //richiata =1,3,4,6 no scanner
+        if(richiesta==1 || richiesta==4) new doOperazione().execute();
+        else if(richiesta==8) sincronizza();
+        else qrScan.initiateScan();
+
+        return true;
+    }
 
 //////OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST+3, "Logout");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
         menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
@@ -859,16 +894,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 1) {
-            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("logged", false);
-            editor.commit();
-            Intent i = new Intent(this, MainActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-
-        }
         if (item.getItemId() == 2) {
             Intent i = new Intent(this, Home.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);

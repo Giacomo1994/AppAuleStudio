@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -71,12 +73,12 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     ArrayList<Orario_Ufficiale> orari_ufficiali;
     ArrayList<Tavolo> tavoli;
     String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
-    String strMatricola, strNome, strCognome, strUniversita;
+    String strMatricola, strNome, strCognome, strUniversita, strNomeUniversita;
     int ingresso;
     boolean aperta=false;
     Tavolo tavolo;
 
-    @SuppressLint("WrongConstant")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,15 +105,9 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
+        strNomeUniversita=settings.getString("nome_universita", null);
         ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        txt_actionbar.setText(strNome+" "+strCognome);
+        action_bar();
 
         //scarica piantina aula
         load_image task_image= (load_image) new load_image().execute();
@@ -144,6 +140,104 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        linear_spinner.setVisibility(View.GONE);
+        tab_layout.setVisibility(View.GONE);
+        btn_prenota.setVisibility(View.GONE);
+        Calendar c=Calendar.getInstance();
+        Date d=c.getTime();
+        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
+        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
+        for(int i=0;i<orari_ufficiali.size();i++){
+            if(orari_ufficiali.get(i).getData().equals(date_now)){
+                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
+                    //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
+                    MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
+                    aperta=false;
+                }
+                else{
+                    //se l'aula è chiusa ma aprirà di oggi oppure apre domani
+                    new get_tavoli().execute();
+                    aperta=true;
+                }
+                break;
+            }
+        }
+    }
+
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Prenotazione");
+        final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(PrenotazioneStudenteActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
+    }
+
+    private class load_image extends AsyncTask<Void, Void, Bitmap> {
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
+            try {
+                String uri="http://pmsc9.altervista.org/progetto/immagini/plant_"+aula.getIdAula()+".png";
+                URL url = new URL(uri);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream inputStream = connection.getInputStream();
+                Bitmap image = BitmapFactory.decodeStream(inputStream);
+                return image;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(Bitmap result) {
+            if(result==null) return;
+            imgView.setImage(ImageSource.bitmap(result));
+        }
+    }
+
 //TASK ASINCRONO PRENOTA
     private class prenota extends AsyncTask<Void, Void, String> {
         @Override
@@ -226,53 +320,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-//creazione alarm
-    public String create_alarm(int id_prenotazione){
-        //cancel_alarm(id_prenotazione);
-        String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date d = null;
-        try {
-            d = df.parse(myTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(d);
-        cal.add(Calendar.SECOND,ingresso);
-
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
-
-        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
-        return strOra;
-    }
-
-
-    private class load_image extends AsyncTask<Void, Void, Bitmap> {
-        @Override
-        protected Bitmap doInBackground(Void... voids) {
-            try {
-                String uri="http://pmsc9.altervista.org/progetto/immagini/plant_"+aula.getIdAula()+".png";
-                URL url = new URL(uri);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-                InputStream inputStream = connection.getInputStream();
-                Bitmap image = BitmapFactory.decodeStream(inputStream);
-                return image;
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        protected void onPostExecute(Bitmap result) {
-            if(result==null) return;
-            imgView.setImage(ImageSource.bitmap(result));
-        }
-    }
 //TASK ASINCRONO TAVOLI DISPONIBILI
     private class get_tavoli extends AsyncTask<Void, Void, String> {
         @Override
@@ -391,32 +438,36 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-//ON RESTART
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        linear_spinner.setVisibility(View.GONE);
-        tab_layout.setVisibility(View.GONE);
-        btn_prenota.setVisibility(View.GONE);
-        Calendar c=Calendar.getInstance();
-        Date d=c.getTime();
-        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
-        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
-        for(int i=0;i<orari_ufficiali.size();i++){
-            if(orari_ufficiali.get(i).getData().equals(date_now)){
-                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
-                    //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
-                    aperta=false;
-                }
-                else{
-                    //se l'aula è chiusa ma aprirà di oggi oppure apre domani
-                    new get_tavoli().execute();
-                    aperta=true;
-                }
-                break;
-            }
+//METODO: creazione alarm
+    public String create_alarm(int id_prenotazione){
+        //cancel_alarm(id_prenotazione);
+        String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = null;
+        try {
+            d = df.parse(myTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.SECOND,ingresso);
+
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
+        return strOra;
     }
+
+
+
+
+
+
 }
 
