@@ -16,6 +16,7 @@ public class Aula implements Parcelable {
     private int posti_totali;
     private int posti_liberi;
     private String servizi;
+    private String last_update;
 
     private Map<Integer, Orario> orari;
     private boolean aperta;
@@ -34,6 +35,7 @@ public class Aula implements Parcelable {
         this.servizi=servizi;
         this.orari=new HashMap<Integer, Orario>();
         this.aperta=false;
+        last_update=null;
     }
 
     public String getIdAula() {
@@ -125,6 +127,14 @@ public class Aula implements Parcelable {
         this.aperta = aperta;
     }
 
+    public String getLast_update() {
+        return last_update;
+    }
+
+    public void setLast_update(String last_update) {
+        this.last_update = last_update;
+    }
+
     protected Aula(Parcel in) {
         idAula = in.readString();
         nome = in.readString();
@@ -135,6 +145,7 @@ public class Aula implements Parcelable {
         posti_totali = in.readInt();
         posti_liberi = in.readInt();
         servizi = in.readString();
+        last_update=in.readString();
     }
 
     @Override
@@ -148,6 +159,7 @@ public class Aula implements Parcelable {
         dest.writeInt(posti_totali);
         dest.writeInt(posti_liberi);
         dest.writeString(servizi);
+        dest.writeString(last_update);
     }
 
     @Override

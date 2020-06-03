@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     boolean studentePassato;
     boolean is_logged=false, is_studente=false;
 
-    @SuppressLint("WrongConstant")
+
     private void initUI(){
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);
         spinner=findViewById(R.id.log_spinner);
@@ -52,15 +52,7 @@ public class MainActivity extends AppCompatActivity {
         radioDocente=findViewById(R.id.radioDocente);
         studente_docente = findViewById(R.id.imageView9);
 
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("StudyAround");
-        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
+        action_bar();
 
         //radio button
         if(radioStudente.isChecked()){
@@ -68,17 +60,17 @@ public class MainActivity extends AppCompatActivity {
         }else {
             studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
         }
-       radioStudente.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
-           @Override
-           public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-               if(radioStudente.isChecked()){
-                   studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.studente));
-               }else {
-                   studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
-               }
+        radioStudente.setOnCheckedChangeListener(new RadioButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(radioStudente.isChecked()){
+                    studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.studente));
+                }else {
+                    studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
+                }
 
-           }
-       });
+            }
+        });
 
         //link a registrazione
         String stringa="Oppure registrati";
@@ -157,13 +149,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
-            @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                token = instanceIdResult.getToken(); //salvo token in variabile globale
-            }
-        });
-        new riempiUniversita().execute();
+        restart();
     }
 
     protected void onResume() {
@@ -173,7 +159,31 @@ public class MainActivity extends AppCompatActivity {
         if(is_logged==true) finish();
     }
 
-//TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
+    private void restart(){
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                token = instanceIdResult.getToken(); //salvo token in variabile globale
+            }
+        });
+        new riempiUniversita().execute();
+    }
+
+    @SuppressLint("WrongConstant")
+    private void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("LOGIN");
+        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
+    }
+
+
+    //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -203,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
                             json_data.getInt("ingresso"), json_data.getInt("pausa"),
                             json_data.getInt("slot"), json_data.getString("first_slot"),
                             json_data.getString("url_registrazione"),json_data.getString("url_corsi"));
+                    array_universita[i].setLast_update(json_data.getString("last_update"));
                 }
                 return array_universita;
             } catch (Exception e) {
@@ -214,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
-                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
+                MyToast.makeText(getApplicationContext(),"Sei offline! Connettititi ad una rete per effettuare il login",false).show();
                 return;
             }
             adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
@@ -232,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-//TASK ASINCRONO PER LOGIN UTENTE
+    //TASK ASINCRONO PER LOGIN UTENTE
     private class loginUtente extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... strings) {
@@ -291,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User user) {
             if(user==null) {
-                MyToast.makeText(getApplicationContext(),"Impossibile effettuare il login!",false).show();
+                MyToast.makeText(getApplicationContext(),"Errore: impossibile effettuare il login!",false).show();
                 return;
             }
             else{
@@ -311,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
                     editor.putString("pausa", ""+universita.getPausa());
                     editor.putString("slot", ""+universita.getSlot());
                     editor.putString("first_slot", universita.getFirst_slot());
+                    editor.putString("last_update", universita.getLast_update());
                     editor.putBoolean("studente", true);
                     editor.commit();
                     Intent i=new Intent(MainActivity.this, Home.class);
@@ -352,5 +364,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            restart();
+        }
+        return true;
+    }
 
 }

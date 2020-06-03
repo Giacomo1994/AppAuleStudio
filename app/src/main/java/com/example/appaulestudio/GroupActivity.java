@@ -49,10 +49,10 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo, strNomeUniversita;
+    boolean offline=false;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +67,7 @@ public class GroupActivity extends AppCompatActivity {
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
         strNomeUniversita=settings.getString("nome_universita", null);
+        offline=settings.getBoolean("offline",false);
         action_bar();
 
         new listaGruppi().execute();
@@ -128,32 +129,12 @@ public class GroupActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        ListView list=(ListView) v;
-        g=(Gruppo) list.getItemAtPosition(info.position);
-        strCodiceGruppo = g.getCodice_gruppo();
-        menu.add(Menu.FIRST,1,Menu.FIRST+1,"Abbandona gruppo");
-        menu.add(Menu.FIRST,2,Menu.FIRST,"Dettagli gruppo");
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        if(item.getItemId()==1){
-            new abbandonaGruppo().execute();
-        }
-        else if(item.getItemId()==2){
-            new dettagliGruppo().execute();
-        }
-        return true;
-    }
 
     public void iscrizione_gruppo(View v){
         Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
         startActivity(i);
-        //finish();
     }
+
 
     private class listaGruppi extends AsyncTask<Void, Void, Gruppo[]>{
         @Override
@@ -215,7 +196,7 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrebbero non essere aggiornati",false).show();
+                MyToast.makeText(getApplicationContext(), "Sei offline! I dati potrebbero non essere aggiornati",false).show();
                 ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
                 if(arrayList_gruppo==null || arrayList_gruppo.size()==0)
                     MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
@@ -258,7 +239,7 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
-// Prendo da database remoto i componenti del gruppo.
+    // Prendo da database remoto i componenti del gruppo.
     private class dettagliGruppo extends AsyncTask<Void, Void, User[]> { //OK
         @Override
         protected User[] doInBackground(Void... voids) {
@@ -350,7 +331,7 @@ public class GroupActivity extends AppCompatActivity {
                 }
             });
             if(componenti==null){
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server! I dati potrebbero non essere aggiornati",false).show();
+                MyToast.makeText(getApplicationContext(), "Sei offline! I dati potrebbero non essere aggiornati",false).show();
                 eti_componenti.setVisibility(View.GONE);
                 return;
             }
@@ -368,7 +349,7 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
-//Cancella da database l'iscrizione e da locale il gruppo
+    //Cancella da database l'iscrizione e da locale il gruppo
     private class abbandonaGruppo extends AsyncTask<Void, Void, String>{
         @Override
         protected String doInBackground(Void... strings) {
@@ -383,7 +364,7 @@ public class GroupActivity extends AppCompatActivity {
                 urlConnection.setDoInput(true);
 
                 String parametri = "matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
-                                   "&codice_gruppo=" + URLEncoder.encode(strCodiceGruppo, "UTF-8");
+                        "&codice_gruppo=" + URLEncoder.encode(strCodiceGruppo, "UTF-8");
 
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
@@ -419,20 +400,50 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
+
+    //CONTEXT MENU
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ListView list=(ListView) v;
+        g=(Gruppo) list.getItemAtPosition(info.position);
+        strCodiceGruppo = g.getCodice_gruppo();
+        menu.add(Menu.FIRST,1,Menu.FIRST+1,"Abbandona gruppo");
+        menu.add(Menu.FIRST,2,Menu.FIRST,"Dettagli gruppo");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if(item.getItemId()==1){
+            new abbandonaGruppo().execute();
+        }
+        else if(item.getItemId()==2){
+            new dettagliGruppo().execute();
+        }
+        return true;
+    }
+
+    //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 2) {
+        if (item.getItemId() == 1) {
             Intent i = new Intent(this, Home.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);

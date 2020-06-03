@@ -12,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -181,7 +183,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             if(result==null){
-                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server!",false).show();
+                MyToast.makeText(getApplicationContext(),"Sei offline! Assicurati di essere connesso ad una rete per poter iscriverti!",false).show();
                 return;
             }
             if(result.equals("Gruppo inesistente!")){
@@ -229,40 +231,40 @@ public class IscrizioneActivity extends AppCompatActivity {
     private class aggiungi_iscrizione extends AsyncTask<Void, Void, String>{
         @Override
         protected String doInBackground(Void... strings) {
-              try {
-            URL url;
-            url = new URL(URL_ISCRIZIONE_GRUPPO);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(1000);
-            urlConnection.setConnectTimeout(1500);
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoOutput(true);
-            urlConnection.setDoInput(true);
+            try {
+                URL url;
+                url = new URL(URL_ISCRIZIONE_GRUPPO);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
 
-            String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
-                    "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
-                    "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");
+                String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
+                        "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
+                        "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");
 
-            DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-            dos.writeBytes(parametri);
-            dos.flush();
-            dos.close();
-            //leggo stringa di ritorno da file php
-            urlConnection.connect();
-            InputStream input = urlConnection.getInputStream();
-            byte[] buffer = new byte[1024];
-            int numRead = 0;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while ((numRead = input.read(buffer)) != -1) {
-                baos.write(buffer, 0, numRead);
-            }
-            input.close();
-            String stringaRicevuta = new String(baos.toByteArray());
-            return stringaRicevuta;
-        } catch (Exception e) {
-            return "Impossibile contattare il server!";
-        } finally {}
-    }
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                //leggo stringa di ritorno da file php
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                return "Impossibile contattare il server!";
+            } finally {}
+        }
         @Override
         protected void onPostExecute(String result) {
             if(result.equals("Iscrizione effettuata con successo!")==false){
@@ -271,14 +273,44 @@ public class IscrizioneActivity extends AppCompatActivity {
             }
             else{
                 MyToast.makeText(getApplicationContext(),result,true).show();
-                Intent i = new Intent(IscrizioneActivity.this, GroupActivity.class);
-                startActivity(i);
                 finish();
             }
         }
     }
 
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
+    }
+
 
 }
+
+
+
 
 

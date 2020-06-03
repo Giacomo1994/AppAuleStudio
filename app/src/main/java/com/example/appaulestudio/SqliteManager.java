@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,11 +92,20 @@ public class SqliteManager {
             String sql="INSERT OR IGNORE INTO gruppi_offline "+
                     "VALUES ('" + g.getCodice_gruppo() + "', '" + g.getNome_gruppo() +"', '" + g.getNome_corso() +"', '"
                     + g.getNome_docente() +"', '" + g.getCognome_docente() +"', " + g.getOre_disponibili() +", '" + g.getData_scadenza() +"')";
-
             String sql1="UPDATE gruppi_offline set ore_disponibili="+g.getOre_disponibili()+", data_scadenza='"+g.getData_scadenza()+"' where codice_gruppo='"+g.getCodice_gruppo()+"'";
             db.execSQL(sql);
             db.execSQL(sql1);
         }
+
+        String sql2 = "DELETE FROM gruppi_offline ";
+        if(gruppi.length==0) db.execSQL(sql2);
+        sql2+="WHERE ";
+        for(int i=0;i<gruppi.length;i++){
+            if(i==0) sql2+="codice_gruppo!='"+gruppi[i].getCodice_gruppo()+"' ";
+            else sql2+="AND codice_gruppo!='"+gruppi[i].getCodice_gruppo()+"' ";
+        }
+        db.execSQL(sql2);
+
     }
 
     public void deleteGruppo(Gruppo g){
@@ -204,26 +214,6 @@ public class SqliteManager {
 
 
 //AULE_OFFLINE E ORARI_OFFLINE
-    public void writeAuleOrari(Aula[] array_aula){
-        SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql1 = "DELETE FROM info_aule_offline";
-        String sql2="DELETE FROM orari_offline";
-        db.execSQL(sql2);
-        db.execSQL(sql1);
-        for (Aula a : array_aula) {
-            String sql =
-                    "INSERT INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali, flag_gruppi, servizi) " +
-                            "VALUES ('" + a.getIdAula() + "', '" + a.getNome() + "', '" + a.getLuogo() + "', " + a.getLatitudine() + "," + a.getLongitudine() + "," + a.getPosti_totali() +  "," + a.getGruppi() + ",'" + a.getServizi() + "')";
-            db.execSQL(sql);
-        }
-        for(Aula a : array_aula){
-            for(int i = 1; i<=7; i++) {
-                String sql = "INSERT INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
-                        "VALUES('" + a.getIdAula() + "', " + i + ", '" + a.getOrari().get(i).getApertura() + "','" + a.getOrari().get(i).getChiusura() + "')";
-                db.execSQL(sql);
-            }
-        }
-    }
 
     public ArrayList<Aula> readListaAule(){
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -231,7 +221,7 @@ public class SqliteManager {
         Cursor cursor=null;
         String sql="";
 
-        sql = "SELECT * FROM info_aule_offline";
+        sql = "SELECT * FROM info_aule_offline ORDER BY id ASC";
         cursor = db.rawQuery(sql, null);
         if(cursor==null ||cursor.getCount()==0) return null;
         for(int i=0; i<cursor.getCount();i++){
@@ -302,13 +292,47 @@ public class SqliteManager {
         return aula;
     }
 
+    public boolean isAulaDaAggiornare(Aula a){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM info_aule_offline WHERE id='"+a.getIdAula()+"' AND last_update='"+a.getLast_update()+"'";
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return true;
+        return false;
+    }
 
+    public ArrayList<Aula> getAuleDaAggiornare(Aula[] array_aula){
+        ArrayList<Aula> auleDaAggiornare=new ArrayList<Aula>();
+        for(Aula a:array_aula){
+            if(isAulaDaAggiornare(a)) auleDaAggiornare.add(a);
+        }
+        return auleDaAggiornare;
+    }
 
+    public void aggiornaAula(Aula a){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql = "INSERT OR REPLACE INTO info_aule_offline (id, nome, luogo, latitudine, longitudine,posti_totali, flag_gruppi, servizi, last_update) " +
+                        "VALUES ('" + a.getIdAula() + "', '" + a.getNome() + "', '" + a.getLuogo() + "', " + a.getLatitudine() + "," + a.getLongitudine() + "," + a.getPosti_totali() +  "," + a.getGruppi() + ",'" + a.getServizi() + "', '"+a.getLast_update()+"')";
+        db.execSQL(sql);
+    }
 
+    public void aggiornaOrariAula(Aula a, HashMap<Integer,Orario> orari){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        for(int i = 1; i<=7; i++) {
+            String sql = "INSERT OR REPLACE INTO orari_offline (id_aula, giorno, apertura, chiusura)" +
+                    "VALUES('" + a.getIdAula() + "', " + i + ", '" + orari.get(i).getApertura() + "','" + orari.get(i).getChiusura() + "')";
+            db.execSQL(sql);
+        }
+    }
 
-
-
-
-
-
+    public void delete_aule_offline(Aula[] array_aula){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql = "DELETE FROM info_aule_offline ";
+        if(array_aula.length==0) db.execSQL(sql);
+        sql+="WHERE ";
+        for(int i=0;i<array_aula.length;i++){
+            if(i==0) sql+="id!='"+array_aula[i].getIdAula()+"' ";
+            else sql+="AND id!='"+array_aula[i].getIdAula()+"' ";
+        }
+        db.execSQL(sql);
+    }
 }

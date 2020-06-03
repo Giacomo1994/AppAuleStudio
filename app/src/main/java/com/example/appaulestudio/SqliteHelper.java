@@ -20,6 +20,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"posti_totali\"\tINTEGER,\n" +
                 "\t\"flag_gruppi\"\tINTEGER,\n" +
                 "\t\"servizi\"\tTEXT,\n" +
+                "\t\"last_update\"\tTEXT,\n" +
                 "\tPRIMARY KEY(\"id\")\n" +
                 ")";
         db.execSQL(sql);

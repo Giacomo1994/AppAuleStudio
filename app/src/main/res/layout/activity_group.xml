@@ -10,17 +10,6 @@
     android:padding="10dp"
     tools:context=".GroupActivity">
 
-    <TextView
-        android:id="@+id/textView12"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:gravity="center_horizontal"
-        android:text="I miei gruppi"
-        android:textColor="@color/intestazione"
-        android:textSize="24sp"
-        app:fontFamily="@font/marko_one" />
-
     <ListView
         android:id="@+id/listaGruppi"
         android:layout_width="match_parent"

@@ -104,10 +104,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     SqliteManager database;
     Intent intent_ricevuto;
     IntentIntegrator qrScan;
-    public Prenotazione p=null;
-    public int richiesta=-1;
+    Prenotazione p=null;
+    int richiesta=-1, ingresso, pausa;
     String strUniversita, strNomeUniversita, strMatricola,strNome, strCognome;
-    int ingresso, pausa;
+    boolean  offline;
     ArrayList<CalendarAccount> array_list_account;
 
 
@@ -122,36 +122,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         txt_legenda=findViewById(R.id.text_legenda);
         array_list_account = new ArrayList<CalendarAccount>();
 
-
-        database=new SqliteManager(PrenotazioniAttiveActivity.this);
-        qrScan = new IntentIntegrator(this);
-        intent_ricevuto=getIntent();
-        if(intent_ricevuto.getAction()!=null && intent_ricevuto.getAction().equals("salva_prenotazione")){
-           int id_prenotazione_intent=intent_ricevuto.getIntExtra("id_prenotazione",-1);
-           String orario_prenotazione_intent=intent_ricevuto.getStringExtra("orario_prenotazione");
-           String nome_aula_intent=intent_ricevuto.getStringExtra("nome_aula");
-           int tavolo_intent=intent_ricevuto.getIntExtra("tavolo",-1);
-           String gruppo_intent=intent_ricevuto.getStringExtra("gruppo");
-           String orario_alarm_intent=intent_ricevuto.getStringExtra("orario_alarm");
-           database.insertPrenotazione(id_prenotazione_intent,orario_prenotazione_intent, nome_aula_intent, tavolo_intent, gruppo_intent);
-           database.insertAlarm(id_prenotazione_intent,orario_alarm_intent);
-           MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
-        }
-
-
-        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-        strUniversita=settings.getString("universita", null);
-        strNomeUniversita = settings.getString("nome_universita", null);
-        strMatricola=settings.getString("matricola", null);
-        strNome=settings.getString("nome", null);
-        strCognome=settings.getString("cognome", null);
-        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
-        pausa=Integer.parseInt(settings.getString("pausa", null))-300;
-        action_bar();
-
+        //legenda
         String stringa="Legenda";
         SpannableString ss=new SpannableString(stringa);
-
         ClickableSpan clickableSpan1 = new ClickableSpan() {
             @Override
             public void onClick(View view) {
@@ -171,10 +144,40 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         };
 
         ss.setSpan(clickableSpan1, 0,7,  Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
         txt_legenda.setText(ss);
         txt_legenda.setMovementMethod(LinkMovementMethod.getInstance());
 
+        //sqlite e qrscan
+        database=new SqliteManager(PrenotazioniAttiveActivity.this);
+        qrScan = new IntentIntegrator(this);
+
+        //intent
+        intent_ricevuto=getIntent();
+        if(intent_ricevuto.getAction()!=null && intent_ricevuto.getAction().equals("salva_prenotazione")){
+            int id_prenotazione_intent=intent_ricevuto.getIntExtra("id_prenotazione",-1);
+            String orario_prenotazione_intent=intent_ricevuto.getStringExtra("orario_prenotazione");
+            String nome_aula_intent=intent_ricevuto.getStringExtra("nome_aula");
+            int tavolo_intent=intent_ricevuto.getIntExtra("tavolo",-1);
+            String gruppo_intent=intent_ricevuto.getStringExtra("gruppo");
+            String orario_alarm_intent=intent_ricevuto.getStringExtra("orario_alarm");
+            database.insertPrenotazione(id_prenotazione_intent,orario_prenotazione_intent, nome_aula_intent, tavolo_intent, gruppo_intent);
+            database.insertAlarm(id_prenotazione_intent,orario_alarm_intent);
+            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
+        }
+
+        //preferenze
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        strUniversita=settings.getString("universita", null);
+        strNomeUniversita = settings.getString("nome_universita", null);
+        strMatricola=settings.getString("matricola", null);
+        strNome=settings.getString("nome", null);
+        strCognome=settings.getString("cognome", null);
+        ingresso=Integer.parseInt(settings.getString("ingresso", null))-300;
+        pausa=Integer.parseInt(settings.getString("pausa", null))-300;
+        offline=settings.getBoolean("offline",false);
+        action_bar();
+
+        //task asincrono
         new getPrenotazioni().execute();
         registerForContextMenu(list_in_corso);
     }
@@ -234,7 +237,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         });
     }
 
-//TASK ASINCRONO --> Richiesta accesso a tornello
+    //TASK ASINCRONO --> Richiesta accesso a tornello
     private class doRichiestaTornello extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -270,7 +273,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {}
     }
 
-///////TASK ASINCRONO --> Operazione su prenotazione
+    ///////TASK ASINCRONO --> Operazione su prenotazione
     private class doOperazione extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -356,7 +359,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
     }
 
-//////TASK ASINCRONO --> scarico prenotazioni prenotazioni in corso, future o terminate nella giornata --> Se non c'è connessione prendo i dati da sqlite
+    //////TASK ASINCRONO --> scarico prenotazioni prenotazioni in corso, future o terminate nella giornata --> Se non c'è connessione prendo i dati da sqlite
     private class getPrenotazioni extends AsyncTask<Void, Void, Prenotazione[]> {
         @Override
         protected Prenotazione[] doInBackground(Void... strings) {
@@ -480,7 +483,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 return;
             }
 
-        //online
+            //online
             ll_cronologia.setVisibility(View.GONE);
             ll_in_corso.setVisibility(View.VISIBLE);
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
@@ -581,7 +584,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
     }
 
-//////CALENDARIO
+    //////CALENDARIO
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
@@ -739,7 +742,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
 
-//////ALARM
+    //////ALARM
     public String create_alarm(Prenotazione prenotazione, boolean inizio, boolean pausa){
         Calendar cal_allarme = Calendar.getInstance();
         if(pausa==true) cal_allarme.add(Calendar.SECOND, this.pausa); //allarme per pausa
@@ -785,7 +788,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
 
-//////QR SCANNER
+    //////QR SCANNER
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -841,7 +844,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         } else super.onActivityResult(requestCode, resultCode, data);
     }
 
-//CONTEXT MENU
+    //CONTEXT MENU
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -883,21 +886,27 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         return true;
     }
 
-//////OPTIONS MENU
+    //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 2, Menu.FIRST, "Home");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 2) {
+        if (item.getItemId() == 1) {
             Intent i = new Intent(this, Home.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);

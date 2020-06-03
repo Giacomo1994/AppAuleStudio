@@ -7,6 +7,7 @@ import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
@@ -57,10 +61,11 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
-    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula, txt_errore;
+    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula;
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner, linear_activity;
+    ImageView pick_time;
 
     SqliteManager database;
     Intent intent;
@@ -73,7 +78,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     LinkedList<String> slot;
 
     String data=null, giorno=null, apertura=null, chiusura=null;
-    String inizio=null, fine=null;
+    String inizio=null, fine=null, nuova_fine=null;
     String strMatricola, strNome, strCognome, strUniversita, strNomeUniversita, FIRST_SLOT;
     int ingresso, pausa, slot_min;
     boolean aperta=false;
@@ -89,19 +94,20 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         txt_data=findViewById(R.id.pren_et_data_studgruppo);
         txt_inizio=findViewById(R.id.pren_et_inizio_studgruppo);
         txt_fine=findViewById(R.id.pren_et_fine_studgruppo);
-        txt_errore=findViewById(R.id.txt_er_studgruppo);
         tab_layout=findViewById(R.id.pren_tab_layout_studgruppo);
         btn_prenota=findViewById(R.id.pren_btn_studgruppo);
         linear_spinner=findViewById(R.id.linear_spinner_studgruppo);
         linear_activity=findViewById(R.id.ll_studgruppo);
         spinner=findViewById(R.id.spinner_tavoli_studgruppo);
-
-
+        pick_time=findViewById(R.id.pick_time_stgr);
         slot=new LinkedList<String>();
         prenotazioni=new LinkedList<Prenotazione>();
         tavoli=null;
 
+        //database
         database=new SqliteManager(this);
+
+        //intent
         intent =getIntent();
         bundle=intent.getBundleExtra("dati");
         aula=bundle.getParcelable("aula");
@@ -109,6 +115,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         Collections.sort(orari_ufficiali);
         txt_nome_aula.setText(aula.getNome());
 
+        //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
@@ -121,24 +128,58 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         FIRST_SLOT=settings.getString("first_slot", null);
         action_bar();
 
-        initDateTime(); //ok
-        new load_image().execute(); //ok
-        if(aperta==true){
-            new getTavoli().execute();
-        }
+        //esecuzione
+        initDateTime();
+        new load_image().execute();
+        if(aperta==true) new getTavoli().execute();
         else{
-            MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
+            dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
             linear_spinner.setVisibility(View.GONE);
             tab_layout.setVisibility(View.GONE);
             btn_prenota.setVisibility(View.GONE);
             return;
         }
+
+        //bottone
         btn_prenota.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new prenota().execute();
             }
         });
+
+        //funzione time picker
+        pick_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog timePicker=new TimePickerDialog(PrenotazioneStudenteAulaGruppoActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int min) {
+                        Calendar c=Calendar.getInstance();
+                        c.set(2020,05,05,hourOfDay,min,0);
+                        nuova_fine=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(c.getTime());
+                        txt_fine.setText(nuova_fine.substring(0,5));
+
+                    }
+                },Calendar.getInstance().get(Calendar.HOUR_OF_DAY),Calendar.getInstance().get(Calendar.MINUTE),true);
+                timePicker.show();
+            }
+        });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        restart();
+    }
+
+    private void restart(){
+        initDateTime();
+        if(aperta==true) new getTavoli().execute();
+        else{
+            dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
+            return;
+        }
     }
 
     @SuppressLint("WrongConstant")
@@ -188,6 +229,47 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 d.show();
             }
         });
+    }
+
+    private void dialogWarning(final String message){
+        final Dialog d = new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_warning);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        Button btn=d.findViewById(R.id.btn_dialog_warning);
+        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
+        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
+        txt_warning.setText(message);
+        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!") ||
+                message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile per l'orario indicato!") ||
+                message.equals("Tavolo non più disponibile!")) btn_aggiorna.setVisibility(View.VISIBLE);
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrenotazioneStudenteAulaGruppoActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+                d.dismiss();
+            }
+        });
+        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(message.equals("Sei offline! Impossibile prenotare!")){
+                    new load_image().execute();
+                    restart();
+                    d.dismiss();
+                }
+                else{
+                    restart();
+                    d.dismiss();
+                }
+
+            }
+        });
+        d.show();
+        return;
     }
 
 
@@ -264,12 +346,13 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
         protected void onPostExecute(ArrayList<Tavolo> result) {
             if (result == null) {//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
-                finish();
+                dialogWarning("Sei offline! Impossibile prenotare!");
                 return;
             }
-            tavoli=result;
-            new getPrenotazioni().execute();
+            else {
+                tavoli = result;
+                new getPrenotazioni().execute();
+            }
         }
     }
 
@@ -296,9 +379,9 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") +
-                            "&data=" + URLEncoder.encode(data, "UTF-8") +
-                            "&ingresso=" + URLEncoder.encode(""+ingresso, "UTF-8") +
-                            "&pausa=" + URLEncoder.encode(""+pausa, "UTF-8");
+                        "&data=" + URLEncoder.encode(data, "UTF-8") +
+                        "&ingresso=" + URLEncoder.encode(""+ingresso, "UTF-8") +
+                        "&pausa=" + URLEncoder.encode(""+pausa, "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -331,7 +414,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
         protected void onPostExecute(LinkedList<Prenotazione> result) {
             if (result == null) {//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
+                dialogWarning("Sei offline! Impossibile prenotare!");
                 linear_activity.removeAllViews();
                 return;
             }
@@ -353,7 +436,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 if(posti_liberi>0) list_tavoli_spinner.add(t);
             }
             if(list_tavoli_spinner.size()==0){
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
+                dialogWarning("Impossibile prenotare: non ci sono tavoli disponibili!");
                 linear_spinner.setVisibility(View.GONE);
                 tab_layout.setVisibility(View.GONE);
                 btn_prenota.setVisibility(View.GONE);
@@ -387,10 +470,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    tab_layout.setVisibility(View.VISIBLE);
-                    btn_prenota.setVisibility(View.VISIBLE);
-                    txt_errore.setVisibility(View.GONE);
-
+                    nuova_fine=null;
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
                     getSlot();
 
@@ -399,10 +479,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                         Date d=c.getTime();
                         String time_now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
                         if(time_now.compareTo(tavolo.getInizio_disponibilita())>=0){
-                            tab_layout.setVisibility(View.GONE);
-                            btn_prenota.setVisibility(View.GONE);
-                            txt_errore.setVisibility(View.VISIBLE);
-                            txt_errore.setText("Tavolo non più disponibile");
+                            dialogWarning("Tavolo non più disponibile");
                             return;
                         }
                     }
@@ -438,6 +515,12 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 String slots=getSlotIntermedi();
                 if(slot==null) return "Errore: il tavolo non è più disponibile per l'orario indicato!";
 
+                if(nuova_fine!=null){
+                    if(nuova_fine.compareTo(fine)>0 || nuova_fine.compareTo(inizio)<0)
+                        return "Orario di fine prenotazione errato: per favore modifica il campo";
+                    else fine=nuova_fine;
+                }
+
                 String parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") +
                         "&universita=" + URLEncoder.encode(strUniversita, "UTF-8") +
                         "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
@@ -471,21 +554,24 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
-                finish();
+                dialogWarning("Sei offline! Impossibile procedere con la prenotazione!");
                 return;
             }
-            else if(result.equals("Errore: il tavolo non è più disponibile per l'orario indicato!") || result.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato")){
-                MyToast.makeText(getApplicationContext(), result, false).show();
-                finish();
+            else if(result.equals("Errore: il tavolo non è più disponibile per l'orario indicato!")){
+                dialogWarning("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile per l'orario indicato!");
+                return;
+            }
+            else if(result.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato")){
+                dialogWarning("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!");
+                return;
+            }
+            else if(result.equals("Orario di fine prenotazione errato: per favore modifica il campo")){
+                MyToast.makeText(getApplicationContext(),"Orario di fine prenotazione errato: per favore modifica il campo", false).show();
                 return;
             }
             else{
                 int id_prenotazione=Integer.parseInt(result);
                 String orario_alarm=create_alarm(id_prenotazione);
-                //database.insertPrenotazione(id_prenotazione,data+" "+inizio, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
-                //database.insertAlarm(id_prenotazione,orario_alarm);
-                //MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
                 Intent i=new Intent(PrenotazioneStudenteAulaGruppoActivity.this,PrenotazioniAttiveActivity.class);
                 i.setAction("salva_prenotazione");
                 i.putExtra("id_prenotazione", id_prenotazione);
@@ -495,7 +581,6 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 i.putExtra("gruppo", "null");
                 i.putExtra("orario_alarm", orario_alarm);
                 startActivity(i);
-                startActivity(i);
                 finish();
             }
 
@@ -503,6 +588,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
         }
     }
+
 
     public String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
@@ -587,7 +673,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             calendar_start=calendar_apertura;
         }
 
-           while (true) {
+        while (true) {
             String s=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(cc.getTime());
             if(cc.compareTo(calendar_start)<=0){
                 cc.add(Calendar.MINUTE, slot_min);
@@ -646,6 +732,40 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             result=result.substring(0,result.length()-1);
         }
         return result;
+    }
+
+
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            restart();
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
     }
 
 

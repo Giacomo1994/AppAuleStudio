@@ -7,6 +7,7 @@ import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
@@ -44,6 +46,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -65,6 +69,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner;
+    ImageView pick_time;
 
     SqliteManager database;
     Intent intent;
@@ -72,12 +77,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     Aula aula;
     ArrayList<Orario_Ufficiale> orari_ufficiali;
     ArrayList<Tavolo> tavoli;
-    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione;
+    String data_prenotazione, orario_inizio_prenotazione, orario_fine_prenotazione, nuovo_orario_fine_prenotazione=null;
     String strMatricola, strNome, strCognome, strUniversita, strNomeUniversita;
     int ingresso;
     boolean aperta=false;
     Tavolo tavolo;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +95,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         tab_layout=findViewById(R.id.pren_tab_layout);
         btn_prenota=findViewById(R.id.pren_btn);
         linear_spinner=findViewById(R.id.linear_spinner);
+        pick_time=findViewById(R.id.pick_time_st);
 
         database=new SqliteManager(this);
         intent =getIntent();
@@ -118,15 +123,15 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
         for(int i=0;i<orari_ufficiali.size();i++){
             if(orari_ufficiali.get(i).getData().equals(date_now)){
-                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
+                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
                     //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                     MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
-                     aperta=false;
+                    dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
+                    aperta=false;
                 }
                 else{
                     //se l'aula è chiusa ma aprirà di oggi oppure apre domani
-                     new get_tavoli().execute();
-                     aperta=true;
+                    new get_tavoli().execute();
+                    aperta=true;
                 }
                 break;
             }
@@ -139,11 +144,34 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 new prenota().execute();
             }
         });
+
+        //funzione time picker
+        pick_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog timePicker=new TimePickerDialog(PrenotazioneStudenteActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int min) {
+                        Calendar c=Calendar.getInstance();
+                        c.set(2020,05,05,hourOfDay,min,0);
+                        nuovo_orario_fine_prenotazione=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(c.getTime());
+                        txt_fine.setText(nuovo_orario_fine_prenotazione.substring(0,5));
+
+                    }
+                },Calendar.getInstance().get(Calendar.HOUR_OF_DAY),Calendar.getInstance().get(Calendar.MINUTE),true);
+                timePicker.show();
+            }
+        });
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+        restart();
+    }
+
+    private void restart(){
+        tavoli=null;
         linear_spinner.setVisibility(View.GONE);
         tab_layout.setVisibility(View.GONE);
         btn_prenota.setVisibility(View.GONE);
@@ -154,8 +182,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         for(int i=0;i<orari_ufficiali.size();i++){
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
-                    //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
-                    MyToast.makeText(getApplicationContext(), "Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!", false).show();
+                    dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
                     aperta=false;
                 }
                 else{
@@ -217,6 +244,45 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         });
     }
 
+    private void dialogWarning(final String message){
+        final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_warning);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        Button btn=d.findViewById(R.id.btn_dialog_warning);
+        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
+        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
+        txt_warning.setText(message);
+        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!")
+                || message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile")) btn_aggiorna.setVisibility(View.VISIBLE);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrenotazioneStudenteActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+                d.dismiss();
+            }
+        });
+        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(message.equals("Sei offline! Impossibile prenotare!")){
+                    new load_image().execute();
+                    restart();
+                    d.dismiss();
+                }
+                else{
+                    restart();
+                    d.dismiss();
+                }
+            }
+        });
+        d.show();
+        return;
+    }
+
+
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(Void... voids) {
@@ -238,7 +304,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-//TASK ASINCRONO PRENOTA
+    //TASK ASINCRONO PRENOTA
     private class prenota extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -255,6 +321,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 String matricola=settings.getString("matricola", null);
                 String now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime());
                 if(orario_inizio_prenotazione==null) orario_inizio_prenotazione=now;
+                if(nuovo_orario_fine_prenotazione!=null){
+                    if(nuovo_orario_fine_prenotazione.compareTo(orario_fine_prenotazione)>0 || nuovo_orario_fine_prenotazione.compareTo(orario_inizio_prenotazione)<0)
+                        return "Orario di fine prenotazione errato: per favore modifica il campo";
+                    else orario_fine_prenotazione=nuovo_orario_fine_prenotazione;
+                }
                 String inizio_prenotazione=data_prenotazione+" "+orario_inizio_prenotazione;
                 String fine_prenotazione=data_prenotazione+" "+orario_fine_prenotazione;
 
@@ -286,18 +357,19 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){//problema di connessione
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
-                finish();
+                dialogWarning("Sei offline! Impossibile procedere con la prenotazione!");
                 return;
             }
-            if(result.equals("Impossibile prenotare")){ //qualcuno ha occupato il tavolo al posto tuo
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Non ci sono posti disponibili!", false).show();
-                finish();
+            else if(result.equals("Impossibile prenotare")){ //qualcuno ha occupato il tavolo al posto tuo
+                dialogWarning("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile");
                 return;
             }
-            if(result.equals("ER")){
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare! Hai già una prenotazione attiva nell'orario specificato!", false).show();
-                finish();
+            else if(result.equals("ER")){
+                dialogWarning("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!");
+                return;
+            }
+            else if(result.equals("Orario di fine prenotazione errato: per favore modifica il campo")){
+                MyToast.makeText(getApplicationContext(),"Orario di fine prenotazione errato: per favore modifica il campo", false).show();
                 return;
             }
 
@@ -320,7 +392,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-//TASK ASINCRONO TAVOLI DISPONIBILI
+    //TASK ASINCRONO TAVOLI DISPONIBILI
     private class get_tavoli extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -373,11 +445,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(tavoli==null){
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile contattare il server!", false).show();
+                dialogWarning("Sei offline! Impossibile prenotare!");
                 return;
             }
             if(tavoli.size()==0){
-                MyToast.makeText(getApplicationContext(), "Impossibile prenotare: non ci sono tavoli disponibili!", false).show();
+                dialogWarning("Impossibile prenotare: non ci sono tavoli disponibili!");
                 return;
             }
 
@@ -391,6 +463,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    nuovo_orario_fine_prenotazione=null;
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
                     Calendar cal = Calendar.getInstance();
                     Date date = cal.getTime();
@@ -438,7 +511,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-//METODO: creazione alarm
+    //METODO: creazione alarm
     public String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
@@ -464,10 +537,37 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         return strOra;
     }
 
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
+        return true;
+    }
 
-
-
-
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            restart();
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
+    }
 }
 

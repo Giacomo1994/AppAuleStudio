@@ -65,9 +65,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 public class InfoAulaActivity extends AppCompatActivity {
-    //static final String URL_ORARI_SETTIMANA_DEFAULT="http://pmsc9.altervista.org/progetto/infoaula_orariDefault.php";
+    static final String URL_ORARI_SETTIMANA_DEFAULT="http://pmsc9.altervista.org/progetto/infoaula_orariDefault.php";
     static final String URL_ORARI_SETTIMANA_SPECIALI="http://pmsc9.altervista.org/progetto/infoaula_orariSpeciali.php";
-    //static final String URL_CHECK_APERTA="http://pmsc9.altervista.org/progetto/infoaula_checkAperta.php";
     static final String URL_CHECK_POSTI="http://pmsc9.altervista.org/progetto/infoaula_checkPosti.php";
     static final String URL_RICHIEDI_NOTIFICA="http://pmsc9.altervista.org/progetto/infoaula_richiedi_notifica.php";
 
@@ -81,14 +80,10 @@ public class InfoAulaActivity extends AppCompatActivity {
     HashMap<Integer, Orario> orari_default;
     LinkedList<Orario_Speciale> orari_speciali;
     LinkedList<Orario_Ufficiale> orari_giusti;
-    ProgressBar bar;
     String strNome, strCognome, strMatricola, strUniversita, strNomeUniversita;
-    boolean connesso=false;
-
-    SqliteManager database;
+    boolean connesso=false, offline=false;
 
 
-//ON CREATE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,19 +98,9 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazionePosto=findViewById(R.id.infoAula_toPrenSingolo);
         btnPrenotazioneGruppo=findViewById(R.id.infoAula_toPrenGruppo);
         imgGruppo=findViewById(R.id.imageView2);
-        bar=this.findViewById(R.id.bar2);
-        btnPrenotazioneGruppo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent= new Intent(InfoAulaActivity.this, PrenotazioneGruppoActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putParcelable("aula", aula);
-                bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
-                intent.putExtra("dati", bundle);
-                startActivityForResult(intent, 61);
-            }
-        });
 
+
+        //intent
         intent = getIntent();
         bundle=intent.getBundleExtra("bundle");
         aula=bundle.getParcelable("aula");
@@ -127,19 +112,33 @@ public class InfoAulaActivity extends AppCompatActivity {
             infoAula_gruppi.setText("Non disponibile per i gruppi");
             imgGruppo.setImageResource(R.drawable.singolo);
         }
+        getServizi();
 
+        //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
         strMatricola=settings.getString("matricola", null);
         strUniversita=settings.getString("universita", null);
         strNomeUniversita=settings.getString("nome_universita", null);
+        offline=settings.getBoolean("offline",false);
         action_bar();
 
-        database=new SqliteManager(InfoAulaActivity.this);
+        //esecuzione
         new mostra_orari().execute();
-        getServizi();
 
+        //bottone
+        btnPrenotazioneGruppo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent= new Intent(InfoAulaActivity.this, PrenotazioneGruppoActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("aula", aula);
+                bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
+                intent.putExtra("dati", bundle);
+                startActivityForResult(intent, 61);
+            }
+        });
         btnPrenotazionePosto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,7 +149,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                     bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
                     i.putExtra("dati", bundle);
                     startActivity(i);
-                    finish();
                 }
                 else{
                     Intent i= new Intent(InfoAulaActivity.this,
@@ -160,17 +158,21 @@ public class InfoAulaActivity extends AppCompatActivity {
                     bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
                     i.putExtra("dati", bundle);
                     startActivity(i);
-                    finish();
                 }
             }
         });
-
         btnNotifica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new richiedi_notifica().execute();
             }
         });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        restart();
     }
 
     @SuppressLint("WrongConstant")
@@ -222,8 +224,17 @@ public class InfoAulaActivity extends AppCompatActivity {
         });
     }
 
+    private void restart(){
+        btnNotifica.setVisibility(View.GONE);
+        btnPrenotazionePosto.setVisibility(View.GONE);
+        btnPrenotazioneGruppo.setVisibility(View.GONE);
+        LinearLayout layout = findViewById(R.id.infAula_linear);
+        layout.removeAllViews();
+        new mostra_orari().execute();
+    }
 
-//ASYNC TASK --> mostra posti disponibili
+
+    //ASYNC TASK --> prende posti dipsponibili posti disponibili
     private class check_posti extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voids) {
@@ -272,9 +283,8 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Integer[] result) {
-            bar.setVisibility(View.GONE);
             if(result==null){
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
+                MyToast.makeText(getApplicationContext(),"Sei offline! I dati dell'aula potrebbero non essere aggiornati!",false).show();
                 btnNotifica.setVisibility(View.GONE);
                 btnPrenotazionePosto.setVisibility(View.GONE);
                 btnPrenotazioneGruppo.setVisibility(View.GONE);
@@ -295,7 +305,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
     }
 
-//ASYNC TASK --> mostra orari aula
+    //ASYNC TASK --> prende orari default e speciali aula
     private class mostra_orari extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -310,6 +320,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 String line;
                 String result;
                 JSONArray jArrayOrariSpeciali;
+                JSONArray jArrayOrariDefault;
 
                 url = new URL(URL_ORARI_SETTIMANA_SPECIALI);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -335,6 +346,30 @@ public class InfoAulaActivity extends AppCompatActivity {
                 result = sb.toString();
                 jArrayOrariSpeciali = new JSONArray(result);
 
+                url = new URL(URL_ORARI_SETTIMANA_DEFAULT);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1500);
+                urlConnection.setConnectTimeout(1000);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayOrariDefault = new JSONArray(result);
+                if(jArrayOrariDefault.length()==0) return "AULA NON ESISTE";
 
                 orari_speciali=new LinkedList<Orario_Speciale>();
                 for (int i = 0; i < jArrayOrariSpeciali.length(); i++) {
@@ -345,32 +380,42 @@ public class InfoAulaActivity extends AppCompatActivity {
                     if(apertura.equalsIgnoreCase("null")&&chiusura.equalsIgnoreCase("null")) orari_speciali.add(new Orario_Speciale(data, null, null));
                     else orari_speciali.add(new Orario_Speciale(data, apertura, chiusura));
                 }
+
+                orari_default=new HashMap<Integer, Orario>();
+                for (int i = 0; i < jArrayOrariDefault.length(); i++) {
+                    JSONObject json_data = jArrayOrariDefault.getJSONObject(i);
+                    int giorno=json_data.getInt("giorno");
+                    String apertura=json_data.getString("apertura");
+                    String chiusura=json_data.getString("chiusura");
+                    orari_default.put(giorno, new Orario(apertura,chiusura));
+                }
                 return "OK";
             } catch (Exception e) {
                 return null;
             }
         }
         protected void onPostExecute(String result) {
-            if(orari_default==null){
-                MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare gli orari!", false).show();
-                return;
-            }
             if(result==null){
+                MyToast.makeText(getApplicationContext(), "Sei offline! I dati dell'aula potrebbero non essere aggiornati!", false).show();
                 orari_speciali=null;
                 connesso=false;
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server: i dati potrebbero non essere aggiornati!", false).show();
-                bar.setVisibility(View.GONE);
                 btnNotifica.setVisibility(View.GONE);
                 btnPrenotazionePosto.setVisibility(View.GONE);
                 btnPrenotazioneGruppo.setVisibility(View.GONE);
                 infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
+            }
+            else if(result.equals("AULA NON ESISTE")){
+                MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare le informazioni dell'aula!", false).show();
+                Intent i=new Intent(InfoAulaActivity.this,Home.class);
+                startActivity(i);
+                finish();
             }
             else connesso=true;
             stampa_orari(orari_default,orari_speciali);
         }
     }
 
-//ASYNC TASK --> richiede notifica posti liberi
+    //ASYNC TASK --> richiede notifica posti liberi
     private class richiedi_notifica extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -420,7 +465,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     }
 
 
-//METODO --> STAMPA IN UI TABELLA ORARI
+    //METODO --> STAMPA IN UI TABELLA ORARI
     public void stampa_orari(HashMap<Integer,Orario> orari_default,LinkedList<Orario_Speciale> orari_speciali){
         //PREPARAZIONE
         try {
@@ -471,7 +516,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                 new check_posti().execute();
             }
             else if(connesso==true && checkAulaAperta()==false){
-                bar.setVisibility(View.GONE);
                 btnPrenotazionePosto.setVisibility(View.VISIBLE);
                 if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
                 btnNotifica.setVisibility(View.GONE);
@@ -501,7 +545,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }catch (Exception e){}
     }
 
-// METODO --> mostra servizi, presi da aula passata con intent
+    // METODO --> mostra servizi, presi da aula passata con intent
     public  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
         String[] servizi=aula.getServizi().split(",");
@@ -530,7 +574,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
     }
 
-// METODO --> controlla se aula è aperta o chiusa
+    // METODO --> controlla se aula è aperta o chiusa
     public boolean checkAulaAperta(){
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();
@@ -545,6 +589,39 @@ public class InfoAulaActivity extends AppCompatActivity {
         return false;
     }
 
+
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            restart();
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
+    }
 
 
 

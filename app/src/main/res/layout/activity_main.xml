@@ -13,16 +13,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="LOGIN"
-            android:textColor="@color/intestazione"
-            android:textSize="24sp"
-            app:fontFamily="@font/marko_one" />
-
         <ImageView
             android:id="@+id/imageView9"
             android:layout_width="match_parent"

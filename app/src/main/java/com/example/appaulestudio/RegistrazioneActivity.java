@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -49,13 +51,15 @@ public class RegistrazioneActivity extends AppCompatActivity {
     Button btn_registrazione;
     EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password, txt_password2;
     RadioButton radioStudente,radioDocente;
+
     Intent intent;
     Universita universita=null;
     String matricola,nome,cognome, email, password, password2;
     boolean isStudente;
 
-    @SuppressLint("WrongConstant")
-    private void initUI(){
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registrazione);
         spinner=findViewById(R.id.reg_universita);
         btn_registrazione=findViewById(R.id.btn_registrazione);
@@ -67,25 +71,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_password2=this.findViewById(R.id.reg_password2);
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
-
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.my_action_bar);
-        getSupportActionBar().setElevation(0);
-        View view = getSupportActionBar().getCustomView();
-        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
-        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("StudyAround");
-        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        initUI();
-        intent=getIntent();
-
-        new riempiUniversita().execute();
+        action_bar();
 
         btn_registrazione.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,9 +122,34 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 new checkUtenteFromUniversita().execute();
             }
         });
+
+        intent=getIntent();
+        new riempiUniversita().execute();
     }
 
-//TASK ASINCRONO --> riempie lo spinner delle univeristà
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        new riempiUniversita().execute();
+    }
+
+    @SuppressLint("WrongConstant")
+    private void action_bar(){
+
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("REGISTRAZIONE");
+        image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
+    }
+
+
+    //TASK ASINCRONO --> riempie lo spinner delle univeristà
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -183,10 +194,11 @@ public class RegistrazioneActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Universita[] array_universita) {
             if(array_universita==null){
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Impossibile connettersi!" + "</b></font>"),Toast.LENGTH_LONG).show();
                 spinner.setEnabled(false);
+                MyToast.makeText(getApplicationContext(),"Sei offline! Connettititi ad una rete per effettuare registrarti",false).show();
                 return;
             }
+            spinner.setEnabled(true);
             adapter = new ArrayAdapter(RegistrazioneActivity.this, android.R.layout.simple_list_item_1, array_universita);
             spinner.setAdapter(adapter);
 
@@ -202,7 +214,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
             });
         }
     }
-
 
     private class checkUtenteFromUniversita extends AsyncTask<Void, Void, String> {
         @Override
@@ -245,65 +256,79 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            if(result.equals("Impossibile connettersi")) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false).show();
+            if(result.equals("Impossibile connettersi")) MyToast.makeText(getApplicationContext(), "Sei offline! Connettiti ad una rete per registrarti!", false).show();
             else if(result.equals("Permission granted")) new registraUtente().execute();
-            else MyToast.makeText(getApplicationContext(), "ERRORE: Non risulti iscritto all'università. Controlla i campi inseriti", false).show();
+            else MyToast.makeText(getApplicationContext(), "Errore: Non risulti iscritto all'università. Controlla i campi inseriti!", false).show();
+        }
+    }
+
+    //registra nella tabella utente il nuovo utente
+    private class registraUtente extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... strings) {
+            try {
+                URL url = new URL(URL_REGISTRAZIONE);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
+                        + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
+                        + "&nome=" + URLEncoder.encode(nome, "UTF-8")
+                        + "&cognome=" + URLEncoder.encode(cognome, "UTF-8")
+                        + "&mail=" + URLEncoder.encode(email, "UTF-8")
+                        + "&password=" + URLEncoder.encode(password, "UTF-8")
+                        + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8"); //imposto parametri da passare
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                //leggo stringa di ritorno da file php
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                Log.e("SimpleHttpURLConnection", e.getMessage());
+                return "Impossibile connettersi";
+            } finally {
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), result, false).show();
+            else{
+                intent.putExtra("matricola", matricola);
+                intent.putExtra("password", password);
+                intent.putExtra("isStudente", isStudente);
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
         }
     }
 
 
-    //registra nella tabella utente il nuovo utente
-    private class registraUtente extends AsyncTask<Void, Void, String> {
-            @Override
-            protected String doInBackground(Void... strings) {
-                try {
-                    URL url = new URL(URL_REGISTRAZIONE);
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setReadTimeout(1000);
-                    urlConnection.setConnectTimeout(1500);
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setDoInput(true);
-                    String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
-                            + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
-                            + "&nome=" + URLEncoder.encode(nome, "UTF-8")
-                            + "&cognome=" + URLEncoder.encode(cognome, "UTF-8")
-                            + "&mail=" + URLEncoder.encode(email, "UTF-8")
-                            + "&password=" + URLEncoder.encode(password, "UTF-8")
-                            + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8"); //imposto parametri da passare
-                    DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                    dos.writeBytes(parametri);
-                    dos.flush();
-                    dos.close();
-                    //leggo stringa di ritorno da file php
-                    urlConnection.connect();
-                    InputStream input = urlConnection.getInputStream();
-                    byte[] buffer = new byte[1024];
-                    int numRead = 0;
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    while ((numRead = input.read(buffer)) != -1) {
-                        baos.write(buffer, 0, numRead);
-                    }
-                    input.close();
-                    String stringaRicevuta = new String(baos.toByteArray());
-                    return stringaRicevuta;
-                } catch (Exception e) {
-                    Log.e("SimpleHttpURLConnection", e.getMessage());
-                    return "Impossibile connettersi";
-                } finally {
-                }
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), result, false).show();
-                else{
-                    intent.putExtra("matricola", matricola);
-                    intent.putExtra("password", password);
-                    intent.putExtra("isStudente", isStudente);
-                    setResult(Activity.RESULT_OK, intent);
-                    finish();
-                }
-            }
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            new riempiUniversita().execute();
+        }
+        return true;
     }
 }

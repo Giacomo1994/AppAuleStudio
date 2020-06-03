@@ -9,17 +9,6 @@
     android:orientation="vertical"
     tools:context=".PrenotazioniAttiveActivity">
 
-    <TextView
-        android:id="@+id/header_prenotazioni"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:gravity="center"
-        android:text="Prenotazioni"
-        android:textColor="@color/intestazione"
-        android:textSize="24sp"
-        app:fontFamily="@font/marko_one" />
-
     <LinearLayout
         android:id="@+id/prenInCorso_ll"
         android:layout_width="match_parent"
