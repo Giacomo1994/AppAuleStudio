@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ScanQRCodeActivity"></activity>
+
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -31,6 +31,7 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
 
+        <activity android:name=".ScanQRCodeActivity"></activity>
         <activity android:name=".MapActivity" />
         <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
         <activity android:name=".PrenotazioneGruppoActivity" />
