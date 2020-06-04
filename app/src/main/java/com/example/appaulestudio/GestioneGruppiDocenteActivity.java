@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -32,6 +33,7 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -87,7 +89,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     double oreUpdateNumerico; String dataUpdate, oreUpdate;
     ArrayAdapter adapterComponenti;
     TextView nomeGruppo, dataScadenza, oreRimanenti, numeroPartecipanti, codiceGruppo;
-    String codiceUniversita, nomeDocente, matricolaDocente, cognomeDocente, password;
+    String codiceUniversita, nomeUniversita, nomeDocente, matricolaDocente, cognomeDocente, password;
     LinearLayout rowGruppiDocente;
     Intent intent;
     Bundle bundle;
@@ -106,6 +108,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         codiceUniversita=settings.getString("universita", null);
+        nomeUniversita=settings.getString("nome_universita", null);
         matricolaDocente=settings.getString("matricola", null);
         password=settings.getString("password", null);
         nomeDocente=settings.getString("nome", null);
@@ -116,11 +119,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         titoloAttivi.setText(corso.getNomeCorso());
         titoloInScad.setText(corso.getNomeCorso());
         titoloScaduti.setText(corso.getNomeCorso());
-        setTitle(nomeDocente+" "+cognomeDocente);
         output=findViewById(R.id.output);
-        //listaGruppi=findViewById(R.id.listaGruppi);
 
-        //output=findViewById(R.id.output);
         new prendiGruppi().execute();
         frameLayout=findViewById(R.id.frameLayout);
         layoutAttivi=findViewById(R.id.layoutAttivi);
@@ -196,6 +196,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         corso=bundle.getParcelable("corso");
 
         initUI();
+        action_bar();
 
     }
 
@@ -205,7 +206,56 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         new prendiGruppi().execute();
     }
 
+    @SuppressLint("WrongConstant")
+    private void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("I miei gruppi");
+        final Dialog d = new Dialog(GestioneGruppiDocenteActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(nomeDocente+" "+cognomeDocente);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(matricolaDocente);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(nomeUniversita);
+        ImageView img_user=d.findViewById(R.id.img_dialog_user);
+        img_user.setImageResource(R.drawable.docente);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(GestioneGruppiDocenteActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
 
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
+    }
 
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
@@ -778,7 +828,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 urlConnection.setDoInput(true);
                 String parametri = "data_scadenza=" + URLEncoder.encode(dataUpdate, "UTF-8") +
                         "&ore_disponibili=" + URLEncoder.encode(oreUpdate, "UTF-8")+
-                        "&codice_gruppo="+ URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8"); //imposto parametri da passare
+                        "&codice_gruppo="+ URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8") +
+                        "&nome_gruppo="+ URLEncoder.encode(gruppoSelezionato.getNome_gruppo(), "UTF-8"); //imposto parametri da passare
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -825,7 +876,10 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     urlConnection.setDoOutput(true);
                     urlConnection.setDoInput(true);
                     String parametri = "codice_gruppo=" +URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8")+
-                            "&matricola_studente="+URLEncoder.encode(array_eliminati[c].getMatricola(), "UTF-8");
+                            "&nome_gruppo=" +URLEncoder.encode(gruppoSelezionato.getNome_gruppo(), "UTF-8")+
+                            "&matricola_studente="+URLEncoder.encode(array_eliminati[c].getMatricola(), "UTF-8") +
+                            "&nome_studente="+URLEncoder.encode(array_eliminati[c].getNome(), "UTF-8") +
+                            "&cognome_studente="+URLEncoder.encode(array_eliminati[c].getCognome(), "UTF-8");
                     DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                     dos.writeBytes(parametri); //passo i parametri
                     dos.flush();

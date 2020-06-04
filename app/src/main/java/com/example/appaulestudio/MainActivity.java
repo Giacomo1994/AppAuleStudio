@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(is_logged==true&&is_studente==false){
             Intent i=new Intent(MainActivity.this, HomeDocente.class);
-            i.putExtra("from_login",false);
+            i.putExtra("start_from_login",false);
             startActivityForResult(i,23);
             return;
         }
@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
                     editor.putString("url_corsi", universita.getUrl_corsi());
                     editor.commit();
                     Intent i=new Intent(MainActivity.this, HomeDocente.class);
-                    i.putExtra("from_login",true);
+                    i.putExtra("start_from_login",true);
                     startActivityForResult(i,3);
                     finish();
                 }

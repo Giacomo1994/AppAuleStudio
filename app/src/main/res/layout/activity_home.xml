@@ -58,6 +58,7 @@
         android:id="@+id/ll_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#fafafafa"
         android:orientation="vertical"
         android:padding="10dp">
 
@@ -80,7 +81,8 @@
             android:id="@+id/elencoAule"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="#FAFAFA"
+            android:background="#fafafafa"
+            android:divider="#FAFAFAFA"
             android:dividerHeight="10dp" />
     </LinearLayout>
 </LinearLayout>

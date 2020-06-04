@@ -49,7 +49,6 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo, strNomeUniversita;
-    boolean offline=false;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
@@ -67,7 +66,6 @@ public class GroupActivity extends AppCompatActivity {
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
         strNomeUniversita=settings.getString("nome_universita", null);
-        offline=settings.getBoolean("offline",false);
         action_bar();
 
         new listaGruppi().execute();

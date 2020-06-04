@@ -1,11 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F6F4F4"
-    android:padding="10dp">
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnAttivi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#F6F4F4"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="Attivi"
+            android:textColor="@color/button_text" />
+
+        <Button
+            android:id="@+id/btnInScadenza"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#F6F4F4"
+            android:paddingLeft="3dp"
+            android:paddingRight="3dp"
+            android:text="In scadenza"
+            android:textColor="@color/button_text" />
+
+        <Button
+            android:id="@+id/btnScaduti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#F6F4F4"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="Scaduti"
+            android:textColor="@color/button_text" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutAttivi"
@@ -19,8 +58,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="24sp" />
 
         <ListView
             android:id="@+id/listaAttivi"
@@ -29,7 +68,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:alpha="100"
-            android:divider="#F6F4F4"
+            android:divider="@color/bianco"
             android:dividerHeight="10dp"
             android:paddingTop="10dp" />
     </LinearLayout>
@@ -46,8 +85,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="24sp" />
 
         <ListView
             android:id="@+id/listaInScadenza"
@@ -56,8 +95,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:alpha="100"
-            android:background="#F6F4F4"
-            android:divider="#F6F4F4"
+            android:divider="@color/bianco"
             android:dividerHeight="10dp"
             android:paddingTop="10dp" />
     </LinearLayout>
@@ -67,6 +105,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="50dp"
+        android:divider="@color/bianco"
         android:orientation="vertical">
 
         <TextView
@@ -74,8 +113,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="24sp" />
 
         <ListView
             android:id="@+id/listaScaduti"
@@ -84,44 +123,9 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:alpha="100"
-            android:background="#F6F4F4"
-            android:divider="#F6F4F4"
+            android:divider="@color/bianco"
             android:dividerHeight="10dp"
             android:paddingTop="10dp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btnAttivi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#F6F4F4"
-            android:text="Attivi" />
-
-        <Button
-            android:id="@+id/btnInScadenza"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#F6F4F4"
-            android:text="In scadenza" />
-
-        <Button
-            android:id="@+id/btnScaduti"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#F6F4F4"
-            android:text="Scaduti" />
-
-        <TextView
-            android:id="@+id/output"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
 </FrameLayout>

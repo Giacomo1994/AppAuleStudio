@@ -5,6 +5,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -35,6 +37,7 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,7 +87,7 @@ public class CreaCodici extends AppCompatActivity {
             "j", "k", "x", "w"};
     int lunghezzaCodice=10;
     String codice;
-    String nome_docente, cognome_docente, universita, matricola_docente;
+    String nome_docente, cognome_docente, universita, nomeUniversita, matricola_docente;
     String  gruppi, ore, partecipanti;
     EditText numeroPartecipanti, numeroOre, numeroGruppi, txtNomeGruppo;
     Spinner materieDocente;
@@ -210,7 +213,8 @@ public class CreaCodici extends AppCompatActivity {
         cognome_docente = settings.getString("cognome", null);
         matricola_docente = settings.getString("matricola", null);
         universita = settings.getString("universita", null);
-        setTitle(nome_docente + " " + cognome_docente);
+        nomeUniversita= settings.getString("nome_universita", null);
+        action_bar();
 
         Intent intent = getIntent();
         Bundle bundle=intent.getBundleExtra("bundle_corsi");
@@ -226,6 +230,57 @@ public class CreaCodici extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    @SuppressLint("WrongConstant")
+    private void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Crea nuovi gruppi");
+        final Dialog d = new Dialog(CreaCodici.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(nome_docente+" "+cognome_docente);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(matricola_docente);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(nomeUniversita);
+        ImageView img_user=d.findViewById(R.id.img_dialog_user);
+        img_user.setImageResource(R.drawable.docente);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(CreaCodici.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
             }
         });
     }

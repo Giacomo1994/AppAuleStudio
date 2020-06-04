@@ -51,6 +51,15 @@ public class SqliteManager {
 
 
 //EVENTI_CALENDARIO
+    public boolean is_prenotazione_sincronizzata(int id_prenotazione){
+        ArrayList<CalendarEvent> eventi=new ArrayList<CalendarEvent>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM eventi_calendario WHERE id_prenotazione="+id_prenotazione;
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return false;
+        else return true;
+    }
+
     public void insertEventoCalendario(int id_prenotazione, int id_calendar, int id_evento){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_calendar, id_evento) "+

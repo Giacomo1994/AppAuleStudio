@@ -2,11 +2,15 @@ package com.example.appaulestudio;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Parcelable;
 import android.text.Html;
 import android.util.Log;
@@ -18,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,15 +43,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HomeDocente extends AppCompatActivity {
-
-
-    String strMatricola, strNome, strCognome, URL_CORSI;
+    String strMatricola, strNome, strCognome, strNomeUniversita, URL_CORSI;
     ArrayAdapter adapter;
     TextView infoCorso ;
     ListView elencoCorsi;
     Button creaGruppi;
+    LinearLayout ll_start;
     ArrayList<Corso> corsoArrayList=new ArrayList<Corso>();
-
+    Intent from_login;
+    boolean fatto=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +59,35 @@ public class HomeDocente extends AppCompatActivity {
         setContentView(R.layout.activity_home_docente);
         elencoCorsi=findViewById(R.id.elencoCorsi2);
         creaGruppi= findViewById(R.id.btnCreaCodici);
+        ll_start=findViewById(R.id.ll_start_docente);
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
         URL_CORSI=settings.getString("url_corsi",null);
-        setTitle(strNome+" "+strCognome);
+        strNomeUniversita=settings.getString("nome_universita",null);
+
+        action_bar();
+
+        from_login=getIntent();
+        if(from_login.hasExtra("start_from_login")){
+            getSupportActionBar().hide();
+            new CountDownTimer(30000, 1000) {
+                public void onTick(long millisUntilFinished) {
+                    if(fatto==true && millisUntilFinished<28000){
+                        ll_start.setVisibility(View.GONE);
+                        getSupportActionBar().show();
+                        cancel();
+                    }
+                }
+                public void onFinish() {
+                    ll_start.setVisibility(View.GONE);
+                }
+            }.start();
+        }
+
+
 
         new listaCorsi().execute();
 
@@ -86,6 +114,57 @@ public class HomeDocente extends AppCompatActivity {
             }
         });
 
+    }
+
+    @SuppressLint("WrongConstant")
+    private void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Home");
+        final Dialog d = new Dialog(HomeDocente.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(strNome+" "+strCognome);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(strMatricola);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(strNomeUniversita);
+        ImageView img_user=d.findViewById(R.id.img_dialog_user);
+        img_user.setImageResource(R.drawable.docente);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(HomeDocente.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
     }
 
 // asynctask per riempire la listview dei corsi del docente
@@ -143,6 +222,7 @@ public class HomeDocente extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Corso[] array_corso) {
+            fatto=true;
             if(array_corso==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false);
                 creaGruppi.setEnabled(false);
@@ -171,30 +251,5 @@ public class HomeDocente extends AppCompatActivity {
         }
     }
 
-    //creo menu in alto
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Logout");
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 1) {
-            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString("universita", null);
-            editor.putString("nome_universita", null);
-            editor.putString("matricola", null);
-            editor.putBoolean("studente", true);
-            editor.putBoolean("logged", false);
-            editor.commit();
-            Intent i = new Intent(this, MainActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivityForResult(i, 100);
-            finish();
-        }
-        return true;
-    }
 
 }

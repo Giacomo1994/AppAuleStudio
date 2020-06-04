@@ -43,7 +43,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
                 .setContentText(message)// message for notification
                 .setAutoCancel(true); // clear notification after click
         Intent intent=null;
-        if(message.contains("si è iscritto al gruppo") || message.contains("ha abbandonato il gruppo")) intent = new Intent(getApplicationContext(), GroupActivity.class);
+        if(message.contains("si è iscritto al gruppo") || message.contains("ha abbandonato il gruppo")
+                || message.contains("ha aggiornato") || message.contains("docente ti ha rimosso") || message.contains("docente ha rimosso")) intent = new Intent(getApplicationContext(), GroupActivity.class);
         else if(message.contains("non parteciperà alla prenotazione")) intent = new Intent(getApplicationContext(), PrenotazioniAttiveActivity.class);
         else intent = new Intent(getApplicationContext(), Home.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

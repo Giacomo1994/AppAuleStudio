@@ -588,8 +588,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
-            } else
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
+            } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
         } else dialog_pick_calendar(get_account_from_calendar());
     }
 
@@ -863,9 +862,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             }
         }
         else if(p.getIn_corso().equals("futura")){
-            menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
+            if(!database.is_prenotazione_sincronizzata(p.getId_prenotazione())) menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
-            //if(!p.getGruppo().equals("null")) menu.add(Menu.FIRST, 7, Menu.FIRST+2,"Cancella prenotazione gruppo");
         }
         else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){
             menu.add(Menu.FIRST, 5, Menu.FIRST,"Entra in aula");

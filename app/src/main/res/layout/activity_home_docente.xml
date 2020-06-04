@@ -4,34 +4,86 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_liste"
     android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".HomeDocente">
 
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="match_parent"
-        android:layout_height="116dp"
-        app:srcCompat="@drawable/corso" />
-
-    <ListView
-        android:id="@+id/elencoCorsi2"
+    <LinearLayout
+        android:id="@+id/ll_start_docente"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:divider="@color/background_liste"
-        android:dividerHeight="15dp">
+        android:background="#FFFFFF"
+        android:orientation="vertical">
 
-    </ListView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="60dp"
+            android:gravity="center_horizontal"
+            android:text="@string/app_name"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="50sp"
+            app:fontFamily="@font/el_messiri_medium" />
 
-    <Button
-        android:id="@+id/btnCreaCodici"
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="60dp"
+            app:srcCompat="@drawable/logo_size" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Caricamento..."
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_layout"
-        android:padding="5dp"
-        android:text="CREA GRUPPI"
-        android:visibility="visible" />
+        android:layout_height="match_parent"
+        android:background="@color/bianco"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="I miei corsi"
+            android:textColor="@color/intestazione"
+            android:textSize="24sp"
+            app:fontFamily="@font/el_messiri_medium" />
+
+        <ListView
+            android:id="@+id/elencoCorsi2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/bianco"
+            android:divider="@color/bianco"
+            android:dividerHeight="15dp">
+
+        </ListView>
+
+        <Button
+            android:id="@+id/btnCreaCodici"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/button_layout"
+            android:padding="5dp"
+            android:text="CREA GRUPPI"
+            android:visibility="visible" />
+    </LinearLayout>
 </LinearLayout>
