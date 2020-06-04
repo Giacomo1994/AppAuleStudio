@@ -488,7 +488,7 @@ public class Home extends AppCompatActivity{
             } catch (Exception e) { return null;}
         }
         protected void onPostExecute(String result) {
-            if(result!=null) MyToast.makeText(getApplicationContext(),result,true).show();
+            //if(result!=null) MyToast.makeText(getApplicationContext(),result,true).show();
         }
     }
 

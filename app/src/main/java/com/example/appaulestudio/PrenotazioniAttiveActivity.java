@@ -49,6 +49,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -103,7 +106,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     SqliteManager database;
     Intent intent_ricevuto;
-    IntentIntegrator qrScan;
+    //IntentIntegrator qrScan;
     Prenotazione p=null;
     int richiesta=-1, ingresso, pausa;
     String strUniversita, strNomeUniversita, strMatricola,strNome, strCognome;
@@ -149,7 +152,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         //sqlite e qrscan
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
-        qrScan = new IntentIntegrator(this);
+        //qrScan = new IntentIntegrator(this);
 
         //intent
         intent_ricevuto=getIntent();
@@ -315,7 +318,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if(result==null){ //problema di connessione o perchè qualcuno ha occupato il tavolo al posto tuo
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
-                finish();
                 return;
             }
             if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione"))
@@ -596,8 +598,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            //Toast.makeText(PrenotazioniAttiveActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
             if (requestCode == 1) dialog_pick_calendar(get_account_from_calendar());
+            else if(requestCode==2) startScan();
         } else
             MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari", false).show();
 
@@ -790,58 +792,70 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     //////QR SCANNER
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                MyToast.makeText(getApplicationContext(),"Risultato non trovato!", false).show();
-            } else {
-                try {
-                    String s=result.getContents();
-                    int first=s.indexOf('"')+1;
-                    int second=s.lastIndexOf('"');
-                    String id_aula=s.substring(first,second);
-                    String nome_aula=database.getNomeAula(id_aula);
-                    String entrata_uscita=s.substring(0,first-1);
+        if(requestCode==24 && resultCode== CommonStatusCodes.SUCCESS && data!=null){
+            Barcode barcode=data.getParcelableExtra("barcode");
+            String s=barcode.displayValue;
+            int first=s.indexOf('"')+1;
+            int second=s.lastIndexOf('"');
+            String id_aula=s.substring(first,second);
+            String nome_aula=database.getNomeAula(id_aula);
+            String entrata_uscita=s.substring(0,first-1);
 
-                    if(!nome_aula.equals(p.getAula())){
-                        MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
-                        return;
-                    }
-                    if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
-                        return;
-                    }
-                    if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
-                        MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
-                        return;
-                    }
-
-                    final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
-                    d.setCancelable(false);
-                    d.setContentView(R.layout.dialog_qr_code);
-                    d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-                    TextView txt_qr= d.findViewById(R.id.et_qr);
-                    Button btn_yes=d.findViewById(R.id.btn_yes_qr);
-                    Button btn_no=d.findViewById(R.id.btn_no_qr);
-                    txt_qr.setText(entrata_uscita+" "+nome_aula);
-                    btn_yes.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new doOperazione().execute();
-                            d.dismiss();
-                        }
-                    });
-                    btn_no.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            d.dismiss();
-                        }
-                    });
-                    d.show();
-                } catch (Exception e) {MyToast.makeText(getApplicationContext(),"Errore nella lettura del codice QR. Riprova!",false).show();}
+            if(!nome_aula.equals(p.getAula())){
+                MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
+                return;
             }
-        } else super.onActivityResult(requestCode, resultCode, data);
+            if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
+                MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
+                return;
+            }
+            if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+                MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
+                return;
+            }
+
+            final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
+            d.setCancelable(false);
+            d.setContentView(R.layout.dialog_qr_code);
+            d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+            TextView txt_qr= d.findViewById(R.id.et_qr);
+            Button btn_yes=d.findViewById(R.id.btn_yes_qr);
+            Button btn_no=d.findViewById(R.id.btn_no_qr);
+            txt_qr.setText(entrata_uscita+" "+nome_aula);
+            btn_yes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new doOperazione().execute();
+                    d.dismiss();
+                }
+            });
+            btn_no.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    d.dismiss();
+                }
+            });
+            d.show();
+        }
+        else super.onActivityResult(requestCode, resultCode, data);
     }
+
+    public void scanQRcode(){
+        if (ActivityCompat.checkSelfPermission(PrenotazioniAttiveActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(PrenotazioniAttiveActivity.this, Manifest.permission.CAMERA)) {
+            } else{ ActivityCompat.requestPermissions(PrenotazioniAttiveActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.CAMERA}, 2); }
+        }
+        else {
+           startScan();
+        }
+    }
+
+    public void startScan(){
+        Intent i = new Intent(PrenotazioniAttiveActivity.this, ScanQRCodeActivity.class);
+        startActivityForResult(i, 24);
+    }
+
+
 
     //CONTEXT MENU
     @Override
@@ -879,7 +893,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         //richiata =1,3,4,6 no scanner
         if(richiesta==1 || richiesta==4) new doOperazione().execute();
         else if(richiesta==8) sincronizza();
-        else qrScan.initiateScan();
+        //else qrScan.initiateScan();
+        else scanQRcode();
 
         return true;
     }
