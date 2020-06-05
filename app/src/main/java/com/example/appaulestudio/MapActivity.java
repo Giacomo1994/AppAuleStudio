@@ -21,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,19 +49,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     Aula aulaSelezionata;
 
     private Double lat_pref, lng_pref; //latlng dell'università a cui l'utente loggato è iscritto
-
+    String strNomeUniversita;
     private void initUi(){
+        spinner_map=findViewById(R.id.spinner_map);
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         lat_pref=Double.parseDouble(settings.getString("latitudine", null));
         lng_pref=Double.parseDouble(settings.getString("longitudine", null));
-        int ingresso=Integer.parseInt(settings.getString("ingresso", null));
-        int pausa=Integer.parseInt(settings.getString("pausa", null));
-        int slot=Integer.parseInt(settings.getString("slot", null));
-        String first_slot=settings.getString("first_slot", null);
-
-
-
+        strNomeUniversita=settings.getString("nome_universita", null);
+        //intent
         intent = getIntent();
         bundle = intent.getBundleExtra("bundle_aule");
         if(bundle!=null) {
@@ -68,19 +65,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }else{
             Log.i("mylog","Il bundle è null");
         }
-        spinner_map=findViewById(R.id.spinner_map);
-        array_aule.add(0, new Aula("","PoliTO","",lat_pref,lng_pref,0,0,0," "));
+        //spinner
+        array_aule.add(0, new Aula("",strNomeUniversita,"",lat_pref,lng_pref,0,0,0," "));
         adapter = new ArrayAdapter<>(MapActivity.this, android.R.layout.simple_list_item_1, array_aule);
         spinner_map.setAdapter((SpinnerAdapter) adapter);
-
 
         spinner_map.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 aulaSelezionata = (Aula) parent.getItemAtPosition(position);
-               // gmap.clear();
                 LatLng selected = new LatLng(aulaSelezionata.getLatitudine(),aulaSelezionata.getLongitudine());
-               // gmap.addMarker(new MarkerOptions().position(selected));
                 gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(selected,17));
             }
 
@@ -117,19 +111,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         uiSettings.setZoomControlsEnabled(true);//inserisce i controlli sullo zoom, il piu e il meno
         uiSettings.setCompassEnabled(true);//inserisce la bussola muovendosi nello spazio della mappa
         uiSettings.setMyLocationButtonEnabled(true);
-        //centro lo zoom inizialmente sulla università a cui sono iscritto - sede centrale
 
-        LatLng universita = new LatLng(lat_pref, lng_pref);
-        gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(universita, 15));
-        gmap.addMarker(new MarkerOptions().position(universita));
         for(Aula a : array_aule){
-            gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()));
+            if(!a.getNome().equals(strNomeUniversita)) gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            else gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         }
 
         gmap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-
                 for(Aula a :array_aule){
                     if(a.getNome().compareTo(marker.getTitle())==0){
                         //creoDialog

@@ -42,7 +42,7 @@ public class Aula implements Parcelable {
 
     @Override
     public String toString() {
-        return nome+" "+luogo;
+        return nome;
     }
 
     public String getIdAula() {
