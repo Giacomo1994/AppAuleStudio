@@ -420,8 +420,6 @@ public class CreaCodici extends AppCompatActivity {
             MyToast.makeText(this, "Impossibile salavare pdf", false).show();
         }
         dialogPdf.cancel();
-        Intent i=new Intent(CreaCodici.this, HomeDocente.class);
-        startActivity(i);
         finish();
     }
 

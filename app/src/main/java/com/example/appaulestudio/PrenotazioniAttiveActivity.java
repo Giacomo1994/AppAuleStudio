@@ -699,15 +699,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
             Calendar cal_begin = Calendar.getInstance();
             cal_begin.setTime(date_inizio);
-
             Calendar cal_end = Calendar.getInstance();
             cal_end.setTime(date_fine);
-
-            Calendar beginTime = Calendar.getInstance();
-            beginTime.set(2020, 4, 26, 8, 30);
-
-            Calendar endTime = Calendar.getInstance();
-            endTime.set(2020, 4, 26, 20, 30);
 
             ContentValues values = new ContentValues();
             values.put(CalendarContract.Events.DTSTART, cal_begin.getTimeInMillis());
