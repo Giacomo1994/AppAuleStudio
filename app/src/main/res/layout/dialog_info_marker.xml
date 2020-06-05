@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginLeft="20dp"
     android:layout_marginTop="1dp"
     android:layout_marginRight="20dp"
@@ -10,73 +10,97 @@
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/title_dialog_marker"
-        android:layout_width="wrap_content"
+        android:id="@+id/marker_nome"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginRight="20dp"
+        android:gravity="center_horizontal"
+        android:text="nome aula"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/marker_indirizzo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="indirizzo"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/imageView11"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         app:srcCompat="@drawable/scuola" />
 
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="10dp"
+        android:foregroundGravity="center">
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TableRow
+                android:id="@+id/row_luogo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal">
 
                 <TextView
-                    android:id="@+id/i_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nome:" />
+                    android:text="Luogo:" />
 
                 <TextView
-                    android:id="@+id/i_1a"
+                    android:id="@+id/marker_luogo"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
             </TableRow>
 
             <TableRow
+                android:id="@+id/row_posti"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal">
 
                 <TextView
-                    android:id="@+id/i_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Indirizzo:" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/i_3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Posti totali:" />
 
+                <TextView
+                    android:id="@+id/marker_posti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/row_aperta"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:text="Attualmente:" />
+
+                <TextView
+                    android:id="@+id/marker_aperta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
             </TableRow>
 
         </TableLayout>
@@ -88,8 +112,8 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/button_calcola"
-            android:layout_width="wrap_content"
+            android:id="@+id/button_indicazioni"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:layout_marginRight="5dp"
@@ -99,13 +123,13 @@
             android:text="INDICAZIONI" />
 
         <Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
+            android:id="@+id/button_aula"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:width="120dp"
             android:background="@drawable/button_layout"
-            android:text="Button" />
+            android:text="info aula" />
     </LinearLayout>
 </LinearLayout>

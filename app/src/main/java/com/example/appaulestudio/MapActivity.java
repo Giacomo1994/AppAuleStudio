@@ -12,8 +12,10 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -33,14 +35,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
     private MapView mapView;
     private GoogleMap gmap;
-
-
-    //dialog
-    TextView title_dialog_marker;
-    TextView nome_dialog_marker;
-    TextView indirizzo_dialog_marker;
-    TextView postitotali_dialog_marker;
-
     Intent intent;
     Bundle bundle;
     ArrayList<Aula> array_aule;
@@ -124,14 +118,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     if(a.getNome().compareTo(marker.getTitle())==0){
                         //creoDialog
                         final Dialog d = new Dialog(MapActivity.this);
-
                         d.setContentView(R.layout.dialog_info_marker);
-                        //inizializzo variabili dialog
-                        title_dialog_marker = d.findViewById(R.id.title_dialog_marker);
-                        title_dialog_marker.setText(marker.getTitle());
-                        nome_dialog_marker = d.findViewById(R.id.i_1a);
-                        nome_dialog_marker.setText(a.getNome());
+                        TableRow row_luogo=d.findViewById(R.id.row_luogo);
+                        TableRow row_aperta=d.findViewById(R.id.row_aperta);
+                        TableRow row_posti=d.findViewById(R.id.row_posti);
 
+                        TextView txt_nome_aula= d.findViewById(R.id.marker_nome);
+                        TextView txt_indirizzo= d.findViewById(R.id.marker_indirizzo);
+                        TextView txt_luogo= d.findViewById(R.id.marker_luogo);
+                        TextView txt_posti= d.findViewById(R.id.marker_posti);
+                        TextView txt_aperta= d.findViewById(R.id.marker_aperta);
+                        Button btn_percorso= d.findViewById(R.id.button_indicazioni);
+                        Button btn_to_aula= d.findViewById(R.id.button_aula);
+                        if(a.getNome().equals(strNomeUniversita)){
+                            row_aperta.setVisibility(View.GONE);
+                            row_posti.setVisibility(View.GONE);
+                            row_luogo.setVisibility(View.GONE);
+                            btn_to_aula.setVisibility(View.GONE);
+                        }
+                        txt_nome_aula.setText(a.getNome());
                         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
                         d.show();
 
