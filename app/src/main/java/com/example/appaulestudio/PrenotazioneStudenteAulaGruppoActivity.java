@@ -506,8 +506,8 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             try {
                 URL url = new URL(URL_PRENOTA);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
+                urlConnection.setReadTimeout(2000);
+                urlConnection.setConnectTimeout(2000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
