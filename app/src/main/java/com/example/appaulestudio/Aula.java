@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 public class Aula implements Parcelable {
     private String idAula;
     private String nome;
@@ -36,6 +38,11 @@ public class Aula implements Parcelable {
         this.orari=new HashMap<Integer, Orario>();
         this.aperta=false;
         last_update=null;
+    }
+
+    @Override
+    public String toString() {
+        return nome+" "+luogo;
     }
 
     public String getIdAula() {
