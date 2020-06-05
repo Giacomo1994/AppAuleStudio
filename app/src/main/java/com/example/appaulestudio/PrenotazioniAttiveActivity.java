@@ -898,7 +898,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
         menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
         return true;
     }
 
@@ -916,11 +915,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);
-            startActivity(i);
-            finish();
-        }
-        if(item.getItemId() == 4){
-            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
             startActivity(i);
             finish();
         }

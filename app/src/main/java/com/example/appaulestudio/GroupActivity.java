@@ -426,7 +426,6 @@ public class GroupActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
         return true;
     }
@@ -439,11 +438,6 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(i);
         }
         if (item.getItemId() == 2) {
-            Intent i = new Intent(this, GroupActivity.class);
-            startActivity(i);
-            finish();
-        }
-        if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);
             startActivity(i);
             finish();
