@@ -211,6 +211,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         UiSettings uiSettings = gmap.getUiSettings();
         uiSettings.setZoomControlsEnabled(true);
         uiSettings.setCompassEnabled(true);
+        uiSettings.setMapToolbarEnabled(true);
         try{
             gmap.setMyLocationEnabled(true);
         } catch (Exception e) { }
@@ -256,7 +257,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         if(connesso_orari==false || connesso_posti==false){
                             if(connesso_orari==false) row_aperta.setVisibility(View.GONE);
                             if(connesso_posti==false) row_posti_liberi.setVisibility(View.GONE);
-
                         }
                         txt_nome_aula.setText(a.getNome());
                         txt_luogo.setText(a.getLuogo());
@@ -274,6 +274,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             }
                         }
                         if(connesso_orari==true && connesso_posti==true && a.isAperta()) txt_posti_liberi.setText(""+a.getPosti_liberi());
+                        else txt_posti_liberi.setVisibility(View.GONE);
 
                         //bottone vai ad aula
                         btn_to_aula.setOnClickListener(new View.OnClickListener() {
