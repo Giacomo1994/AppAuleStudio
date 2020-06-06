@@ -1,5 +1,6 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +13,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,9 +46,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -62,6 +69,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     LatLng my_position=null;
     Marker marker_my_position=null;
     List<Marker> markerList=new LinkedList<Marker>();
+    LocationManager locationManager;
+    LocationListener locationListener;
+    boolean percorso_mostrato=false;
 
     String strNomeUniversita, strUniversita, strMatricola, strNome, strCognome;
     String mode=null;
@@ -158,6 +168,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         createMapView(savedInstanceState);
         initUi();
         action_bar();
+        getLocation();
+        verifyPermissions();
     }
 
     private void createMapView(Bundle savedInstanceState) {
@@ -175,7 +187,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         UiSettings uiSettings = gmap.getUiSettings();
         uiSettings.setZoomControlsEnabled(true);
         uiSettings.setCompassEnabled(true);
-//!!!!! gmap.setMyLocationEnabled(true); //MOSTRA BOTTONE POSIZIONE! DA METTERE UNA VOLTA CHE HAI DATO IL PERMESSO DI GEOLOCALIZZAZIONE
+        try{
+            gmap.setMyLocationEnabled(true);
+        } catch (Exception e) { }
         uiSettings.setMyLocationButtonEnabled(true);
 
         for(Aula a : array_aule){
@@ -188,6 +202,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         gmap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                if(marker.getTitle().equals("Tu sei qui")) return false;
                 for(Aula a :array_aule){
                     if(a.getNome().compareTo(marker.getTitle())==0){
                         //creoDialog
@@ -213,6 +228,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         txt_nome_aula.setText(a.getNome());
                         txt_luogo.setText(a.getLuogo());
                         txt_posti.setText(""+a.getPosti_totali());
+                        String indirizzo=reverseGeocoding(a.getLatitudine(),a.getLongitudine());
+                        if(indirizzo!=null) txt_indirizzo.setText(indirizzo);
                         btn_percorso.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -249,6 +266,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                             MyToast.makeText(getApplicationContext(), "Seleziona un mezzo di trasporto!",false).show();
                                             return;
                                         }
+                                        percorso_mostrato=true;
                                         calcolaPercorso();
                                         d_mezzo.dismiss();
                                     }
@@ -266,13 +284,82 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
 
-    private void getLocation(){} //aggiungo marker della mia posizione
+    private void getLocation(){
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locationListener=new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                my_position=new LatLng(location.getLatitude(),location.getLongitude()); // prendo mia posizione
+                gmap.clear(); //pulisco mappa
+                marker_my_position=gmap.addMarker(new MarkerOptions()
+                        .position(my_position)
+                        .title("Tu sei qui")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                for(Aula a : array_aule){
+                    Marker marker=null;
+                    if(!a.getNome().equals(strNomeUniversita)) marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    else marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    markerList.add(marker);
+                }
+                if(percorso_mostrato==true) calcolaPercorso();
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+
+    } //aggiungo marker della mia posizione
 
     private void calcolaPercorso(){} //chiamato una volta che ho scelto il mezzo di trasporto
 
-    private void reverseGeocoding(){} //chiamato quando apro il dialog dell'aula
+    private String reverseGeocoding(double lat, double lng){ //chiamato quando apro il dialog dell'aula
+        String indirizzo=null;
+        Geocoder geocoder=new Geocoder(MapActivity.this, Locale.ITALY);
+        try {
+            List<Address> addresses=geocoder.getFromLocation(lat, lng,1);
+            Log.i("myLog", addresses.toString());
+            indirizzo=addresses.get(0).getAddressLine(0);
+            //Toast.makeText(getApplicationContext(),"Ecco l'indirizzo: "+indirizzo, Toast.LENGTH_LONG).show();
+            return indirizzo;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return indirizzo;
+        }
+    }
 
-    public void verifyPermissions() {} //per geolocalizzazione
+    public void verifyPermissions() {
+        if(Build.VERSION.SDK_INT>=23){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 3);
+            }
+            else locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, locationListener);
+        }
+        else locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, locationListener);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode==3 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, locationListener);
+                gmap.setMyLocationEnabled(true);
+            }
+        }
+    }
+
 
 
 

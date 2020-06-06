@@ -601,7 +601,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             if (requestCode == 1) dialog_pick_calendar(get_account_from_calendar());
             else if(requestCode==2) startScan();
         } else
-            MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari", false).show();
+            if(requestCode==1) MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari! Hai negato il permesso!", false).show();
+            else if(requestCode==2 ) MyToast.makeText(getApplicationContext(), "Non puoi accedere alla camera! Hai negato il permesso!", false).show();
 
     }
 
