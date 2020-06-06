@@ -13,17 +13,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,14 +50,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+    static final String URL_AULE_APERTE= "http://pmsc9.altervista.org/progetto/map_check_aule_aperte.php";
+    static final String URL_AULE_POSTI= "http://pmsc9.altervista.org/progetto/map_check_posti_liberi.php";
     private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
     private MapView mapView;
     private GoogleMap gmap;
@@ -62,7 +78,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     ArrayList<Aula> array_aule;
     Spinner spinner_map;
     Adapter adapter;
-    Aula aulaSelezionata;
 
     //posizioni
     private Double lat_uni, lng_uni;
@@ -72,9 +87,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     LocationManager locationManager;
     LocationListener locationListener;
     boolean percorso_mostrato=false;
-
-    String strNomeUniversita, strUniversita, strMatricola, strNome, strCognome;
     String mode=null;
+
+    String strNomeUniversita, strUniversita, strMatricola, strNome, strCognome,strIngresso, strPausa;
+    boolean connesso_orari=false, connesso_posti=false;
+    SqliteManager database;
+    Aula aulaSelezionata_spinner=null;
+    Aula aulaSelezionata_marker=null;
 
     private void initUi(){
         spinner_map=findViewById(R.id.spinner_map);
@@ -87,6 +106,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         strMatricola=settings.getString("matricola", null);
         strNome=settings.getString("nome", null);
         strCognome=settings.getString("cognome", null);
+        strIngresso=settings.getString("ingresso",null);
+        strPausa=settings.getString("pausa",null);
         //intent
         intent = getIntent();
         bundle = intent.getBundleExtra("bundle_aule");
@@ -103,8 +124,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         spinner_map.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                aulaSelezionata = (Aula) parent.getItemAtPosition(position);
-                LatLng selected = new LatLng(aulaSelezionata.getLatitudine(),aulaSelezionata.getLongitudine());
+                aulaSelezionata_spinner = (Aula) parent.getItemAtPosition(position);
+                LatLng selected = new LatLng(aulaSelezionata_spinner.getLatitudine(),aulaSelezionata_spinner.getLongitudine());
                 gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(selected,17));
             }
             @Override
@@ -168,8 +189,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         createMapView(savedInstanceState);
         initUi();
         action_bar();
+        database=new SqliteManager(MapActivity.this);
         getLocation();
         verifyPermissions();
+        new auleAperte().execute();
+        new posti_aule().execute();
     }
 
     private void createMapView(Bundle savedInstanceState) {
@@ -203,8 +227,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
                 if(marker.getTitle().equals("Tu sei qui")) return false;
-                for(Aula a :array_aule){
+                for(final Aula a :array_aule){
                     if(a.getNome().compareTo(marker.getTitle())==0){
+                        aulaSelezionata_marker=a;
                         //creoDialog
                         final Dialog d = new Dialog(MapActivity.this);
                         d.setContentView(R.layout.dialog_info_marker);
@@ -212,24 +237,60 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         TableRow row_luogo=d.findViewById(R.id.row_luogo);
                         TableRow row_aperta=d.findViewById(R.id.row_aperta);
                         TableRow row_posti=d.findViewById(R.id.row_posti);
+                        TableRow row_posti_liberi=d.findViewById(R.id.row_posti_liberi);
                         TextView txt_nome_aula= d.findViewById(R.id.marker_nome);
                         TextView txt_indirizzo= d.findViewById(R.id.marker_indirizzo);
                         TextView txt_luogo= d.findViewById(R.id.marker_luogo);
                         TextView txt_posti= d.findViewById(R.id.marker_posti);
+                        TextView txt_posti_liberi= d.findViewById(R.id.marker_posti_liberi);
                         TextView txt_aperta= d.findViewById(R.id.marker_aperta);
                         Button btn_percorso= d.findViewById(R.id.button_indicazioni);
                         Button btn_to_aula= d.findViewById(R.id.button_aula);
                         if(a.getNome().equals(strNomeUniversita)){
                             row_aperta.setVisibility(View.GONE);
                             row_posti.setVisibility(View.GONE);
+                            row_posti_liberi.setVisibility(View.GONE);
                             row_luogo.setVisibility(View.GONE);
                             btn_to_aula.setVisibility(View.GONE);
+                        }
+                        if(connesso_orari==false || connesso_posti==false){
+                            if(connesso_orari==false) row_aperta.setVisibility(View.GONE);
+                            if(connesso_posti==false) row_posti_liberi.setVisibility(View.GONE);
+
                         }
                         txt_nome_aula.setText(a.getNome());
                         txt_luogo.setText(a.getLuogo());
                         txt_posti.setText(""+a.getPosti_totali());
                         String indirizzo=reverseGeocoding(a.getLatitudine(),a.getLongitudine());
                         if(indirizzo!=null) txt_indirizzo.setText(indirizzo);
+                        if(connesso_orari==true){
+                            if(a.isAperta()==true){
+                                txt_aperta.setText("Aperta");
+                                txt_aperta.setTextColor(Color.argb(255, 12, 138, 17));
+                            }
+                            else{
+                                txt_aperta.setText("Chiusa");
+                                txt_aperta.setTextColor(Color.RED);
+                            }
+                        }
+                        if(connesso_orari==true && connesso_posti==true && a.isAperta()) txt_posti_liberi.setText(""+a.getPosti_liberi());
+
+                        //bottone vai ad aula
+                        btn_to_aula.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent=new Intent(MapActivity.this,InfoAulaActivity.class);
+                                Bundle bundle=new Bundle();
+                                bundle.putParcelable("aula",a);
+                                HashMap<Integer,Orario> orari_aula=database.readOrariAula(a.getIdAula());
+                                bundle.putSerializable("orari",orari_aula);
+                                intent.putExtra("bundle", bundle);
+                                startActivityForResult(intent, 3);
+                                finish();
+                            }
+                        });
+
+                        //bottone calcola percorso --> mostra dialog successivo
                         btn_percorso.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -281,7 +342,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-
 
 
     private void getLocation(){
@@ -361,7 +421,121 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
+    private class auleAperte extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                String params;
+                URL url;
+                HttpURLConnection urlConnection; //serve per aprire connessione
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArray;
+                url = new URL(URL_AULE_APERTE); //passo la richiesta post che mi restituisce i corsi dal db
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                params = "codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(params);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArray = new JSONArray(result);
+                for(int i = 0; i<jArray.length(); i++){
+                    JSONObject json_data = jArray.getJSONObject(i);
+                    String id=json_data.getString("id_aula");
+                    for(Aula a: array_aule){
+                        if(a.getIdAula().equals(id)) a.setAperta(true);
+                    }
+                }
+                return "ok";
+            }  catch (Exception e) {
+                return null;
+            }
+        }
 
+        @Override
+        protected void onPostExecute(String result) {
+            if(result!=null) connesso_orari=true;
+        }
+    }
+
+    private class posti_aule extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                String params;
+                URL url;
+                HttpURLConnection urlConnection; //serve per aprire connessione
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArray;
+                url = new URL(URL_AULE_POSTI); //passo la richiesta post che mi restituisce i corsi dal db
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                params = "codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8") +
+                        "&ingresso="+ URLEncoder.encode(strIngresso, "UTF-8") +
+                        "&pausa="+ URLEncoder.encode(strPausa, "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(params);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArray = new JSONArray(result);
+                for(Aula aa:array_aule) aa.setPosti_liberi(aa.getPosti_totali());
+                for(int i = 0; i<jArray.length(); i++){
+                    JSONObject json_data = jArray.getJSONObject(i);
+                    String id=json_data.getString("id_aula");
+                    int posti_occupati=json_data.getInt("posti_occupati");
+                    for(Aula a: array_aule){
+                        if(a.getIdAula().equals(id)) a.setPosti_liberi(a.getPosti_totali()-posti_occupati);
+                    }
+                }
+                return "ok";
+            }  catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(result!=null) connesso_posti=true;
+        }
+    }
 
     @Override
     protected void onStart() {

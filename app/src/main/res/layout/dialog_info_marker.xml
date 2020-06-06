@@ -85,6 +85,24 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/row_posti_liberi"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Posti liberi:" />
+
+                <TextView
+                    android:id="@+id/marker_posti_liberi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
+            </TableRow>
+
+            <TableRow
                 android:id="@+id/row_aperta"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -102,7 +120,6 @@
                     android:layout_height="wrap_content"
                     android:text="TextView" />
             </TableRow>
-
         </TableLayout>
     </ScrollView>
 
