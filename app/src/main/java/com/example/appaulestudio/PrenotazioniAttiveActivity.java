@@ -671,14 +671,19 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     public ArrayList<CalendarAccount> get_account_from_calendar() {
         ArrayList<CalendarAccount> lista = new ArrayList<CalendarAccount>();
-        @SuppressLint("MissingPermission") Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, CalendarContract.Calendars.VISIBLE + " = 1", null, null);
-        while (cursor.moveToNext()) {
-            String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
-            long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
-            String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
-            String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
-            if (name.contains("Holidays") || name.contains("Festività") || name.equals("Contacts")) continue;
-            lista.add(new CalendarAccount(id, name, accountName, type));
+        try {
+            Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, null, null, null);
+            while (cursor.moveToNext()) {
+                String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
+                long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+                String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
+                String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
+                if (name.contains("Holidays") || name.contains("Festività") || name.equals("Contacts"))
+                    continue;
+                lista.add(new CalendarAccount(id, name, accountName, type));
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
         return lista;
     }

@@ -47,14 +47,12 @@
                     android:id="@+id/textView17_studgruppo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
                     android:text="Seleziona tavolo disponibile:" />
 
                 <Spinner
                     android:id="@+id/spinner_tavoli_studgruppo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:spinnerMode="dialog" />
 
             </LinearLayout>
