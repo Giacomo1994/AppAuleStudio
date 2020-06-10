@@ -49,6 +49,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -67,6 +68,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
     static final String URL_AULE_APERTE= "http://pmsc9.altervista.org/progetto/map_check_aule_aperte.php";
     static final String URL_AULE_POSTI= "http://pmsc9.altervista.org/progetto/map_check_posti_liberi.php";
@@ -77,17 +80,27 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     Bundle bundle;
     ArrayList<Aula> array_aule;
     Spinner spinner_map;
+    Button btn_to_home;
     Adapter adapter;
+    LinearLayout ll_dist_dur;
+    ImageView img_dist;
+    TextView txt_dist, txt_dur;
 
     //posizioni
     private Double lat_uni, lng_uni;
     LatLng my_position=null;
+    LatLng destinazione=null;
     Marker marker_my_position=null;
     List<Marker> markerList=new LinkedList<Marker>();
     LocationManager locationManager;
     LocationListener locationListener;
     boolean percorso_mostrato=false;
     String mode=null;
+    List<LatLng> polylinesPoints=new LinkedList<LatLng>();
+    PolylineOptions plo;
+    DownloadTask task;
+    String lunghezza=null;
+    String durata=null;
 
     String strNomeUniversita, strUniversita, strMatricola, strNome, strCognome,strIngresso, strPausa;
     boolean connesso_orari=false, connesso_posti=false;
@@ -96,7 +109,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     Aula aulaSelezionata_marker=null;
 
     private void initUi(){
+        btn_to_home=findViewById(R.id.btn_to_listaaule);
         spinner_map=findViewById(R.id.spinner_map);
+        ll_dist_dur=findViewById(R.id.ll_dist_dur);
+        img_dist=findViewById(R.id.img_distance);
+        txt_dist=findViewById(R.id.txt_distance);
+        txt_dur=findViewById(R.id.txt_duration);
+        ll_dist_dur.setVisibility(View.GONE);
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         lat_uni=Double.parseDouble(settings.getString("latitudine", null));
@@ -130,6 +149,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        btn_to_home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MapActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
         });
     }
 
@@ -258,6 +286,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             if(connesso_orari==false) row_aperta.setVisibility(View.GONE);
                             if(connesso_posti==false) row_posti_liberi.setVisibility(View.GONE);
                         }
+                        if(my_position==null) btn_percorso.setVisibility(View.GONE);
                         txt_nome_aula.setText(a.getNome());
                         txt_luogo.setText(a.getLuogo());
                         txt_posti.setText(""+a.getPosti_totali());
@@ -271,6 +300,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             else{
                                 txt_aperta.setText("Chiusa");
                                 txt_aperta.setTextColor(Color.RED);
+                                row_posti_liberi.setVisibility(View.GONE);
                             }
                         }
                         if(connesso_orari==true && connesso_posti==true && a.isAperta()) txt_posti_liberi.setText(""+a.getPosti_liberi());
@@ -302,8 +332,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 d_mezzo.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
                                 final LinearLayout ll_car=d_mezzo.findViewById(R.id.ll_car);
                                 final LinearLayout ll_walk=d_mezzo.findViewById(R.id.ll_walk);
-                                ImageView img_car=d_mezzo.findViewById(R.id.img_car);;
-                                ImageView img_walk=d_mezzo.findViewById(R.id.img_walk);;
+                                ImageView img_car=d_mezzo.findViewById(R.id.img_car);
+                                ImageView img_walk=d_mezzo.findViewById(R.id.img_walk);
                                 Button btn_start_navigation=d_mezzo.findViewById(R.id.btn_start_navigation);
                                 img_car.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -329,7 +359,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                             return;
                                         }
                                         percorso_mostrato=true;
-                                        calcolaPercorso();
+                                        destinazione=new LatLng(aulaSelezionata_marker.getLatitudine(),aulaSelezionata_marker.getLongitudine());
+                                        resetMap();
                                         d_mezzo.dismiss();
                                     }
                                 });
@@ -344,25 +375,33 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
+    //resetta markers e polylines quando cambia posizione oppure scelgo un altra aula
+    private void resetMap(){
+        gmap.clear(); //pulisco mappa
+        marker_my_position=gmap.addMarker(new MarkerOptions()
+                .position(my_position)
+                .title("Tu sei qui")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        for(Aula a : array_aule){
+            Marker marker=null;
+            if(!a.getNome().equals(strNomeUniversita)) marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            else marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            markerList.add(marker);
+        }
+        if (percorso_mostrato==true){
+            calcolaPercorso(destinazione);
+        }
+        //gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_position,17));
+    }
 
+    //rileva posizione
     private void getLocation(){
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener=new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 my_position=new LatLng(location.getLatitude(),location.getLongitude()); // prendo mia posizione
-                gmap.clear(); //pulisco mappa
-                marker_my_position=gmap.addMarker(new MarkerOptions()
-                        .position(my_position)
-                        .title("Tu sei qui")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                for(Aula a : array_aule){
-                    Marker marker=null;
-                    if(!a.getNome().equals(strNomeUniversita)) marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                    else marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                    markerList.add(marker);
-                }
-                if(percorso_mostrato==true) calcolaPercorso();
+                resetMap();
             }
 
             @Override
@@ -380,12 +419,105 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
             }
         };
+    }
 
+    //calcola percorso
+    public void calcolaPercorso(LatLng destinazione){
+        task=new DownloadTask();
+        task.execute("https://maps.googleapis.com/maps/api/directions/json?origin=" +
+                my_position.latitude+","+my_position.longitude +
+                "&destination=" +
+                destinazione.latitude+","+destinazione.longitude +
+                "&mode="+ mode +
+                "&key=AIzaSyC7a_cSKvoRh6u-ccqs8WF-1XBXT6crVkY");
+    }
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            String result="";
+            URL url;
+            HttpsURLConnection urlConnection;
+            try {
+                url=new URL(strings[0]);
+                urlConnection= (HttpsURLConnection) url.openConnection();
+                InputStream in=urlConnection.getInputStream();
+                InputStreamReader reader=new InputStreamReader(in);
+                int data=reader.read();
+                while(data!=-1){
+                    char cur = (char) data;
+                    result+=cur;
+                    data=reader.read();
+                }
+                Log.i("myLog",result);
+                return result;
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-    } //aggiungo marker della mia posizione
+        @Override
+        protected void onPostExecute(String stringa) {
+            super.onPostExecute(stringa);
+            try {
+                JSONObject jsonObject=new JSONObject(stringa);
 
-    private void calcolaPercorso(){} //chiamato una volta che ho scelto il mezzo di trasporto
+                String routes=jsonObject.getString("routes");
+                JSONArray arrayRoutes=new JSONArray(routes);
+                JSONObject primaRoute=arrayRoutes.getJSONObject(0);
 
+                String legs=primaRoute.getString("legs");
+                JSONArray arrayLegs=new JSONArray(legs);
+                JSONObject primaLeg=arrayLegs.getJSONObject(0);
+
+                String lenght=primaLeg.getString("distance");
+                JSONObject obj_lunghezza = new JSONObject(lenght);
+                lunghezza=obj_lunghezza.getString("text");
+                String duration=primaLeg.getString("duration");
+                JSONObject obj_duration=new JSONObject(duration);
+                durata=obj_duration.getString("text");
+
+                String steps=primaLeg.getString("steps");
+                JSONArray arraySteps=new JSONArray(steps);
+
+                polylinesPoints.clear();
+                for(int i=0;i<arraySteps.length();i++){
+                    JSONObject step=arraySteps.getJSONObject(i);
+                    String lat=step.getJSONObject("end_location").getString("lat");
+                    String lon=step.getJSONObject("end_location").getString("lng");
+                    Log.i("myLog",lat+" "+lon);
+                    polylinesPoints.add(new LatLng(Double.parseDouble(lat),Double.parseDouble(lon)));
+                }
+                drawPolylines();
+                //mostro lunghezza e durataMyToast.makeText(getApplicationContext(),lunghezza+", "+durata, false).show();
+                ll_dist_dur.setVisibility(View.VISIBLE);
+                if(mode.equals("walking")) img_dist.setImageDrawable(getResources().getDrawable(R.drawable.walk));
+                else img_dist.setImageDrawable(getResources().getDrawable(R.drawable.auto));
+                txt_dist.setText(lunghezza);
+                txt_dur.setText(durata);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    public void drawPolylines(){
+        plo=new PolylineOptions();
+        plo.add(new LatLng(my_position.latitude,my_position.longitude));
+        plo.color(Color.RED);
+        plo.width(10);
+        for(LatLng latLng:polylinesPoints){
+            //map.clear();
+            plo.add(latLng);
+            if(mode.equals("walking")) plo.color(Color.GREEN);
+            else plo.color(Color.RED);
+            plo.width(10);
+        }
+        gmap.addPolyline(plo);
+    }
+
+    //reverse geocoding
     private String reverseGeocoding(double lat, double lng){ //chiamato quando apro il dialog dell'aula
         String indirizzo=null;
         Geocoder geocoder=new Geocoder(MapActivity.this, Locale.ITALY);
@@ -401,6 +533,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    //permessi
     public void verifyPermissions() {
         if(Build.VERSION.SDK_INT>=23){
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -422,6 +555,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
 
+    //task aule aperte e posti liberi
     private class auleAperte extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -568,34 +702,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapView.onLowMemory();
     }
 
-    //OPTIONS MENU
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
-        menu.add(Menu.FIRST, 2, Menu.FIRST, "Gestione gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
-        return true;
+    protected void onRestart() {
+        super.onRestart();
+        getLocation();
+        verifyPermissions();
+        new auleAperte().execute();
+        new posti_aule().execute();
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 1) {
-            Intent i = new Intent(this, Home.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-        }
-        if (item.getItemId() == 2) {
-            Intent i = new Intent(this, GroupActivity.class);
-            startActivity(i);
-            finish();
-        }
-        if(item.getItemId() == 4){
-            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
-            startActivity(i);
-            finish();
-        }
-        return true;
-    }
-
-
 }
