@@ -77,7 +77,6 @@
                     android:id="@+id/log_matricola"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="10"
                     android:hint="matricola"
                     android:importantForAutofill="no"
                     android:inputType="textPersonName" />
@@ -97,7 +96,6 @@
                     android:id="@+id/log_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="10"
                     android:hint="password"
                     android:importantForAutofill="no"
                     android:inputType="textPassword" />
@@ -105,12 +103,6 @@
             </TableRow>
 
         </TableLayout>
-
-        <CheckBox
-            android:id="@+id/checkRicordami"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ricordami (non dovrai più effettuare il login fino a quando ti disconnetterai)" />
 
         <Button
             android:id="@+id/btn_login"

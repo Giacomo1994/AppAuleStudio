@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -51,11 +52,12 @@ public class RegistrazioneActivity extends AppCompatActivity {
     Button btn_registrazione;
     EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password, txt_password2;
     RadioButton radioStudente,radioDocente;
+    ImageView img_reg;
 
     Intent intent;
     Universita universita=null;
     String matricola,nome,cognome, email, password, password2;
-    boolean isStudente;
+    boolean isStudente=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +73,21 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_password2=this.findViewById(R.id.reg_password2);
         radioStudente=findViewById(R.id.radioButton5);
         radioDocente=findViewById(R.id.radioButton6);
+        img_reg=findViewById(R.id.img_registrazione);
         action_bar();
+
+        radioStudente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(radioStudente.isChecked()){
+                    img_reg.setImageDrawable(getResources().getDrawable(R.drawable.studente));
+                    isStudente=true;
+                }else {
+                    img_reg.setImageDrawable(getResources().getDrawable(R.drawable.docente));
+                    isStudente=false;
+                }
+            }
+        });
 
         btn_registrazione.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,12 +129,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Password troppo corta!" + "</b></font>"),Toast.LENGTH_LONG).show();
                     return;
                 }
-
-                if(radioStudente.isChecked()){
-                    isStudente=true;
-                }
-                else isStudente=false;
-
                 new checkUtenteFromUniversita().execute();
             }
         });

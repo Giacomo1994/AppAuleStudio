@@ -5,12 +5,14 @@ public class CalendarAccount {
     private String name;
     private String name_account;
     private String type;
+    private String owner;
 
-    public CalendarAccount(long id, String name, String name_account, String type) {
+    public CalendarAccount(long id, String name, String name_account, String type, String owner) {
         this.id = id;
         this.name = name;
         this.name_account = name_account;
         this.type = type;
+        this.owner = owner;
     }
 
     public long getId() {

@@ -76,39 +76,24 @@ import java.util.Locale;
 import java.util.Random;
 
 public class CreaCodici extends AppCompatActivity {
-    static final String URL_REGISTRAZIONE_CODICE ="http://pmsc9.altervista.org/progetto/registrazione_codice.php";
+    static final String URL_CREA_GRUPPI ="http://pmsc9.altervista.org/progetto/random_codice.php";
     private static final int STORAGE_CODE = 1000;
-    private static final int READ_CODE = 2000;
 
-    Random random = new Random();
-    String[] numeriArray ={"0","1","2","3","4","5","6","7","8","9"};
-    String[] caratteriArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i",
-            "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "z", "y",
-            "j", "k", "x", "w"};
-    int lunghezzaCodice=10;
-    String codice;
-    String nome_docente, cognome_docente, universita, nomeUniversita, matricola_docente;
-    String  gruppi, ore, partecipanti;
+    View.OnClickListener listener;
+    Dialog dialogPdf;
+    ArrayList<Corso> corsoArrayList;
+    Button creaCodici, btnDailogPdf, getBtnDailogPdfAnnulla;
     EditText numeroPartecipanti, numeroOre, numeroGruppi, txtNomeGruppo;
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
-    Corso corso=null;
-    Button creaCodici, btnDailogPdf, getBtnDailogPdfAnnulla;
     CalendarView calendario;
-    int anno;
-    int mese;
-    int giorno;
-    String nomeGruppo;
-    //int year, month, day;
-    String dataStringa=null; //formato dd/mm/YYYY bisogna risolvere inizializzazione
-    String[] codici;
+
+    Gruppo[] array_gruppi=null;
+    String nome_docente, cognome_docente, universita, nomeUniversita, matricola_docente, gruppi, ore, partecipanti, nomeGruppo, dataStringa=null;
+    Corso corso=null;
+    int anno,mese,giorno;
     Date date=null;
     SimpleDateFormat formatter;
-    View.OnClickListener listener;
-    Dialog dialogPdf;
-
-    ArrayList<Corso> corsoArrayList;
-    //int current_year, current_month, current_day;
 
     private void initUI() {
         calendario= findViewById(R.id.calendario);
@@ -129,7 +114,13 @@ public class CreaCodici extends AppCompatActivity {
                 mese=month+1;
                 giorno=day;
                 dataStringa=""+anno+"-"+mese+"-"+giorno;
-                try{ date=formatter.parse(dataStringa); }
+                try{
+                    date=formatter.parse(dataStringa);
+                    if(date.before(Calendar.getInstance().getTime())){
+                        MyToast.makeText(getApplicationContext(), "Data errata! Seleziona un'altra data.", false).show();
+                        dataStringa=null;
+                    }
+                }
                 catch(ParseException e) { return; }
             }
         });
@@ -145,14 +136,18 @@ public class CreaCodici extends AppCompatActivity {
                 gruppi=numeroGruppi.getText().toString().trim();
                 partecipanti=numeroPartecipanti.getText().toString().trim();
                 ore=numeroOre.getText().toString().trim();
+
+                // ho selezionato data e corso?
                 if(dataStringa==null){
                     MyToast.makeText(getApplicationContext(), "Per favore, seleziona una data", false).show();
                     return;
                 }
-                if(corso==null){
+                else if(corso==null){
                     MyToast.makeText(getApplicationContext(), "Per favore, seleziona un corso", false).show();
                     return;
                 }
+
+                //il formato dei dati è corretto?
                 try{ gruppiIntero= Integer.parseInt(gruppi); }
                 catch(NumberFormatException e){ return; }
 
@@ -166,37 +161,25 @@ public class CreaCodici extends AppCompatActivity {
                     ore=""+oreIntero;
                 }
                 catch(NumberFormatException e){ return; }
-                //controllo che siano diversi da zero
+
+                //i dati sono giusti?
                 if(gruppiIntero<=0){
                     MyToast.makeText(getApplicationContext(), "Numero di gruppi errato!", false).show();
                     return;
                 }
-                if(partecipantiIntero<=0){
+                else if(partecipantiIntero<=0){
                     MyToast.makeText(getApplicationContext(), "Numero di partecipanti errato!", false).show();
                     return;
                 }
-                if(oreIntero<=0){
+                else if(oreIntero<=0){
                     MyToast.makeText(getApplicationContext(), "Numero di ore errato!", false).show();
                     return;
                 }
-
-                int j=0;
-                int k=0;
-                codici=new String[gruppiIntero];
-                for(j=0; j<gruppiIntero; j++){
-                    String nuovoCodice=creaCodice();
-                    codici[j]=  nuovoCodice;
-
-                    if(j>0) { //controllo che non ci siano duecodici uguali
-                        for (k = 0; k < j; k++) {
-                            if (codici[j].compareTo(codici[k]) == 0) {
-                                codici[j] = null;
-                                j--;
-                            }
-                        }
-                    }
-                }
-                new iscriviCodici().execute();
+                /*else if(){
+                    MyToast.makeText(getApplicationContext(), "Data errata!", false).show();
+                    return;
+                }*/
+                else new creaGruppi().execute();
             }
         };
         creaCodici.setOnClickListener(listener);
@@ -285,64 +268,70 @@ public class CreaCodici extends AppCompatActivity {
         });
     }
 
-    private class iscriviCodici extends AsyncTask<Void, Void, String> {
 
+    private class creaGruppi extends AsyncTask<Void, Void, Gruppo[]> {
         @Override
-        protected String doInBackground(Void... voids) {
+        protected Gruppo[] doInBackground(Void... voids) {
             try {
-                URL url = new URL(URL_REGISTRAZIONE_CODICE);
-                if(nomeGruppo.equals("")){
-                    nomeGruppo=corso.getNomeCorso();
+                String params;
+                URL url;
+                HttpURLConnection urlConnection; //serve per aprire connessione
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayGruppi;
+                url = new URL(URL_CREA_GRUPPI); //passo la richiesta post che mi restituisce i corsi dal db
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                params = "matricolaDocente="+URLEncoder.encode(matricola_docente, "UTF-8")+
+                        "&numeroGruppi="+URLEncoder.encode(gruppi, "UTF-8")+
+                        "&numeroOre="+URLEncoder.encode(ore, "UTF-8")+
+                        "&numeroPartecipanti="+URLEncoder.encode(partecipanti,"UTF-8")+
+                        "&codiceCorso="+URLEncoder.encode(corso.getCodiceCorso(),"UTF-8")+
+                        "&nome_corso="+URLEncoder.encode(corso.getNomeCorso(),"UTF-8")+
+                        "&dataScadenza="+URLEncoder.encode(dataStringa,"UTF-8")+
+                        "&codiceUniversita="+URLEncoder.encode(universita,"UTF-8")+
+                        "&nomeGruppo="+URLEncoder.encode(nomeGruppo, "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(params);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
                 }
-                for (int c=0; c<codici.length; c++) {
-                    int g=c+1;
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setReadTimeout(3000);
-                    urlConnection.setConnectTimeout(3000);
-                    urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setDoInput(true);
-                    String parametri = "codice=" + URLEncoder.encode(codici[c], "UTF-8")+
-                            "&matricolaDocente="+URLEncoder.encode(matricola_docente, "UTF-8")+
-                            "&numeroOre="+URLEncoder.encode(ore, "UTF-8")+
-                            "&numeroPartecipanti="+URLEncoder.encode(partecipanti,"UTF-8")+
-                            "&codiceCorso="+URLEncoder.encode(corso.getCodiceCorso(),"UTF-8")+
-                            "&nome_corso="+URLEncoder.encode(corso.getNomeCorso(),"UTF-8")+
-                            "&dataScadenza="+URLEncoder.encode(dataStringa,"UTF-8")+
-                            "&codiceUniversita="+URLEncoder.encode(universita,"UTF-8")+
-                            "&nomeGruppo="+URLEncoder.encode("Gruppo"+g+"-"+nomeGruppo, "UTF-8");
-                    DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-                    dos.writeBytes(parametri); //passo i parametri
-                    dos.flush();
-                    dos.close();
-                    urlConnection.connect();
-                    InputStream input = urlConnection.getInputStream();
-                    byte[] buffer = new byte[1024];
-                    int numRead = 0;
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    while ((numRead = input.read(buffer)) != -1) {
-                        baos.write(buffer, 0, numRead);
-                    }
-                    input.close();
-                    String result = new String(baos.toByteArray());
-                    if(result.equals("Codice gia presente")){
-                        String nuovoCodice=creaCodice();
-                        codici[c]=nuovoCodice;
-                        c--;
-                    }
-                    else if(result.equals("ERROR: Could not connect.")) return null;
+                is.close();
+                result = sb.toString();
+                jArrayGruppi = new JSONArray(result);
+                Gruppo[] array_gruppo = new Gruppo[jArrayGruppi.length()];
+                for(int i = 0; i<jArrayGruppi.length(); i++){
+                    JSONObject json_data = jArrayGruppi.getJSONObject(i);
+                    array_gruppo[i] = new Gruppo(json_data.getString("codice"), json_data.getString("nome"),
+                            corso.getCodiceCorso(), matricola_docente, Integer.parseInt(partecipanti), Double.parseDouble(ore), dataStringa);
                 }
-                return "ok";
+                return array_gruppo;
             } catch (Exception e) {
                 return null;
             }
         }
-
         @Override
-        protected void onPostExecute(String result) {
-            //super.onPostExecute(result);
-            if(result.equals("ok")) dialogPdfCodici();
-            else MyToast.makeText(getApplicationContext(),"Errore nella creazione dei codici",false).show();
+        protected void onPostExecute(Gruppo[] array_gruppo) {
+            if(array_gruppo==null) MyToast.makeText(getApplicationContext(),"Errore nella creazione dei codici",false).show();
+            else{
+                array_gruppi=array_gruppo;
+                dialogPdfCodici();
+            }
         }
     }
 
@@ -373,8 +362,6 @@ public class CreaCodici extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 dialogPdf.cancel();
-                Intent i=new Intent(CreaCodici.this, HomeDocente.class);
-                startActivity(i);
                 finish();
             }
         });
@@ -386,33 +373,21 @@ public class CreaCodici extends AppCompatActivity {
         //nome del file
         String mFileName= new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
         mFileName+="_"+corso.getCodiceCorso()+"_"+corso.getNomeCorso();
-        //è deprecata
         String mFilePath = Environment.getExternalStorageDirectory()+"/"+mFileName+".pdf";
         try{
-
+            //aggiungo testo
             PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
-            //apri per scrivere
             mDoc.open();
-            //mDoc.add(new Chunk(""));
-            //openPdfFile(mDoc);
-            //scegli il testo da inserire
-            String mText="";
+            String mText=""+corso.getNomeCorso()+"\n";
             mText+="Scadenza gruppi: "+dataStringa+"\n"+"Numero di partecipanti per ogni gruppo: "+partecipanti+
                     "\nOre assegnate a ciascun gruppo: "+ore+"\n";
-            int i=1;
-            for(String s:codici){
-                mText+="Gruppo"+i+"-"+nomeGruppo+" codice: "+s+"\n";
-                i++;
+            for(Gruppo g: array_gruppi){
+                mText+=g.getNome_gruppo()+", "+g.getCodice_gruppo()+"\n";
             }
-            //String mText="cioa";
-            //aggiungi paragrafo
+            //salvo pdf
             mDoc.add(new Paragraph(mText));
-            // aggiungi autore opzionale e altre cose
-            mDoc.addAuthor("App Aule Studio");
-
-            //chiudi il doc
+            mDoc.addAuthor("StudyAround");
             mDoc.close();
-            //mostra messaggio
             MyToast.makeText(this, mFileName+": operazione avvenuta con successo", true).show();
 
         }
@@ -439,51 +414,5 @@ public class CreaCodici extends AppCompatActivity {
         }
 
     }
-
-    //algoritmo per calcolare i codici
-    public String creaCodice(){
-        codice="";
-
-        for(int i=0; i<lunghezzaCodice; i++){
-            boolean scelgoArray = random.nextBoolean();
-            if(scelgoArray==true){
-                //scelgo casualmente tra l'array dei numeri
-                int numeroRandom = random.nextInt(numeriArray.length-1);
-                codice += numeriArray[numeroRandom];
-
-            }
-            else{
-                //scelgo casualmente tra l'array delle lettere
-                int letteraRandom =random.nextInt(caratteriArray.length-1);
-                codice += caratteriArray[letteraRandom];
-            }
-        }
-        return codice;
-    }
-
-
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-
-
-
-
-
-
 
 }

@@ -35,7 +35,7 @@
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC7a_cSKvoRh6u-ccqs8WF-1XBXT6crVkY"/>
 
-        <activity android:name=".ScanQRCodeActivity"></activity>
+        <activity android:name=".ScanQRCodeActivity"/>
         <activity android:name=".MapActivity" />
         <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
         <activity android:name=".PrenotazioneGruppoActivity" />

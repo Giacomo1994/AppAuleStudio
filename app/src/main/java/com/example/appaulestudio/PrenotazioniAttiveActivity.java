@@ -596,14 +596,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (requestCode == 1) dialog_pick_calendar(get_account_from_calendar());
             else if(requestCode==2) startScan();
         } else
             if(requestCode==1) MyToast.makeText(getApplicationContext(), "Non puoi accedere ai calendari! Hai negato il permesso!", false).show();
             else if(requestCode==2 ) MyToast.makeText(getApplicationContext(), "Non puoi accedere alla camera! Hai negato il permesso!", false).show();
-
     }
 
     public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
@@ -626,7 +624,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 final CalendarAccount item = getItem(position);
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_dialog_calendario, parent, false);
                 CheckBox check_cal = convertView.findViewById(R.id.check_account);
-                check_cal.setText(item.getName());
+                if(item.getId()==1) check_cal.setText(item.getName_account());
+                else check_cal.setText(item.getName());
                 check_cal.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -674,13 +673,14 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         try {
             Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, null, null, null);
             while (cursor.moveToNext()) {
-                String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
                 long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
+                String accountName = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME));
                 String name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME));
                 String type = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE));
-                if (name.contains("Holidays") || name.contains("Festività") || name.equals("Contacts"))
-                    continue;
-                lista.add(new CalendarAccount(id, name, accountName, type));
+                String owner=cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.OWNER_ACCOUNT));
+
+                if(id==1 && !accountName.contains("@")) lista.add(new CalendarAccount(id, name, accountName, type, owner));
+                else if(name.contains("@")) lista.add(new CalendarAccount(id, name, accountName, type, owner));
             }
         } catch (SecurityException e) {
             e.printStackTrace();
