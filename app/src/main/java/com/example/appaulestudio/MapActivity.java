@@ -494,8 +494,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
 
                 //disegno percorso
-                    //drawPolylines(); //usa solo Directions API
-                calcolaStrade(polylinesPoints); //usa anche Roads API
+                    if(mode.equals("walking")) drawPolylines(); //usa solo Directions API
+                    else calcolaStrade(polylinesPoints); //usa Roads API
                 //mostro lunghezza e durata
                 ll_dist_dur.setVisibility(View.VISIBLE);
                 if(mode.equals("walking")) img_dist.setImageDrawable(getResources().getDrawable(R.drawable.walk));
@@ -583,6 +583,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             if(mode.equals("walking")) plo.color(Color.GREEN);
             else plo.color(Color.RED);
             plo.width(10);
+            plo.geodesic(true);
         }
         gmap.addPolyline(plo);
     }
