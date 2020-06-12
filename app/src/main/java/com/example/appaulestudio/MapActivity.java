@@ -97,6 +97,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     boolean percorso_mostrato=false;
     String mode=null;
     List<LatLng> polylinesPoints=new LinkedList<LatLng>();
+    List<LatLng> polylinesRoads=new LinkedList<LatLng>();
     PolylineOptions plo;
     DownloadTask task;
     String lunghezza=null;
@@ -452,7 +453,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     result+=cur;
                     data=reader.read();
                 }
-                Log.i("myLog",result);
                 return result;
             }catch (Exception e) {
                 e.printStackTrace();
@@ -485,15 +485,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 JSONArray arraySteps=new JSONArray(steps);
 
                 polylinesPoints.clear();
+                polylinesPoints.add(new LatLng(my_position.latitude,my_position.longitude));
                 for(int i=0;i<arraySteps.length();i++){
                     JSONObject step=arraySteps.getJSONObject(i);
                     String lat=step.getJSONObject("end_location").getString("lat");
                     String lon=step.getJSONObject("end_location").getString("lng");
-                    Log.i("myLog",lat+" "+lon);
                     polylinesPoints.add(new LatLng(Double.parseDouble(lat),Double.parseDouble(lon)));
                 }
+
                 //disegno percorso
-                drawPolylines();
+                    //drawPolylines(); //usa solo Directions API
+                calcolaStrade(polylinesPoints); //usa anche Roads API
                 //mostro lunghezza e durata
                 ll_dist_dur.setVisibility(View.VISIBLE);
                 if(mode.equals("walking")) img_dist.setImageDrawable(getResources().getDrawable(R.drawable.walk));
@@ -506,15 +508,89 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+    //calcola strade
+    public void calcolaStrade(List<LatLng> lista_pos){
+        DownloadRoads task_roads=new DownloadRoads();
+        String uri="";
+        uri+="https://roads.googleapis.com/v1/snapToRoads?path=";
+
+        for (LatLng trackPoint : lista_pos) {
+            uri+=""+trackPoint.latitude;
+            uri+=",";
+            uri+=""+trackPoint.longitude;
+            uri+="|";
+        }
+        uri=uri.substring(0,uri.length()-1);
+        uri+="&interpolate=true";
+        uri+="&key=AIzaSyC7a_cSKvoRh6u-ccqs8WF-1XBXT6crVkY";
+        Log.i("myLog", uri);
+        task_roads.execute(uri);
+    }
+    private class DownloadRoads extends AsyncTask<String, Void, String>{
+        @Override
+        protected String doInBackground(String... strings) {
+            String result="";
+            URL url;
+            HttpsURLConnection urlConnection;
+            try {
+                url=new URL(strings[0]);
+                urlConnection= (HttpsURLConnection) url.openConnection();
+                InputStream in=urlConnection.getInputStream();
+                InputStreamReader reader=new InputStreamReader(in);
+                int data=reader.read();
+                while(data!=-1){
+                    char cur = (char) data;
+                    result+=cur;
+                    data=reader.read();
+                }
+                return result;
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(String stringa) {
+            super.onPostExecute(stringa);
+            try {
+                JSONObject jsonObject = new JSONObject(stringa);
+                JSONArray snappedPointsArr = jsonObject.getJSONArray("snappedPoints");
+                polylinesRoads.clear();
+                for (int i = 0; i < snappedPointsArr.length(); i++) {
+                    JSONObject snappedPointLocation = ((JSONObject) (snappedPointsArr.get(i))).getJSONObject("location");
+                    double lattitude = snappedPointLocation.getDouble("latitude");
+                    double longitude = snappedPointLocation.getDouble("longitude");
+                    polylinesRoads.add(new LatLng(lattitude, longitude));
+                    //disegno percorso
+                    drawPolylinesRoads();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
     }
     public void drawPolylines(){
         plo=new PolylineOptions();
-        plo.add(new LatLng(my_position.latitude,my_position.longitude));
         plo.color(Color.RED);
         plo.width(10);
         for(LatLng latLng:polylinesPoints){
+            //map.clear();
+            plo.add(latLng);
+            if(mode.equals("walking")) plo.color(Color.GREEN);
+            else plo.color(Color.RED);
+            plo.width(10);
+        }
+        gmap.addPolyline(plo);
+    }
+    public void drawPolylinesRoads(){
+        plo=new PolylineOptions();
+        plo.color(Color.RED);
+        plo.width(10);
+        for(LatLng latLng:polylinesRoads){
             //map.clear();
             plo.add(latLng);
             if(mode.equals("walking")) plo.color(Color.GREEN);
