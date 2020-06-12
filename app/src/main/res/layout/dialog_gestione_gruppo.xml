@@ -16,6 +16,12 @@
         android:textSize="24sp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rimuovi componente:" />
+
     <ListView
         android:id="@+id/listaStudenti"
         android:layout_width="match_parent"
@@ -66,15 +72,16 @@
 
             <Button
                 android:id="@+id/btnNuovaScadenza"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginRight="10dp"
                 android:background="@android:drawable/ic_menu_month" />
 
             <TextView
                 android:id="@+id/nuovaScadenza"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
         </TableRow>
 
         <TableRow
@@ -92,6 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_span="2"
+                android:layout_weight="1"
                 android:inputType="number" />
         </TableRow>
 

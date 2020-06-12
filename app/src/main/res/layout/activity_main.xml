@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="10dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -45,12 +45,11 @@
         <TableLayout
             android:id="@+id/log_table"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp">
+            android:layout_height="wrap_content">
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent" >
 
                 <TextView
                     android:id="@+id/textView9"
@@ -60,8 +59,10 @@
 
                 <Spinner
                     android:id="@+id/log_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:spinnerMode="dialog" />
             </TableRow>
 
             <TableRow
@@ -77,6 +78,8 @@
                     android:id="@+id/log_matricola"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
                     android:hint="matricola"
                     android:importantForAutofill="no"
                     android:inputType="textPersonName" />
@@ -90,12 +93,15 @@
                     android:id="@+id/textView11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingRight="5dp"
                     android:text="Inserisci password:" />
 
                 <EditText
                     android:id="@+id/log_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
                     android:hint="password"
                     android:importantForAutofill="no"
                     android:inputType="textPassword" />

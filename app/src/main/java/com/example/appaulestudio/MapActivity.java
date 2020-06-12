@@ -127,6 +127,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         strCognome=settings.getString("cognome", null);
         strIngresso=settings.getString("ingresso",null);
         strPausa=settings.getString("pausa",null);
+        //
+        MyToast.makeText(getApplicationContext(),strIngresso+" "+strPausa
+                +" "+settings.getString("slot",null)+" "+settings.getString("first_slot",null)
+                +" "+settings.getString("last_update",null),true).show();
         //intent
         intent = getIntent();
         bundle = intent.getBundleExtra("bundle_aule");
@@ -488,13 +492,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     Log.i("myLog",lat+" "+lon);
                     polylinesPoints.add(new LatLng(Double.parseDouble(lat),Double.parseDouble(lon)));
                 }
+                //disegno percorso
                 drawPolylines();
-                //mostro lunghezza e durataMyToast.makeText(getApplicationContext(),lunghezza+", "+durata, false).show();
+                //mostro lunghezza e durata
                 ll_dist_dur.setVisibility(View.VISIBLE);
                 if(mode.equals("walking")) img_dist.setImageDrawable(getResources().getDrawable(R.drawable.walk));
                 else img_dist.setImageDrawable(getResources().getDrawable(R.drawable.auto));
                 txt_dist.setText(lunghezza);
                 txt_dur.setText(durata);
+                //centro mappa su posizione attuale
+                gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(my_position,17));
 
             } catch (Exception e) {
                 e.printStackTrace();

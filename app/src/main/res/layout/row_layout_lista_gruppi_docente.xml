@@ -3,7 +3,7 @@
     android:id="@+id/rowGruppiDocente"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/layout_docente_complete"
+    android:background="@drawable/layout_gruppo_complete"
     android:orientation="vertical"
     android:padding="10dp">
 
@@ -16,25 +16,44 @@
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/codiceGruppo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:gravity="center_horizontal" />
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal">
 
-    <TextView
-        android:id="@+id/dataScadenza"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:gravity="center_horizontal" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/oreRimanenti"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:gravity="center_horizontal" />
+            <TextView
+                android:id="@+id/codiceGruppo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/dataScadenza"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/oreRimanenti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp" />
+        </TableRow>
+
+    </TableLayout>
 
 </LinearLayout>

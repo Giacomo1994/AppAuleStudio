@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 MyToast.makeText(getApplicationContext(),"Sei offline! Connettititi ad una rete per effettuare il login",false).show();
                 return;
             }
-            adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, array_universita);
+            adapter = new ArrayAdapter(MainActivity.this, R.layout.simple_custom_list_item, array_universita);
             spinner.setAdapter(adapter);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

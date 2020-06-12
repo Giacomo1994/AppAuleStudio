@@ -209,7 +209,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 return;
             }
             spinner.setEnabled(true);
-            adapter = new ArrayAdapter(RegistrazioneActivity.this, android.R.layout.simple_list_item_1, array_universita);
+            adapter = new ArrayAdapter(RegistrazioneActivity.this, R.layout.simple_custom_list_item, array_universita);
             spinner.setAdapter(adapter);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

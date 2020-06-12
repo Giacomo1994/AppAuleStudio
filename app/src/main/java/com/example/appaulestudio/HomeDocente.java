@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,15 +44,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HomeDocente extends AppCompatActivity {
-    String strMatricola, strNome, strCognome, strNomeUniversita, URL_CORSI;
+    static final String URL_DETTAGLI_CORSI ="http://pmsc9.altervista.org/progetto/corsi_gruppi_docente.php";
+    String strMatricola, strNome, strCognome, strNomeUniversita, strUniversita, URL_CORSI;
     ArrayAdapter adapter;
-    TextView infoCorso ;
     ListView elencoCorsi;
     Button creaGruppi;
     LinearLayout ll_start;
-    ArrayList<Corso> corsoArrayList=new ArrayList<Corso>();
+
+    ArrayList<Corso> corsoArrayList=null;
     Intent from_login;
-    boolean fatto=false;
+    boolean fatto=false, created=false;
+    int risultato=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,7 @@ public class HomeDocente extends AppCompatActivity {
         strCognome=settings.getString("cognome", null);
         URL_CORSI=settings.getString("url_corsi",null);
         strNomeUniversita=settings.getString("nome_universita",null);
+        strUniversita=settings.getString("universita",null);
 
         action_bar();
 
@@ -78,16 +82,26 @@ public class HomeDocente extends AppCompatActivity {
                     if(fatto==true && millisUntilFinished<28000){
                         ll_start.setVisibility(View.GONE);
                         getSupportActionBar().show();
+                        if(risultato==0 || risultato==2){
+                            MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare i corsi",false).show();
+                            creaGruppi.setEnabled(false);
+                        }
+                        else if(risultato==1) {
+                            MyToast.makeText(getApplicationContext(), "Non hai in carico nessun insegnamento",false).show();
+                            creaGruppi.setEnabled(false);
+                        }
+                        else if(risultato==2){
+                            MyToast.makeText(getApplicationContext(), "Impossibile aggiornare il numero dei gruppi",false).show();
+                        }
                         cancel();
                     }
                 }
                 public void onFinish() {
                     ll_start.setVisibility(View.GONE);
+                    MyToast.makeText(getApplicationContext(), "Impossibile ottenere i corsi",false).show();
                 }
             }.start();
         }
-
-
 
         new listaCorsi().execute();
 
@@ -116,6 +130,12 @@ public class HomeDocente extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        aggiorna_pagina();
+    }
+
     @SuppressLint("WrongConstant")
     private void action_bar(){
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -125,7 +145,7 @@ public class HomeDocente extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Home");
+        txt_actionbar.setText("I miei corsi");
         final Dialog d = new Dialog(HomeDocente.this);
         d.setCancelable(false);
         d.setContentView(R.layout.dialog_user);
@@ -167,7 +187,7 @@ public class HomeDocente extends AppCompatActivity {
         });
     }
 
-// asynctask per riempire la listview dei corsi del docente
+//TASK ASINCRONI
     private class listaCorsi extends AsyncTask<Void, Void, Corso[]>{
         @Override
         protected Corso[] doInBackground(Void... voids) {
@@ -219,36 +239,157 @@ public class HomeDocente extends AppCompatActivity {
                 return null;
             }
         }
-
         @Override
         protected void onPostExecute(Corso[] array_corso) {
-            fatto=true;
             if(array_corso==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false);
-                creaGruppi.setEnabled(false);
+                if(created==false){
+                    fatto=true;
+                    risultato=0;
+                }
+                else MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare i corsi",false).show();
                 return;
             }
             if(array_corso.length==0){
-                MyToast.makeText(getApplicationContext(), "Non possiedi nessun insegnamento", false);
-                creaGruppi.setEnabled(false);
+                if(created==false){
+                    fatto=true;
+                    risultato=1;
+                }
+                else MyToast.makeText(getApplicationContext(), "Non hai in carico nessun insegnamento",false).show();
                 return;
             }
             List<Corso> corsi_list= Arrays.asList(array_corso);
             corsoArrayList=new ArrayList<Corso>();
             corsoArrayList.addAll(corsi_list);
+            new dettagliCorsi().execute();
+        }
+    }
+
+    private class dettagliCorsi extends AsyncTask<Void, Void, String>{
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                //definisco le variabili
+                String params;
+                URL url;
+                HttpURLConnection urlConnection; //serve per aprire connessione
+                DataOutputStream dos;
+                InputStream is;
+                BufferedReader reader;
+                StringBuilder sb;
+                String line;
+                String result;
+                JSONArray jArrayGruppi;
+                url = new URL(URL_DETTAGLI_CORSI); //passo la richiesta post che mi restituisce i corsi dal db
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                params = "codice_universita="+ URLEncoder.encode(strUniversita, "UTF-8") +
+                        "&matricola_docente="+ URLEncoder.encode(strMatricola, "UTF-8");
+                dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(params);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                is = urlConnection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                sb = new StringBuilder();
+                line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                result = sb.toString();
+                jArrayGruppi = new JSONArray(result);  //questa decodifica crea un array di elementi json
+
+                for(Corso cc:corsoArrayList){
+                    cc.setGruppi_totali(0);
+                    cc.setGruppi_scaduti(0);
+                    cc.setGruppi_in_scadenza(0);
+                }
+                for(int i = 0; i<jArrayGruppi.length(); i++){
+                    JSONObject json_data = jArrayGruppi.getJSONObject(i);
+                    String tipo=json_data.getString("type");
+                    String codice=json_data.getString("corso");
+                    int cont=json_data.getInt("cont");
+                    for(Corso c:corsoArrayList){
+                        if(c.getCodiceCorso().equals(codice)){
+                            if(tipo.equals("totali")) c.setGruppi_totali(cont);
+                            else if(tipo.equals("scadenza")) c.setGruppi_in_scadenza(cont);
+                            else c.setGruppi_scaduti(cont);
+                        }
+                    }
+                }
+                return "ok";
+            }  catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            fatto=true;
+            risultato=3;
+            if(result==null) {
+                if(created==true) MyToast.makeText(getApplicationContext(), "Impossibile aggiornare il numero dei gruppi",false).show();
+                else risultato=2;
+            }
+
             adapter = new ArrayAdapter<Corso>(HomeDocente.this, R.layout.row_layout_home_docente, corsoArrayList ){
                 @Override
                 public View getView(int position,  View convertView,  ViewGroup parent) {
                     Corso item = getItem(position);
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home_docente, parent, false);
-                    infoCorso = convertView.findViewById(R.id.infoCorso);
-                    infoCorso.setText(""+item.getCodiceCorso()+" - "+item.getNomeCorso());
-
+                    LinearLayout ll_gruppi=convertView.findViewById(R.id.ll_gruppi_home_docente);
+                    LinearLayout row_scadenza=convertView.findViewById(R.id.row_dscadenza);
+                    LinearLayout row_scaduti=convertView.findViewById(R.id.row_dscaduti);
+                    TextView nome_corso=convertView.findViewById(R.id.infoCorso);
+                    TextView codice_corso=convertView.findViewById(R.id.cod_corso);
+                    TextView gruppi_totali=convertView.findViewById(R.id.txt_home_gtotali);
+                    TextView gruppi_scadenza=convertView.findViewById(R.id.txt_home_gscadenza);
+                    TextView gruppi_scaduti=convertView.findViewById(R.id.txt_home_gscaduti);
+                    nome_corso.setText(item.getNomeCorso());
+                    codice_corso.setText(item.getCodiceCorso());
+                    if(item.getGruppi_totali()==0){
+                        row_scadenza.setVisibility(View.GONE);
+                        row_scaduti.setVisibility(View.GONE);
+                    }
+                    if(item.getGruppi_in_scadenza()==0) row_scadenza.setVisibility(View.GONE);
+                    if(item.getGruppi_scaduti()==0) row_scaduti.setVisibility(View.GONE);
+                    gruppi_totali.setText(""+item.getGruppi_totali());
+                    gruppi_scaduti.setText(""+item.getGruppi_scaduti());
+                    gruppi_scadenza.setText(""+item.getGruppi_in_scadenza());
                     return convertView;
                 }
             };
             elencoCorsi.setAdapter(adapter);
         }
+    }
+
+
+//OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            aggiorna_pagina();
+        }
+
+        return true;
+    }
+
+    private void aggiorna_pagina(){
+        created=true;
+        creaGruppi.setEnabled(true);
+        if(corsoArrayList==null) new listaCorsi().execute();
+        else new dettagliCorsi().execute();
     }
 
 

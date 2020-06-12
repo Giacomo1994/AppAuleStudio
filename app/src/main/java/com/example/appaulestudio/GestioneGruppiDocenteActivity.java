@@ -79,7 +79,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     ListView listaAttivi, listaInScadenza,listaScaduti;
     Button btnInScadenza, btnAttivi, btnScaduti;
     //dialog gestione gruppo
-    TextView nomeGruppoDialog; ListView listastudenti;
+    TextView nomeGruppoDialog;
+    ListView listastudenti;
     TextView txtNomeComponente, txtCognomeComponente; CheckBox checkComponente;
     TextView nuovaScadenza;
     EditText oreDaAggiungere;
@@ -88,7 +89,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     int anno,mese,giorno;
     double oreUpdateNumerico; String dataUpdate, oreUpdate;
     ArrayAdapter adapterComponenti;
-    TextView nomeGruppo, dataScadenza, oreRimanenti, numeroPartecipanti, codiceGruppo;
+    TextView nomeGruppo, dataScadenza, oreRimanenti, codiceGruppo;
     String codiceUniversita, nomeUniversita, nomeDocente, matricolaDocente, cognomeDocente, password;
     LinearLayout rowGruppiDocente;
     Intent intent;
@@ -96,13 +97,11 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     Corso corso;
     Gruppo[] gruppi;
     Gruppo[] gruppiAttivi, gruppiInScadenza,gruppiScaduti;
-    //ListView listaGruppi;
     ArrayAdapter adapter, adapterInScadenza, adapterScaduti;
     Dialog gestisciGruppoDialog;
     User[] componenti, array_copia, array_dinamico,array_eliminati;
     Gruppo gruppoSelezionato;
     String studente;
-    Date date=null;
 
     private void initUI(){
         //preferenze
@@ -198,11 +197,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         initUI();
         action_bar();
 
+        new prendiGruppi().execute();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onRestart() {
+        super.onRestart();
         new prendiGruppi().execute();
     }
 
@@ -257,6 +257,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         });
     }
 
+//METODI GESTIONE GRUPPI
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
         Calendar c= Calendar.getInstance();
@@ -273,7 +274,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         me2= c2.get(Calendar.MONTH)+1;
         gi2= c2.get(Calendar.DAY_OF_MONTH);
 
-
         if(me<=9) mes="0"+me;
         else mes = me + "";
         if(gi<=9)gio="0"+gi;
@@ -286,14 +286,15 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         else gio2 = gi2 + "";
         String dataFra2sett=an2+"-"+mes2+"-"+gio2;
 
+        //smisto i gruppi
         for(Gruppo g:gruppi) {
             if (g.getData_scadenza().compareTo(dataOggi) < 0) scaduti++;
             else if (g.getData_scadenza().compareTo(dataOggi) == 0 || (g.getData_scadenza().compareTo(dataOggi) > 0 && g.getData_scadenza().compareTo(dataFra2sett) <= 0)) inScadenza++;
             else attivi++;
         }
-        if(attivi!=0) gruppiAttivi = new Gruppo[attivi];
-        if(scaduti!=0) gruppiScaduti = new Gruppo[scaduti];
-        if(inScadenza!=0) gruppiInScadenza = new Gruppo[inScadenza];
+        gruppiAttivi = new Gruppo[attivi];
+        gruppiScaduti = new Gruppo[scaduti];
+        gruppiInScadenza = new Gruppo[inScadenza];
 
         int scadutiAggiunti=0, attiviAggiunti=0, inScadenzaAggiunti=0;
         for(Gruppo g:gruppi) {
@@ -302,10 +303,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 scadutiAggiunti++;
             }
             else if (g.getData_scadenza().compareTo(dataOggi) == 0 || (g.getData_scadenza().compareTo(dataOggi) > 0 && g.getData_scadenza().compareTo(dataFra2sett) <= 0)) {
-                gruppiInScadenza[inScadenzaAggiunti]=g; inScadenzaAggiunti++;
+                gruppiInScadenza[inScadenzaAggiunti]=g;
+                inScadenzaAggiunti++;
             }
             else {
-                gruppiAttivi[attiviAggiunti]=g; attiviAggiunti++;
+                gruppiAttivi[attiviAggiunti]=g;
+                attiviAggiunti++;
             }
         }
         mostraGruppi();
@@ -430,7 +433,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         dataScadenzaDialog=gestisciGruppoDialog.findViewById(R.id.dataScadenzaDialog);
         oreResidueDailog.setText("Ore disponibili residue: "+gruppoSelezionato.getOre_disponibili());
         dataScadenzaDialog.setText("Scadenza: "+ gruppoSelezionato.getData_scadenza());
-        nuovaScadenza.setText(gruppoSelezionato.getData_scadenza());
+        nuovaScadenza.setText("");
         btnOk=gestisciGruppoDialog.findViewById(R.id.btnOK);
         btnAnnulla=gestisciGruppoDialog.findViewById(R.id.btnAnnulla);
         btnNuovaScadenza=gestisciGruppoDialog.findViewById(R.id.btnNuovaScadenza);
@@ -443,13 +446,10 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                     //return super.getView(position, convertView, parent);
                     User item = getItem(position);
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_componenti
-                            , parent, false);
-                    //txtComponenti = convertView.findViewById(R.id.txtComponente);
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_componenti, parent, false);
                     checkComponente = convertView.findViewById(R.id.checkComponente);
                     txtNomeComponente = convertView.findViewById(R.id.txtNomeComponente);
                     txtCognomeComponente = convertView.findViewById(R.id.txtCognomeComponente);
-                    //txtUniversitaComponente=convertView.findViewById(R.id.txtUniversitaComponente);
 
                     if (contiene(array_dinamico, item) == true) {
                         checkComponente.setChecked(true);
@@ -459,19 +459,13 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     checkComponente.setText(item.getMatricola());
                     txtNomeComponente.setText(item.getNome());
                     txtCognomeComponente.setText(item.getCognome());
-                    //txtUniversitaComponente.setText(item.getUniversita());
-                    //all inizio l array dinamico li contiene tutti e sono tutti checked
 
                     checkComponente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
                         @Override
                         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                            //output.setText("");
-                            //output.append(componenti.length + "COMPONENTI");
                             array_copia = array_dinamico;
                             studente = compoundButton.getText().toString();
-
-
                             //se lo toglie
                             if (b == false) {
                                 array_dinamico = rimuoviUser(array_copia, studente);
@@ -510,8 +504,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //prendi studenti dall arraydinamico
-                //prendi ore da aggiungere
                 String n=oreDaAggiungere.getText().toString().trim();
                 double numero;
                 double numeroTroncato;
@@ -533,10 +525,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 }
                 oreUpdateNumerico=gruppoSelezionato.getOre_disponibili()+numeroTroncato;
                 oreUpdate=""+oreUpdateNumerico;
-
                 dataUpdate=nuovaScadenza.getText().toString().trim();
 
-                if(!dataUpdate.equals(gruppoSelezionato.getData_scadenza()) || !n.equals("")) {
+                if((!dataUpdate.equals("") && !dataUpdate.equals(gruppoSelezionato.getData_scadenza())) || !n.equals("")) {
                     new aggiornaGruppi().execute();
                 }
                 if(componenti!=null) {
@@ -545,8 +536,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                         new eliminaComponenti().execute();
                     }
                 }
+                new prendiGruppi().execute();
                 gestisciGruppoDialog.cancel();
-                onResume();
+
             }
         });
         btnAnnulla.setOnClickListener(new View.OnClickListener() {
@@ -685,8 +677,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         return false;
     }
 
-
-
+//TASK ASINCRONI
     private class prendiGruppi extends AsyncTask<Void, Void, Gruppo[]> {
 
         @Override
@@ -750,14 +741,11 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 return;
             }
             gruppi=array_gruppi;
-            //iniazializzo l'arrau degli effettivi partecipanti
             smistaGruppi(gruppi);
-
         }
     }
 
     private class prendiUtenti extends AsyncTask<Void, Void, User[]> {
-
         @Override
         protected User[] doInBackground(Void... voids) {
             try {
@@ -805,7 +793,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             super.onPostExecute(array_componenti);
             if (array_componenti == null) {
                 componenti=array_componenti;
-                creaDialogGruppo();
+                MyToast.makeText(getApplicationContext(), "Sei offline! Non puoi aggiornare il gruppo.",false).show();
+                //creaDialogGruppo();
                 return;
             }
             componenti=array_componenti;
@@ -826,6 +815,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
+                if(dataUpdate.equals("")) dataUpdate=gruppoSelezionato.getData_scadenza();
                 String parametri = "data_scadenza=" + URLEncoder.encode(dataUpdate, "UTF-8") +
                         "&ore_disponibili=" + URLEncoder.encode(oreUpdate, "UTF-8")+
                         "&codice_gruppo="+ URLEncoder.encode(gruppoSelezionato.getCodice_gruppo(), "UTF-8") +
@@ -846,19 +836,18 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 String stringaRicevuta = new String(baos.toByteArray());
                 return stringaRicevuta;
             } catch (Exception e) {
-                Log.e("SimpleHttpURLConnection", e.getMessage());
-                return "Impossibile connettersi";
+                return null;
             } finally {
             }
         }
 
         @Override
         protected void onPostExecute(String result) {
-            if(result.equals("Gruppo aggiornato")==false){
-                MyToast.makeText(getApplicationContext(),"Errore nel caricamento",false).show();
+            if(result==null || !result.equals("Gruppo aggiornato")){
+                MyToast.makeText(getApplicationContext(),"Errore nell'aggiornamento del gruppo",false).show();
                 return;
             }
-            else MyToast.makeText(getApplicationContext(), result,true).show();
+            else MyToast.makeText(getApplicationContext(), "Gruppo aggiornato",true).show();
         }
     }
 
@@ -894,18 +883,19 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     }
                     input.close();
                     String result = new String(baos.toByteArray());
+                    if(result==null || !result.equals("Studente eliminato")) return null;
                 }
-                return null;
+                return "ok";
 
             } catch (Exception e) {
-                MyToast.makeText(getApplicationContext(),e.getMessage(),false).show();
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            MyToast.makeText(getApplicationContext(),"Componenti aggiornati",false).show();
+        protected void onPostExecute(String result) {
+            if(result==null) MyToast.makeText(getApplicationContext(),"Errore nell'aggiornamento del gruppo",false).show();
+            else MyToast.makeText(getApplicationContext(), "Studenti eliminati",true).show();
         }
     }
 
@@ -938,15 +928,14 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 String result = new String(baos.toByteArray());
                 return result;
             } catch (Exception e) {
-                Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            if(!s.equals("Gruppo eliminato")) MyToast.makeText(getApplicationContext(),"Qualcosa è andato storto",false).show();
-            else MyToast.makeText(getApplicationContext(),"Gruppo eliminato definitvamente",false).show();
+        protected void onPostExecute(String result) {
+            if(result==null || !result.equals("Gruppo eliminato")) MyToast.makeText(getApplicationContext(),"Impossibile eliminare il gruppo",false).show();
+            else MyToast.makeText(getApplicationContext(),"Gruppo eliminato definitvamente",true).show();
 
         }
     }
@@ -972,16 +961,33 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         menu.add(Menu.FIRST, 1, Menu.FIRST,"Elimina gruppo");
 
     }
-
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if(item.getItemId()==1){
             new eliminaGruppoIntero().execute();
-            onResume();
+            new prendiGruppi().execute();
 
         }
         return true;
     }
 
+//OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 2, Menu.FIRST+1, "Home");
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            new prendiGruppi().execute();
+        }
+        if (item.getItemId() == 2) {
+            finish();
+        }
+
+        return true;
+    }
 }

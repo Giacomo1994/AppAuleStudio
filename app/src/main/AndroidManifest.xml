@@ -35,27 +35,34 @@
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC7a_cSKvoRh6u-ccqs8WF-1XBXT6crVkY"/>
 
-        <activity android:name=".ScanQRCodeActivity"/>
-        <activity android:name=".MapActivity" />
-        <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
-        <activity android:name=".PrenotazioneGruppoActivity" />
-        <activity android:name=".GroupActivity" />
-        <activity android:name=".GestioneGruppiDocenteActivity" />
-        <activity android:name=".CreaCodici" />
-        <activity android:name=".HomeDocente" />
-        <activity android:name=".InfoAulaActivity" />
-        <activity android:name=".Home" />
-        <activity android:name=".RegistrazioneActivity" />
-        <activity android:name=".IscrizioneActivity" />
-        <activity android:name=".PrenotazioneStudenteActivity" />
-        <activity android:name=".PrenotazioniAttiveActivity" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".RegistrazioneActivity" />
+        <activity
+            android:name=".Home"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity android:name=".MapActivity" />
+        <activity android:name=".InfoAulaActivity" />
+        <activity android:name=".GroupActivity" />
+        <activity android:name=".IscrizioneActivity" />
+        <activity android:name=".PrenotazioneStudenteActivity" />
+        <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
+        <activity android:name=".PrenotazioneGruppoActivity" />
+        <activity android:name=".PrenotazioniAttiveActivity" />
+        <activity android:name=".ScanQRCodeActivity"/>
+        <activity
+            android:name=".HomeDocente"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity android:name=".GestioneGruppiDocenteActivity" />
+        <activity android:name=".CreaCodici" />
+
 
         <service android:name=".FirebaseMessagingService">
             <intent-filter>
@@ -66,9 +73,7 @@
         <receiver android:name=".AlertReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <action android:name="com.example.appaulestudio" />
             </intent-filter>
         </receiver>

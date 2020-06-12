@@ -17,23 +17,13 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txtTitoloInScad"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_horizontal"
-                android:text="INSERISCI I DATI RICHIESTI"
-                android:textColor="@color/colorPrimary"
-                android:textSize="24sp"
-                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -44,7 +34,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="Seleziona corso: "
+                    android:text="Seleziona corso "
                     android:textSize="18sp" />
 
                 <Spinner
@@ -87,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="Nome del gruppo (opzionale*)"
+                android:hint="Suffisso gruppo (opzionale*)"
                 android:inputType="textPersonName"
                 android:textSize="18sp" />
 
@@ -96,15 +86,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="*Se lesciato vuoto verrà assegnato ad ogni gruppo un nome formato da un numero progressivo e il nome del corso"
-                android:textSize="10sp" />
+                android:text="*Se lesciato vuoto verrà assegnato ad ogni gruppo un nome formato da un numero progressivo e il nome del corso."
+                android:textSize="10sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/dataScadenza"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="Selezionare la data scadenza dei gruppi"
+                android:layout_marginTop="10dp"
+                android:text="Seleziona la data scadenza dei gruppi"
                 android:textSize="18sp" />
 
             <CalendarView
@@ -115,14 +106,15 @@
                 android:verticalScrollbarPosition="defaultPosition"
                 android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
-            <Button
-                android:id="@+id/btnCreaCodici"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/button_layout"
-                android:text="Crea i gruppi" />
         </LinearLayout>
     </ScrollView>
+
+    <Button
+        android:id="@+id/btnCreaCodici"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/button_layout"
+        android:text="Crea i gruppi" />
 
 </LinearLayout>

@@ -268,7 +268,7 @@ public class CreaCodici extends AppCompatActivity {
         });
     }
 
-
+//TASK ASINCRONO
     private class creaGruppi extends AsyncTask<Void, Void, Gruppo[]> {
         @Override
         protected Gruppo[] doInBackground(Void... voids) {
@@ -335,11 +335,30 @@ public class CreaCodici extends AppCompatActivity {
         }
     }
 
+// PDF
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case STORAGE_CODE:{
+                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    savePdf();
+                }
+                else{
+                    //permesso non accordato dalla finestra di pop un e mostro errore
+                    MyToast.makeText(getApplicationContext(), "Hai negato il permesso quindi non posso procedere", false).show();
+                }
+            }
+        }
+
+    }
+
     public void dialogPdfCodici(){
         dialogPdf= new Dialog(CreaCodici.this);
         dialogPdf.setTitle("Crea Pdf");
         dialogPdf.setCancelable(true);
         dialogPdf.setContentView(R.layout.dialog_crea_pdf);
+        dialogPdf.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         getBtnDailogPdfAnnulla=dialogPdf.findViewById(R.id.btnDialogPdfAnnulla);
         btnDailogPdf=dialogPdf.findViewById(R.id.btnDialogPdf);
         dialogPdf.show();
@@ -398,21 +417,18 @@ public class CreaCodici extends AppCompatActivity {
         finish();
     }
 
+//OPTIONS MENU
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case STORAGE_CODE:{
-                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                    savePdf();
-                }
-                else{
-                    //permesso non accordato dalla finestra di pop un e mostro errore
-                    MyToast.makeText(getApplicationContext(), "Hai negato il permesso quindi non posso procedere", false).show();
-                }
-            }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST, "Home");
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            finish();
         }
 
+        return true;
     }
-
 }
