@@ -23,6 +23,7 @@ public class ScanQRCodeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_q_r_code);
         cameraView=findViewById(R.id.camera_view);
+        setTitle("Scannerizza un QR code");
         createCameraSource();
     }
     private void createCameraSource(){
