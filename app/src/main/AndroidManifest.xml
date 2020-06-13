@@ -42,26 +42,59 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegistrazioneActivity" />
+        <activity
+            android:name=".RegistrazioneActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
         <activity
             android:name=".Home"
             android:configChanges="keyboardHidden|orientation">
         </activity>
-        <activity android:name=".MapActivity" />
-        <activity android:name=".InfoAulaActivity" />
-        <activity android:name=".GroupActivity" />
-        <activity android:name=".IscrizioneActivity" />
-        <activity android:name=".PrenotazioneStudenteActivity" />
-        <activity android:name=".PrenotazioneStudenteAulaGruppoActivity" />
-        <activity android:name=".PrenotazioneGruppoActivity" />
-        <activity android:name=".PrenotazioniAttiveActivity" />
+        <activity
+            android:name=".MapActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".InfoAulaActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".GroupActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".IscrizioneActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".PrenotazioneStudenteActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".PrenotazioneStudenteAulaGruppoActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".PrenotazioneGruppoActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".PrenotazioniAttiveActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
         <activity android:name=".ScanQRCodeActivity"/>
         <activity
             android:name=".HomeDocente"
             android:configChanges="keyboardHidden|orientation">
         </activity>
-        <activity android:name=".GestioneGruppiDocenteActivity" />
-        <activity android:name=".CreaCodici" />
+        <activity
+            android:name=".GestioneGruppiDocenteActivity"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+            android:name=".CreaCodici"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
 
 
         <service android:name=".FirebaseMessagingService">

@@ -22,7 +22,7 @@ public class SqliteManager {
 //ALARM_TRIGGER
     public void insertAlarm(int id_prenotazione, String orario_alarm){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        String sql="INSERT OR IGNORE INTO alarm_trigger (id_prenotazione, orario_alarm) "+
+        String sql="INSERT OR REPLACE INTO alarm_trigger (id_prenotazione, orario_alarm) "+
                 "VALUES (" +id_prenotazione + ", '" + orario_alarm + "')";
         db.execSQL(sql);
     }

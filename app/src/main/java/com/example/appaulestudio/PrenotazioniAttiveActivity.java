@@ -320,7 +320,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server!", false).show();
                 return;
             }
-            if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione"))
+            if(result.equals("Accesso non consentito") || result.equals("Impossibile effettuare pausa") || result.equals("Impossibile cancellare prenotazione") || result.equals("Impossibile procedere"))
                 MyToast.makeText(getApplicationContext(), result, false).show();
             else MyToast.makeText(getApplicationContext(), result, true).show();
 
@@ -356,7 +356,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 }
             }
             else if((richiesta==5 && result.equals("Entrata consentita")) || (richiesta==6) && result.equals("Uscita consentita")) new doRichiestaTornello().execute();
-
+            else if(richiesta==10 && result.equals("Conferma avvenuta")){
+                String orario_alarm=create_alarm(p, false, false);
+                database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+            }
             new getPrenotazioni().execute();
         }
     }
@@ -804,14 +807,23 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
                 return;
             }
+            if(entrata_uscita.equals("entrata") && richiesta==10){
+                MyToast.makeText(getApplicationContext(),"Non sei in aula!", false).show();
+                return;
+            }
             if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
                 MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
                 return;
             }
-            if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+            if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6 && richiesta!=10){
                 MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
                 return;
             }
+            if(richiesta==10){
+                new doOperazione().execute();
+                return;
+            }
+
 
             final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
             d.setCancelable(false);
@@ -850,10 +862,13 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
     public void startScan(){
+        if(richiesta==0 || richiesta==5) MyToast.makeText(getApplicationContext(), "Scannerizza QR code all'ingresso", true).show();
+        else if(richiesta==10) MyToast.makeText(getApplicationContext(), "Scannerizza un qualsiasi QR code dentro l'aula", true).show();
+        else MyToast.makeText(getApplicationContext(), "Scannerizza QR code all'uscita", true).show();
         Intent i = new Intent(PrenotazioniAttiveActivity.this, ScanQRCodeActivity.class);
+
         startActivityForResult(i, 24);
     }
-
 
 
     //CONTEXT MENU
@@ -867,6 +882,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if(p.getIn_corso().equals("in_corso")){
             if(p.getStato()==1 || p.getStato()==2){
                 menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
+                menu.add(Menu.FIRST, 10, Menu.FIRST+1,"Sono già in aula");
                 menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
             }
             if(p.getStato()==0){
@@ -889,10 +905,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         richiesta=item.getItemId();
         p= (Prenotazione) list_in_corso.getItemAtPosition(info.position);
-        //richiata =1,3,4,6 no scanner
         if(richiesta==1 || richiesta==4) new doOperazione().execute();
         else if(richiesta==8) sincronizza();
-        //else qrScan.initiateScan();
         else scanQRcode();
 
         return true;
