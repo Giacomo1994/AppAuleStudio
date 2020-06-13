@@ -494,8 +494,10 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
             for(Prenotazione p:array_prenotazioni){
                 if(p.getStato()==1 && p.getIn_corso().equals("futura") && !p.getGruppo().equals("null")){
-                    String orario_alarm=create_alarm(p,true,false);
-                    database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+                    if(database.isAllarmeGiaInserito(p.getId_prenotazione())==false){
+                        String orario_alarm=create_alarm(p,true,false);
+                        database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+                    }
                 }
                 lista_prenotazioni.add(p);
             }
@@ -585,7 +587,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                 }
             };
             list_in_corso.setAdapter(adapter);
-            database.insertPrenotazioniGruppi(lista_prenotazioni);
+            database.insertPrenotazioni(lista_prenotazioni);
         }
     }
 

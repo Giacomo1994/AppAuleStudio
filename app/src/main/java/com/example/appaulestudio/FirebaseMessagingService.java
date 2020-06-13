@@ -45,7 +45,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         Intent intent=null;
         if(message.contains("si è iscritto al gruppo") || message.contains("ha abbandonato il gruppo")
                 || message.contains("ha aggiornato") || message.contains("docente ti ha rimosso") || message.contains("docente ha rimosso")) intent = new Intent(getApplicationContext(), GroupActivity.class);
-        else if(message.contains("non parteciperà alla prenotazione")) intent = new Intent(getApplicationContext(), PrenotazioniAttiveActivity.class);
+        else if(message.contains("non parteciperà alla prenotazione") || message.contains("Attenzione! La tua prenotazione sta per terminare!")) intent = new Intent(getApplicationContext(), PrenotazioniAttiveActivity.class);
         else intent = new Intent(getApplicationContext(), Home.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(pi);

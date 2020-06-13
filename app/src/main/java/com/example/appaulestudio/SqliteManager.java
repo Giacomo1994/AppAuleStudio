@@ -49,6 +49,14 @@ public class SqliteManager {
         return allarmi;
     }
 
+    public boolean isAllarmeGiaInserito(int id_prenotazione){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM alarm_trigger where id_prenotazione="+id_prenotazione;
+        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
+        if(cursor==null ||cursor.getCount()==0) return false;
+        return true;
+    }
+
 
 //EVENTI_CALENDARIO
     public boolean is_prenotazione_sincronizzata(int id_prenotazione){
@@ -182,18 +190,13 @@ public class SqliteManager {
         db.execSQL(sql);
     }
 
-    public void insertPrenotazioniGruppi(ArrayList<Prenotazione> prenotazioni){
+    public void insertPrenotazioni(ArrayList<Prenotazione> prenotazioni){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
-        ArrayList<Prenotazione> pren_gruppi=new ArrayList<Prenotazione>();
-        for(Prenotazione pren:prenotazioni){
-            if(!pren.getGruppo().equals("null")) pren_gruppi.add(pren);
-        }
-        for(Prenotazione p: pren_gruppi){
+        for(Prenotazione p:prenotazioni){
             String sql="INSERT OR IGNORE INTO prenotazioni_offline (id_prenotazione, orario_prenotazione, nome_aula, tavolo, gruppo) "+
                     "VALUES (" +p.getId_prenotazione() + ", '" + p.getOrario_prenotazione() + "', '" + p.getAula() + "'," + p.getNum_tavolo() + ",'" + p.getGruppo() + "')";
             db.execSQL(sql);
         }
-
     }
 
     public ArrayList<Prenotazione> selectPrenotazioni(){
