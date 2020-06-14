@@ -285,8 +285,8 @@ public class CreaCodici extends AppCompatActivity {
                 JSONArray jArrayGruppi;
                 url = new URL(URL_CREA_GRUPPI); //passo la richiesta post che mi restituisce i corsi dal db
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(3000);
-                urlConnection.setConnectTimeout(3000);
+                urlConnection.setReadTimeout(5000);
+                urlConnection.setConnectTimeout(5000);
                 urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);

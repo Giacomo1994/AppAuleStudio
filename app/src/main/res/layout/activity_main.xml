@@ -132,5 +132,13 @@
             android:gravity="center_horizontal"
             android:textColorLink="#359739" />
 
+        <TextView
+            android:id="@+id/log_toPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center_horizontal"
+            android:textColorLink="#359739" />
+
     </LinearLayout>
 </ScrollView>

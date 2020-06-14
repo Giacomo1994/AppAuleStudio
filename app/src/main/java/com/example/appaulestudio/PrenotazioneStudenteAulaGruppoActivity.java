@@ -380,8 +380,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 urlConnection.setDoInput(true);
                 parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8") +
                         "&data=" + URLEncoder.encode(data, "UTF-8") +
-                        "&ingresso=" + URLEncoder.encode(""+ingresso, "UTF-8") +
-                        "&pausa=" + URLEncoder.encode(""+pausa, "UTF-8");
+                        "&universita=" + URLEncoder.encode(strUniversita, "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();
@@ -525,13 +524,10 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                         "&universita=" + URLEncoder.encode(strUniversita, "UTF-8") +
                         "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8") +
                         "&tavolo=" + URLEncoder.encode(""+tavolo.getNum_tavolo(), "UTF-8") +
-                        "&posti_tavolo=" + URLEncoder.encode(""+tavolo.getPosti_totali(), "UTF-8") +
                         "&data=" + URLEncoder.encode(data, "UTF-8") +
                         "&inizio=" + URLEncoder.encode(inizio, "UTF-8") +
                         "&fine=" + URLEncoder.encode(fine, "UTF-8") +
-                        "&slots=" + URLEncoder.encode(slots, "UTF-8") +
-                        "&ingresso=" + URLEncoder.encode(""+ingresso, "UTF-8") +
-                        "&pausa=" + URLEncoder.encode(""+pausa, "UTF-8");
+                        "&slots=" + URLEncoder.encode(slots, "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();

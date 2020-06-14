@@ -415,7 +415,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8")+"&matricola=" + URLEncoder.encode(strMatricola, "UTF-8");
+                parametri = "id_aula=" + URLEncoder.encode(aula.getIdAula(), "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
                 dos.flush();

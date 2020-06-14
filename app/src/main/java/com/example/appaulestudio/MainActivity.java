@@ -26,24 +26,27 @@ import com.google.firebase.iid.InstanceIdResult;
 public class MainActivity extends AppCompatActivity {
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login.php";
+    static final String URL_RECUPERA_PASSWORD="http://pmsc9.altervista.org/progetto/recupero_password.php";
 
     ImageView studente_docente;
-    TextView txt_toRegistrazione;
+    TextView txt_toRegistrazione, txt_toPassword;
     Spinner spinner;
-    ArrayAdapter<Universita> adapter;
+    ArrayAdapter<Universita> adapter=null;
     EditText txtMatricola, txtPassword;
     Button btn_login;
     RadioButton radioStudente,radioDocente;
 
-    Universita universita=null;
+    Universita universita=null, universita_recupero=null;
     String matricola, password, token=null;
     boolean isStudente;
     boolean studentePassato;
     boolean is_logged=false, is_studente=false;
+    String rec_matricola=null, rec_mail=null;
 
 
     private void initUI(){
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);
+        txt_toPassword=findViewById(R.id.log_toPassword);
         spinner=findViewById(R.id.log_spinner);
         txtMatricola=findViewById(R.id.log_matricola);
         txtPassword=findViewById(R.id.log_password);
@@ -88,6 +91,61 @@ public class MainActivity extends AppCompatActivity {
 
         txt_toRegistrazione.setText(ss);
         txt_toRegistrazione.setMovementMethod(LinkMovementMethod.getInstance());
+
+        //link a recupero password
+        String stringa_topw="Password dimenticata?";
+        SpannableString ss_topw=new SpannableString(stringa_topw);
+
+        ClickableSpan clickableSpan_topw = new ClickableSpan() {
+            @Override
+            public void onClick(View view) {
+                final Dialog d = new Dialog(MainActivity.this);
+                d.setContentView(R.layout.dialog_recupero_password);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                Spinner dialog_spinner=d.findViewById(R.id.dialog_spinner_uni);
+                final EditText dialog_matricola=d.findViewById(R.id.dialog_input_matricola);
+                final EditText dialog_mail=d.findViewById(R.id.dialog_input_mail);
+                Button btn_recupera=d.findViewById(R.id.btn_recupera_pw);
+
+                dialog_spinner.setAdapter(adapter);
+                dialog_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        universita_recupero = (Universita) parent.getItemAtPosition(position);
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
+                btn_recupera.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        rec_matricola=dialog_matricola.getText().toString().trim();
+                        rec_mail=dialog_mail.getText().toString().trim();
+                        if(universita_recupero==null){
+                            MyToast.makeText(getApplicationContext(),"Per favore, seleziona un'università", false).show();
+                            return;
+                        }
+                        if(universita_recupero==null){
+                            MyToast.makeText(getApplicationContext(),"Per favore, seleziona un'università", false).show();
+                            return;
+                        }
+                        if(rec_matricola==null || rec_matricola.equals("") || rec_mail==null || rec_mail.equals("")){
+                            MyToast.makeText(getApplicationContext(),"Per favore, inserisci tutti i campi", false).show();
+                            return;
+                        }
+                        else {
+                            new recuperoPassword().execute();
+                            d.dismiss();
+                        }
+                    }
+                });
+                d.show();
+            }
+        };
+        ss_topw.setSpan(clickableSpan_topw, 0, stringa_topw.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txt_toPassword.setText(ss_topw);
+        txt_toPassword.setMovementMethod(LinkMovementMethod.getInstance());
 
         //funzione bottone
         btn_login.setOnClickListener(new View.OnClickListener() {
@@ -340,6 +398,50 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
             }
+        }
+    }
+
+    private class recuperoPassword extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... strings) {
+            try {
+                URL url=new URL(URL_RECUPERA_PASSWORD);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "matricola=" + URLEncoder.encode(rec_matricola, "UTF-8")
+                        + "&universita=" + URLEncoder.encode(universita_recupero.getCodice(), "UTF-8")
+                        + "&mail=" + URLEncoder.encode(rec_mail, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                Log.e("SimpleHttpURLConnection", e.getMessage());
+                return "Impossibile connettersi";
+            } finally {
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(result.equals("Impossibile connettersi") || result.equals("ERROR: Could not connect.")) MyToast.makeText(getApplicationContext(), "Sei offline! Connettiti ad una rete per recuperare la password!", false).show();
+            else if(result.equals("Utente inesistente: impossibile inviare email")) MyToast.makeText(getApplicationContext(), result, false).show();
+            else MyToast.makeText(getApplicationContext(), "E-mail inviata: controlla la tua casella di posta", true).show();
         }
     }
 

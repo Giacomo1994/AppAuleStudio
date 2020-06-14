@@ -96,7 +96,7 @@ public class Home extends AppCompatActivity{
         if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==true) from_login=true;
         else from_login=false;
 
-        if(from_login==false) new check_last_update_universita().execute();
+        //if(from_login==false)
         if(start_app==true){
             getSupportActionBar().hide();
             new CountDownTimer(30000, 1000) {
@@ -130,6 +130,7 @@ public class Home extends AppCompatActivity{
             ll_home.setVisibility(View.VISIBLE);
         }
 
+        new check_last_update_universita().execute();
         new listaAule().execute();
 
         //listener listview
@@ -166,6 +167,7 @@ public class Home extends AppCompatActivity{
         super.onRestart();
         bar.setVisibility(ProgressBar.VISIBLE);
         new listaAule().execute();
+        new check_last_update_universita().execute();
     }
 
     @SuppressLint("WrongConstant")
