@@ -27,6 +27,7 @@
                 android:gravity="center"
                 android:textColor="@color/intestazione"
                 android:textSize="24sp"
+                android:textStyle="bold"
                 app:fontFamily="@font/el_messiri_medium" />
 
             <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -56,6 +57,14 @@
                     android:spinnerMode="dialog" />
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/txt_num_posti_g"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textColor="#23A364"
+                android:textSize="16sp" />
 
             <TableLayout
                 android:id="@+id/pren_tab_layout_studgruppo"

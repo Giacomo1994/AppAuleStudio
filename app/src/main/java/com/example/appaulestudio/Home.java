@@ -395,8 +395,6 @@ public class Home extends AppCompatActivity{
                 ready=1;
                 mostraOffline();
             } else {
-                database.delete_aule_offline(array_aula);
-                aule_da_aggiornare=database.getAuleDaAggiornare(array_aula);
                 ready=0;
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
                     @Override
@@ -438,6 +436,9 @@ public class Home extends AppCompatActivity{
                 };
                 elencoAule.setAdapter(adapter);
 
+                //aggiorno sqlite
+                database.delete_aule_offline(array_aula);
+                aule_da_aggiornare=database.getAuleDaAggiornare(array_aula);
                 if(aule_da_aggiornare.size()!=0){
                     for(Aula a:aule_da_aggiornare){
                         database.aggiornaAula(a);
@@ -453,7 +454,7 @@ public class Home extends AppCompatActivity{
         protected String doInBackground(Void... voids) {
             try {
                 URL url=new URL(URL_ORARI_DEFAULT);
-                for(Aula a:array_aule){
+                for(Aula a:aule_da_aggiornare){
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setReadTimeout(1500);
                     urlConnection.setConnectTimeout(1000);
@@ -507,9 +508,9 @@ public class Home extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 2) {
-            Intent i = new Intent(this, Home.class);
-            startActivity(i);
-            finish();
+            bar.setVisibility(ProgressBar.VISIBLE);
+            new listaAule().execute();
+            new check_last_update_universita().execute();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);

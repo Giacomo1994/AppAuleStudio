@@ -19,6 +19,8 @@ public class Tavolo implements Comparable<Tavolo>{
         this.num_tavolo = numero_tavolo;
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
+        inizio_disponibilita=null;
+        fine_disponibilita=null;
     }
     /*public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
         this.id_aula = id_aula;
@@ -95,6 +97,13 @@ public class Tavolo implements Comparable<Tavolo>{
 
     @Override
     public int compareTo(Tavolo o) {
+        if(inizio_disponibilita==null && fine_disponibilita==null){
+            if(posti_liberi>o.getPosti_liberi()) return -1;
+            else{
+                if(num_tavolo>o.getNum_tavolo()) return 1;
+                else return -1;
+            }
+        }
         if(!fine_disponibilita.equals(o.getFine_disponibilita())) return fine_disponibilita.compareTo(o.getFine_disponibilita());
         else if(num_tavolo>o.getNum_tavolo()) return -1;
         else return 1;

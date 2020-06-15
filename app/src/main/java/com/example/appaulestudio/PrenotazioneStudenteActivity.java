@@ -65,7 +65,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
-    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula;
+    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula, txt_num_posti;
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner;
@@ -96,6 +96,8 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         btn_prenota=findViewById(R.id.pren_btn);
         linear_spinner=findViewById(R.id.linear_spinner);
         pick_time=findViewById(R.id.pick_time_st);
+        txt_num_posti=findViewById(R.id.txt_num_posti_s);
+        txt_num_posti.setText("");
 
         database=new SqliteManager(this);
         intent =getIntent();
@@ -453,6 +455,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                 return;
             }
 
+            Collections.sort(tavoli);
             spinner=findViewById(R.id.spinner_tavoli);
             adapter = new ArrayAdapter(PrenotazioneStudenteActivity.this, android.R.layout.simple_list_item_1, tavoli);
             spinner.setAdapter(adapter);
@@ -463,6 +466,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    txt_num_posti.setText("");
                     nuovo_orario_fine_prenotazione=null;
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
                     Calendar cal = Calendar.getInstance();
@@ -499,6 +503,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                             if(orario_inizio_prenotazione==null) txt_inizio.setText("A prenotazione confermata");
                             else txt_inizio.setText(orario_inizio_prenotazione.substring(0,5));
                             txt_fine.setText(orario_fine_prenotazione.substring(0,5));
+                            txt_num_posti.setText("Posti liberi: "+tavolo.getPosti_liberi());
                             return;
                         }
                     }

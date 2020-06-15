@@ -61,7 +61,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     SubsamplingScaleImageView imgView;
     Spinner spinner;
     ArrayAdapter<Tavolo> adapter;
-    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula;
+    TextView txt_data, txt_inizio, txt_fine, txt_nome_aula, txt_num_posti;
     TableLayout tab_layout;
     Button btn_prenota;
     LinearLayout linear_spinner, linear_activity;
@@ -100,6 +100,8 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         linear_activity=findViewById(R.id.ll_studgruppo);
         spinner=findViewById(R.id.spinner_tavoli_studgruppo);
         pick_time=findViewById(R.id.pick_time_stgr);
+        txt_num_posti=findViewById(R.id.txt_num_posti_g);
+        txt_num_posti.setText("");
         slot=new LinkedList<String>();
         prenotazioni=new LinkedList<Prenotazione>();
         tavoli=null;
@@ -432,7 +434,10 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                     if(p.getNum_tavolo()==t.getNum_tavolo() && datetime.compareTo(p.getOrario_prenotazione())>=0) posti_occupati++;
                 }
                 int posti_liberi=t.getPosti_totali()-posti_occupati;
-                if(posti_liberi>0) list_tavoli_spinner.add(t);
+                if(posti_liberi>0) {
+                    t.setPosti_liberi(posti_liberi);
+                    list_tavoli_spinner.add(t);
+                }
             }
             if(list_tavoli_spinner.size()==0){
                 dialogWarning("Impossibile prenotare: non ci sono tavoli disponibili!");
@@ -469,6 +474,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                   txt_num_posti.setText("");
                     nuova_fine=null;
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
                     getSlot();
@@ -487,6 +493,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                     if(tavolo.getInizio_disponibilita().equals("A prenotazione confermata")) txt_inizio.setText(tavolo.getInizio_disponibilita());
                     else txt_inizio.setText(tavolo.getInizio_disponibilita().substring(0,5));
                     txt_fine.setText(tavolo.getFine_disponibilita().substring(0,5));
+                    txt_num_posti.setText("Posti liberi: "+tavolo.getPosti_liberi());
                     inizio=tavolo.getInizio_disponibilita();
                     fine=tavolo.getFine_disponibilita();
                 }

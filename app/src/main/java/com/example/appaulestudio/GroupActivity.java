@@ -133,7 +133,6 @@ public class GroupActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-
     private class listaGruppi extends AsyncTask<Void, Void, Gruppo[]>{
         @Override
         protected Gruppo[] doInBackground(Void... voids) {
@@ -438,9 +437,7 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(i);
         }
         if (item.getItemId() == 2) {
-            Intent i = new Intent(this, GroupActivity.class);
-            startActivity(i);
-            finish();
+            new listaGruppi().execute();
         }
         if(item.getItemId() == 4){
             Intent i = new Intent(this, PrenotazioniAttiveActivity.class);

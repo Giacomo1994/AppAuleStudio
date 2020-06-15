@@ -59,6 +59,14 @@
 
                         </LinearLayout>
 
+                        <TextView
+                            android:id="@+id/txt_num_posti_s"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:textColor="#23A364"
+                            android:textSize="16sp" />
+
                         <TableLayout
                             android:id="@+id/pren_tab_layout"
                             android:layout_width="wrap_content"
@@ -144,15 +152,6 @@
                                 </TableRow>
 
                         </TableLayout>
-                        <TextView
-                            android:id="@+id/txt_er_stud"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:layout_marginTop="5dp"
-                            android:textColor="#FF0000"
-                            android:textSize="18sp"
-                            android:visibility="gone" />
 
                 </LinearLayout>
         </ScrollView>
