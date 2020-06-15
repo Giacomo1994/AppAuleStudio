@@ -426,6 +426,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         gestisciGruppoDialog.setContentView(R.layout.dialog_gestione_gruppo);
         gestisciGruppoDialog.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         nomeGruppoDialog=gestisciGruppoDialog.findViewById(R.id.nomeGruppo);
+        TextView txt_componenti=gestisciGruppoDialog.findViewById(R.id.txt_elimina_componente);
         listastudenti=gestisciGruppoDialog.findViewById(R.id.listaStudenti);
         oreDaAggiungere=gestisciGruppoDialog.findViewById(R.id.oreDaAggiungere);
         nuovaScadenza=gestisciGruppoDialog.findViewById(R.id.nuovaScadenza);
@@ -438,9 +439,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         btnAnnulla=gestisciGruppoDialog.findViewById(R.id.btnAnnulla);
         btnNuovaScadenza=gestisciGruppoDialog.findViewById(R.id.btnNuovaScadenza);
         nomeGruppoDialog.setText(gruppoSelezionato.getNome_gruppo());
+        if(componenti.length==0 || componenti==null) txt_componenti.setVisibility(View.GONE);
         if(componenti!=null) {
-            adapterComponenti = new ArrayAdapter<User>(GestioneGruppiDocenteActivity.this,
-                    R.layout.row_layout_componenti, componenti) {
+            adapterComponenti = new ArrayAdapter<User>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_componenti, componenti) {
                 @NonNull
                 @Override
                 public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -490,6 +491,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             };
             listastudenti.setAdapter(adapterComponenti);
         }
+
 
 
         gestisciGruppoDialog.show();

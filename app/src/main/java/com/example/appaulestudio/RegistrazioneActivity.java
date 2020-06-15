@@ -101,7 +101,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
                 //controllo campi non vuoti
                 if(matricola.equals("")||nome.equals("")||cognome.equals("")||email.equals("")||password.equals("")||password2.equals("")){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Devi inserire tutti i campi!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"Per favore, inserisci tutti i campi!", false).show();
                     return;
                 }
 
@@ -114,19 +114,20 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 Matcher matcher = pattern.matcher(email);
                 boolean isValidMail=matcher.matches();
                 if(isValidMail==false){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Formato email non valido!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"Formato e-mail non valido!", false).show();
                     return;
                 }
 
                 //controllo password uguali
                 if(password.equals(password2)==false){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Le password devono essere uguali" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"Le password devono essere uguali!", false).show();
                     return;
                 }
 
                 //controllo lunghezza password
                 if(password.length()<8){
-                    Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>" + "Password troppo corta!" + "</b></font>"),Toast.LENGTH_LONG).show();
+                    MyToast.makeText(getApplicationContext(),"La password deve contenere almeno 8 caratteri!", false).show();
+
                     return;
                 }
                 new checkUtenteFromUniversita().execute();

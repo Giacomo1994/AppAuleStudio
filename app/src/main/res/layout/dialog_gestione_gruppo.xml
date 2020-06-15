@@ -17,7 +17,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/txt_elimina_componente"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Rimuovi componente:" />
@@ -127,7 +127,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="ANULLA" />
+            android:text="ANNULLA" />
     </LinearLayout>
 
 </LinearLayout>

@@ -203,7 +203,7 @@ public class CreaCodici extends AppCompatActivity {
         Bundle bundle=intent.getBundleExtra("bundle_corsi");
         corsoArrayList=bundle.getParcelableArrayList("corsi");
 
-        adapter= new ArrayAdapter<Corso>(CreaCodici.this, android.R.layout.simple_spinner_item, corsoArrayList);
+        adapter= new ArrayAdapter<Corso>(CreaCodici.this, R.layout.simple_custom_list_item, corsoArrayList);
         materieDocente.setAdapter(adapter);
         materieDocente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
