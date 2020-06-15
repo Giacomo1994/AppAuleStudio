@@ -5,8 +5,9 @@
     android:id="@+id/ll_studgruppo"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
+    android:background="@color/bianco"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context=".PrenotazioneStudenteAulaGruppoActivity">
 
     <ScrollView
@@ -63,7 +64,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:textColor="#23A364"
                 android:textSize="16sp" />
 
             <TableLayout
@@ -72,7 +72,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/forma_dialog">
+                android:background="@drawable/layout_gruppo_complete">
 
                 <TableRow
                     android:layout_width="match_parent"
