@@ -333,7 +333,13 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     rowGruppiDocente = convertView.findViewById(R.id.rowGruppiDocente);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
-                    oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
+                    int ore_int= (int) item.getOre_disponibili();
+                    int ore_round= (int) Math.ceil(item.getOre_disponibili());
+                    if(ore_int==ore_round) oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h");
+                    else{
+                        int min=(int)((item.getOre_disponibili()-(double)ore_int)*60);
+                        oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h "+min+"min");
+                    }
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
                     //rowGruppiDocente.setBackgroundResource(R.drawable.forma_lista_gruppi_docente);
                     return convertView;
@@ -359,7 +365,13 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     rowGruppiDocente = convertView.findViewById(R.id.rowGruppiDocente);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
-                    oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
+                    int ore_int= (int) item.getOre_disponibili();
+                    int ore_round= (int) Math.ceil(item.getOre_disponibili());
+                    if(ore_int==ore_round) oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h");
+                    else{
+                        int min=(int)((item.getOre_disponibili()-(double)ore_int)*60);
+                        oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h "+min+"min");
+                    }
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
                     return convertView;
                 }
@@ -384,7 +396,13 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     codiceGruppo=convertView.findViewById(R.id.codiceGruppo);
                     nomeGruppo.setText(item.getNome_gruppo());
                     dataScadenza.setText("Scadenza: " + item.getData_scadenza());
-                    oreRimanenti.setText("Ore disponibili residue: " + item.getOre_disponibili());
+                    int ore_int= (int) item.getOre_disponibili();
+                    int ore_round= (int) Math.ceil(item.getOre_disponibili());
+                    if(ore_int==ore_round) oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h");
+                    else{
+                        int min=(int)((item.getOre_disponibili()-(double)ore_int)*60);
+                        oreRimanenti.setText("Ore disponibili residue: "+ore_int+"h "+min+"min");
+                    }
                     codiceGruppo.setText("Codice gruppo: "+item.getCodice_gruppo());
                     return convertView;
                 }
