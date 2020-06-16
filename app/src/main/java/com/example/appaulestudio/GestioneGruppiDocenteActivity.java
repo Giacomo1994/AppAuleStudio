@@ -739,7 +739,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 return;
             }
             if (array_gruppi.length==0) {
-                MyToast.makeText(getApplicationContext(), "Non ci sono gruppi disponibili", false).show();
+                //MyToast.makeText(getApplicationContext(), "Non ci sono gruppi disponibili", false).show();
                 return;
             }
             gruppi=array_gruppi;

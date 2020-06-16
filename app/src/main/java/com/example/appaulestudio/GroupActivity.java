@@ -9,6 +9,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -23,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,14 +54,31 @@ public class GroupActivity extends AppCompatActivity {
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
+    LinearLayout ll_offline;
+    Button bnt_iscriviti;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         gruppiPerStudente = findViewById(R.id.listaGruppi);
+        ll_offline=findViewById(R.id.ll_group_offline);
+        bnt_iscriviti=findViewById(R.id.iscrizione_gruppo);
+        ll_offline.setVisibility(View.GONE);
+        bnt_iscriviti.setVisibility(View.VISIBLE);
+
+        bnt_iscriviti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
+                startActivity(i);
+            }
+        });
+
+        //database
         database=new SqliteManager(GroupActivity.this);
 
+        //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
         strMatricola=settings.getString("matricola", null);
@@ -68,6 +87,7 @@ public class GroupActivity extends AppCompatActivity {
         strNomeUniversita=settings.getString("nome_universita", null);
         action_bar();
 
+        //task
         new listaGruppi().execute();
         registerForContextMenu(gruppiPerStudente);
     }
@@ -75,6 +95,8 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
+        ll_offline.setVisibility(View.GONE);
+        bnt_iscriviti.setVisibility(View.VISIBLE);
         new listaGruppi().execute();
     }
 
@@ -125,12 +147,6 @@ public class GroupActivity extends AppCompatActivity {
                 d.show();
             }
         });
-    }
-
-
-    public void iscrizione_gruppo(View v){
-        Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
-        startActivity(i);
     }
 
     private class listaGruppi extends AsyncTask<Void, Void, Gruppo[]>{
@@ -193,7 +209,8 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
-                MyToast.makeText(getApplicationContext(), "Sei offline! I dati potrebbero non essere aggiornati",false).show();
+                ll_offline.setVisibility(View.VISIBLE);
+                bnt_iscriviti.setVisibility(View.GONE);
                 ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
                 if(arrayList_gruppo==null || arrayList_gruppo.size()==0)
                     MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
@@ -328,8 +345,8 @@ public class GroupActivity extends AppCompatActivity {
                 }
             });
             if(componenti==null){
-                MyToast.makeText(getApplicationContext(), "Sei offline! I dati potrebbero non essere aggiornati",false).show();
-                eti_componenti.setVisibility(View.GONE);
+                eti_componenti.setText("Impossibile mostrare componenti");
+                eti_componenti.setTextColor(Color.RED);
                 return;
             }
             ArrayAdapter<User> user_adapter=new ArrayAdapter<User>(GroupActivity.this, R.layout.row_layout_dettagli_gruppo, componenti ){
@@ -437,6 +454,8 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(i);
         }
         if (item.getItemId() == 2) {
+            ll_offline.setVisibility(View.GONE);
+            bnt_iscriviti.setVisibility(View.VISIBLE);
             new listaGruppi().execute();
         }
         if(item.getItemId() == 4){

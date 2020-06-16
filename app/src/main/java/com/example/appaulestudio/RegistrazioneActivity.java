@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class RegistrazioneActivity extends AppCompatActivity {
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
-    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/progetto/registrazione.php";
+    static final String URL_REGISTRAZIONE="http://pmsc9.altervista.org/registrazione.php";
 
     Spinner spinner;
     ArrayAdapter<Universita> adapter;
@@ -130,14 +130,14 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
                     return;
                 }
-                new checkUtenteFromUniversita().execute();
+                new registraUtente().execute();
+                //new checkUtenteFromUniversita();
             }
         });
 
         intent=getIntent();
         new riempiUniversita().execute();
     }
-
 
     @Override
     protected void onRestart() {
@@ -158,7 +158,6 @@ public class RegistrazioneActivity extends AppCompatActivity {
         txt_actionbar.setText("REGISTRAZIONE");
         image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
     }
-
 
     //TASK ASINCRONO --> riempie lo spinner delle univeristà
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
@@ -286,6 +285,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
+                        + "&url_registrazione=" + URLEncoder.encode(universita.getUrl_registrazione(), "UTF-8")
                         + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
                         + "&nome=" + URLEncoder.encode(nome, "UTF-8")
                         + "&cognome=" + URLEncoder.encode(cognome, "UTF-8")
@@ -317,7 +317,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), result, false).show();
+            if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), "Errore: "+result, false).show();
             else{
                 intent.putExtra("matricola", matricola);
                 intent.putExtra("password", password);

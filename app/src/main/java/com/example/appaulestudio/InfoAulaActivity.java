@@ -73,6 +73,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     TextView infoAula_nome, infoAula_luogo, infoAula_output, infoAula_gruppi, infoAula_posti;
     Button btnNotifica, btnPrenotazioneGruppo, btnPrenotazionePosto;
     ImageView imgGruppo;
+    LinearLayout ll_offline;
 
     Intent intent;
     Bundle bundle;
@@ -98,7 +99,8 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazionePosto=findViewById(R.id.infoAula_toPrenSingolo);
         btnPrenotazioneGruppo=findViewById(R.id.infoAula_toPrenGruppo);
         imgGruppo=findViewById(R.id.imageView2);
-
+        ll_offline=findViewById(R.id.ll_infoaula_offline);
+        ll_offline.setVisibility(View.GONE);
 
         //intent
         intent = getIntent();
@@ -228,6 +230,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnNotifica.setVisibility(View.GONE);
         btnPrenotazionePosto.setVisibility(View.GONE);
         btnPrenotazioneGruppo.setVisibility(View.GONE);
+        ll_offline.setVisibility(View.GONE);
         LinearLayout layout = findViewById(R.id.infAula_linear);
         layout.removeAllViews();
         new mostra_orari().execute();
@@ -284,7 +287,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(Integer[] result) {
             if(result==null){
-                MyToast.makeText(getApplicationContext(),"Sei offline! I dati dell'aula potrebbero non essere aggiornati!",false).show();
+                ll_offline.setVisibility(View.VISIBLE);
                 btnNotifica.setVisibility(View.GONE);
                 btnPrenotazionePosto.setVisibility(View.GONE);
                 btnPrenotazioneGruppo.setVisibility(View.GONE);
@@ -396,9 +399,9 @@ public class InfoAulaActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String result) {
             if(result==null){
-                MyToast.makeText(getApplicationContext(), "Sei offline! I dati dell'aula potrebbero non essere aggiornati!", false).show();
                 orari_speciali=null;
                 connesso=false;
+                ll_offline.setVisibility(View.VISIBLE);
                 btnNotifica.setVisibility(View.GONE);
                 btnPrenotazionePosto.setVisibility(View.GONE);
                 btnPrenotazioneGruppo.setVisibility(View.GONE);

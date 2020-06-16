@@ -103,6 +103,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     ListView list_in_corso, list_cronologia;
     ArrayAdapter<Prenotazione> adapter;
     TextView txt_legenda;
+    LinearLayout ll_offline;
 
     SqliteManager database;
     Intent intent_ricevuto;
@@ -113,7 +114,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     boolean  offline;
     ArrayList<CalendarAccount> array_list_account;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,6 +123,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         list_in_corso=findViewById(R.id.list_inCorso);
         list_cronologia=findViewById(R.id.list_cronologia);
         txt_legenda=findViewById(R.id.text_legenda);
+        ll_offline=findViewById(R.id.ll_prenattive_offline);
+        ll_offline.setVisibility(View.GONE);
+        txt_legenda.setVisibility(View.VISIBLE);
         array_list_account = new ArrayList<CalendarAccount>();
 
         //legenda
@@ -188,6 +191,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
+        ll_offline.setVisibility(View.GONE);
+        txt_legenda.setVisibility(View.VISIBLE);
         new getPrenotazioni().execute();
     }
 
@@ -247,8 +252,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             try {
                 URL url = new URL(URL_RICHIESTA_TORNELLO);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(2000);
-                urlConnection.setConnectTimeout(2000);
+                urlConnection.setReadTimeout(5000);
+                urlConnection.setConnectTimeout(5000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -283,8 +288,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             try {
                 URL url = new URL(URL_OPERAZIONI);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(2000);
-                urlConnection.setConnectTimeout(2000);
+                urlConnection.setReadTimeout(5000);
+                urlConnection.setConnectTimeout(5000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -382,8 +387,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
                 url = new URL(URL_PRENOTAZIONI);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(2000);
-                urlConnection.setConnectTimeout(2000);
+                urlConnection.setReadTimeout(5000);
+                urlConnection.setConnectTimeout(5000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -430,7 +435,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             if(array_prenotazioni==null){
                 ll_in_corso.setVisibility(View.GONE);
                 ll_cronologia.setVisibility(View.VISIBLE);
-                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server! I dati potrebbero non essere aggiornati", false).show();
+                ll_offline.setVisibility(View.VISIBLE);
+                txt_legenda.setVisibility(View.GONE);
 
                 ArrayList<Prenotazione> prenotazioni_offline=database.selectPrenotazioni();
                 if(prenotazioni_offline==null || prenotazioni_offline.size()==0){
@@ -893,7 +899,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             }
         }
         else if(p.getIn_corso().equals("futura")){
-            if(!database.is_prenotazione_sincronizzata(p.getId_prenotazione())) menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
+            menu.add(Menu.FIRST, 8, Menu.FIRST,"Sincronizza con calendario");
             menu.add(Menu.FIRST, 4, Menu.FIRST+1,"Cancella prenotazione");
         }
         else if(p.getIn_corso().equals("conclusa") && p.getStato()!=1){

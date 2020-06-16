@@ -27,8 +27,35 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:background="@drawable/button_layout"
-        android:onClick="iscrizione_gruppo"
         android:text="Iscriviti ad un gruppo"
         android:textColor="@color/button_text" />
+
+    <LinearLayout
+        android:id="@+id/ll_group_offline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/layout_offline"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/imageView14"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:srcCompat="@drawable/warning" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Impossibile contattare il server!\n I dati potrebbero non essere aggiornati!"
+            android:textColor="#EC0000"
+            android:textSize="12sp" />
+    </LinearLayout>
 
 </LinearLayout>

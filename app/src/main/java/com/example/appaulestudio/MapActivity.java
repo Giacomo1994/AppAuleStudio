@@ -580,8 +580,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         for(LatLng latLng:polylinesPoints){
             //map.clear();
             plo.add(latLng);
-            if(mode.equals("walking")) plo.color(Color.GREEN);
-            else plo.color(Color.RED);
+            plo.color(Color.GREEN);
             plo.width(10);
             plo.geodesic(true);
         }
@@ -592,10 +591,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         plo.color(Color.RED);
         plo.width(10);
         for(LatLng latLng:polylinesRoads){
-            //map.clear();
             plo.add(latLng);
-            if(mode.equals("walking")) plo.color(Color.GREEN);
-            else plo.color(Color.RED);
+            plo.color(Color.RED);
             plo.width(10);
         }
         gmap.addPolyline(plo);

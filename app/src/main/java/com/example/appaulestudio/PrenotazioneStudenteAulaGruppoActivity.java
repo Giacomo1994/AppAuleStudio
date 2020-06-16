@@ -244,8 +244,10 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         txt_warning.setText(message);
         if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!") ||
                 message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile per l'orario indicato!") ||
-                message.equals("Tavolo non più disponibile!")) btn_aggiorna.setVisibility(View.VISIBLE);
-
+                message.equals("Tavolo non più disponibile!") || message.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato"))
+            btn_aggiorna.setVisibility(View.VISIBLE);
+        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
+            btn_aggiorna.setText("Continua");
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -565,7 +567,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 return;
             }
             else if(result.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato")){
-                dialogWarning("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!");
+                dialogWarning(result);
                 return;
             }
             else if(result.equals("Orario di fine prenotazione errato: per favore modifica il campo")){

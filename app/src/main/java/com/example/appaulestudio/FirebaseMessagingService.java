@@ -37,15 +37,30 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             channel.setDescription("YOUR_NOTIFICATION_CHANNEL_DESCRIPTION");
             mNotificationManager.createNotificationChannel(channel);
         }
+        String title="StudyAround";
+        String header="";
+        String body="";
+        if(message.contains("posti liberi")){
+            header=message;
+            body="";
+        }
+        else{
+            int interruzione=message.indexOf(":");
+            header=message.substring(0,interruzione);
+            body=message.substring(interruzione+2);
+        }
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "gcmchn")
                 .setSmallIcon(R.drawable.notification) // notification icon
-                .setContentTitle("StudyAround") // title for notification
-                .setContentText(message)// message for notification
+                .setContentTitle(header) // title for notification
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(body)) //text expandable for notification
                 .setAutoCancel(true); // clear notification after click
         Intent intent=null;
-        if(message.contains("si è iscritto al gruppo") || message.contains("ha abbandonato il gruppo")
-                || message.contains("ha aggiornato") || message.contains("docente ti ha rimosso") || message.contains("docente ha rimosso")) intent = new Intent(getApplicationContext(), GroupActivity.class);
-        else if(message.contains("non parteciperà alla prenotazione") || message.contains("Attenzione! La tua prenotazione sta per terminare!")) intent = new Intent(getApplicationContext(), PrenotazioniAttiveActivity.class);
+        if(message.contains("si è iscritto al gruppo") || message.contains("ha abbandonato il gruppo") || message.contains("ha aggiornato") || message.contains("sei stato rimosso") || message.contains("è stato rimosso"))
+            intent = new Intent(getApplicationContext(), GroupActivity.class);
+        else if(message.contains("non parteciperà alla prenotazione"))
+            intent = new Intent(getApplicationContext(), PrenotazioniAttiveActivity.class);
         else intent = new Intent(getApplicationContext(), Home.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(pi);

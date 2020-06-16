@@ -390,7 +390,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else{
                     editor.putBoolean("studente", false);
-                    editor.putString("url_corsi", universita.getUrl_corsi());
                     editor.commit();
                     Intent i=new Intent(MainActivity.this, HomeDocente.class);
                     i.putExtra("start_from_login",true);

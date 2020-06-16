@@ -48,7 +48,7 @@ public class Home extends AppCompatActivity{
     static final String URL_ORARI_DEFAULT="http://pmsc9.altervista.org/progetto/home_orari_default.php";
     static final String URL_LAST_UPDATE="http://pmsc9.altervista.org/progetto/home_lastUpdate.php";
 
-    LinearLayout ll_start,ll_home;
+    LinearLayout ll_start,ll_home, ll_offline;
     ArrayAdapter adapter;
     ListView elencoAule;
     TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
@@ -71,6 +71,8 @@ public class Home extends AppCompatActivity{
         elencoAule= findViewById(R.id.elencoAule);
         mappa= findViewById(R.id.mappa);
         bar=findViewById(R.id.bar);
+        ll_offline=findViewById(R.id.ll_home_offline);
+        ll_offline.setVisibility(View.GONE);
         ll_start.setVisibility(View.VISIBLE);
         ll_home.setVisibility(View.GONE);
         //prendo preferenze
@@ -104,24 +106,13 @@ public class Home extends AppCompatActivity{
                     if(ready!=-1 && millisUntilFinished<28000){
                         ll_start.setVisibility(View.GONE);
                         ll_home.setVisibility(View.VISIBLE);
-                        if(ready==1) MyToast.makeText(getApplicationContext(), "Sei offline! I dati delle aule potrebbero non essere aggiornati!",false).show();
                         getSupportActionBar().show();
                         cancel();
                     }
                 }
                 public void onFinish() {
-                    //schermata_iniziale_gone=true;
-                    if(ready==0){
-                        ll_home.setVisibility(View.VISIBLE);
-                        ll_start.setVisibility(View.GONE);
-                        getSupportActionBar().show();
-                    }
-                    else if(ready==1){
-                        ll_home.setVisibility(View.VISIBLE);
-                        ll_start.setVisibility(View.GONE);
-                        getSupportActionBar().show();
-                        MyToast.makeText(getApplicationContext(), "Sei offline! I dati delle aule potrebbero non essere aggiornati!",false).show();
-                    }
+                    ll_home.setVisibility(View.VISIBLE);
+                    ll_start.setVisibility(View.GONE);
                 }
             }.start();
         }
@@ -166,6 +157,7 @@ public class Home extends AppCompatActivity{
     protected void onRestart() {
         super.onRestart();
         bar.setVisibility(ProgressBar.VISIBLE);
+        ll_offline.setVisibility(View.GONE);
         new listaAule().execute();
         new check_last_update_universita().execute();
     }
@@ -391,7 +383,7 @@ public class Home extends AppCompatActivity{
             bar.setVisibility(ProgressBar.GONE);
             array_aule=array_aula;
             if (array_aula == null) {
-                if(start_app==false) MyToast.makeText(getApplicationContext(),"Sei offline! I dati delle aule potrebbero non essere aggiornati", false).show();
+                ll_offline.setVisibility(View.VISIBLE);
                 ready=1;
                 mostraOffline();
             } else {
@@ -508,6 +500,7 @@ public class Home extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 2) {
+            ll_offline.setVisibility(View.GONE);
             bar.setVisibility(ProgressBar.VISIBLE);
             new listaAule().execute();
             new check_last_update_universita().execute();

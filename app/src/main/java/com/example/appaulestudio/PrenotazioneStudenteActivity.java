@@ -256,7 +256,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
         txt_warning.setText(message);
         if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!")
-                || message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile")) btn_aggiorna.setVisibility(View.VISIBLE);
+                || message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile") || message.equals("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!"))
+            btn_aggiorna.setVisibility(View.VISIBLE);
+        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
+            btn_aggiorna.setText("Continua");
+
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
