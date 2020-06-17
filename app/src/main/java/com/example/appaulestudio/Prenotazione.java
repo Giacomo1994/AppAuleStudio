@@ -26,6 +26,13 @@ public class Prenotazione implements Comparable<Prenotazione>{
         this.in_corso=in_corso;
         this.id_aula=id_aula;
     }
+    public Prenotazione(String id_aula, int num_tavolo, String orario_prenotazione, String orario_fine_prenotazione, int stato){
+        this.id_aula=id_aula;
+        this.num_tavolo = num_tavolo;
+        this.orario_prenotazione = orario_prenotazione;
+        this.orario_fine_prenotazione=orario_fine_prenotazione;
+        this.stato = stato;
+    }
 
     public String getId_aula() {
         return id_aula;
@@ -125,4 +132,10 @@ public class Prenotazione implements Comparable<Prenotazione>{
         else if(this.in_corso.equals("conclusa") && o.in_corso.equals("in_corso")) return 1;
         return 1;
     }
+
+    @Override
+    public String toString() {
+        return id_aula+" "+num_tavolo+" "+orario_prenotazione+"-"+orario_fine_prenotazione;
+    }
+
 }

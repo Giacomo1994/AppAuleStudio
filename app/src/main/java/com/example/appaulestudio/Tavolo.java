@@ -22,13 +22,29 @@ public class Tavolo implements Comparable<Tavolo>{
         inizio_disponibilita=null;
         fine_disponibilita=null;
     }
-    /*public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
+    public Tavolo(String id_aula, int numero_tavolo, int posti_totali, int posti_liberi, String fasciaOraria) {
         this.id_aula = id_aula;
         this.num_tavolo = numero_tavolo;
         this.posti_totali = posti_totali;
         this.posti_liberi = posti_liberi;
         this.fasciaOraria=fasciaOraria;
-    }*/
+    }
+    public Tavolo(Tavolo t){
+        this.id_aula=t.id_aula;
+        this.num_tavolo = t.num_tavolo;
+        this.posti_totali = t.posti_totali;
+        this.posti_liberi = t.posti_liberi;
+        this.fasciaOraria=t.fasciaOraria;
+    }
+    @Override
+    public int hashCode() {
+        return num_tavolo+fasciaOraria.hashCode();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj);
+    }
 
 
     public String getId_aula() {

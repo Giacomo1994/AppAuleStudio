@@ -175,19 +175,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initUI();
 
-        //ottengo token da Firebase
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
-            @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                token = instanceIdResult.getToken(); //salvo token in variabile globale
-            }
-        });
-
+        //reindirizzamento
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         is_logged=settings.getBoolean("logged", false);
         is_studente = settings.getBoolean("studente", false);
-
-        //se non ho fatto logout reindirizzo a Home, altrimenti riempio spinner universita
         if(is_logged==true&&is_studente==true){
             Intent i=new Intent(MainActivity.this, Home.class);
             i.putExtra("start_from_login",false);
@@ -207,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        restart();
+        new riempiUniversita().execute();
     }
 
     protected void onResume() {
@@ -215,16 +206,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         is_logged=settings.getBoolean("logged", false);
         if(is_logged==true) finish();
-    }
-
-    private void restart(){
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
-            @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                token = instanceIdResult.getToken(); //salvo token in variabile globale
-            }
-        });
-        new riempiUniversita().execute();
     }
 
     @SuppressLint("WrongConstant")
@@ -306,6 +287,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected User doInBackground(Void... strings) {
             try {
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        token = instanceIdResult.getToken();
+                    }
+                });
                 URL url=new URL(URL_LOGIN);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
@@ -475,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 1) {
-            restart();
+            new riempiUniversita().execute();
         }
         return true;
     }

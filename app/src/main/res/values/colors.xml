@@ -12,4 +12,5 @@
     <color name="bianco">#FFFFFF</color>
     <color name="rosso">#FFC7C7</color>
     <color name="giallo">#F8F1B3</color>
+    <color name="rosso_scuro">#E35959</color>
 </resources>

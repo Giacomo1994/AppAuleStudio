@@ -24,12 +24,17 @@ public class AlertReceiver extends BroadcastReceiver {
     public int id=0;
     public Context context;
     SqliteManager database;
+    SharedPreferences preferences;
+    boolean logged;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context=context;
-
-        if(intent.getAction().equals("StudyAround")) showNotification(); //se ascolta l'intent con action StudyAround mostra notifica
+        if(intent.getAction().equals("StudyAround")){
+            preferences = context.getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+            logged = preferences.getBoolean("logged", false);
+            showNotification(); //se ascolta l'intent con action StudyAround mostra notifica
+        }
         else if(intent.getAction().equals("android.intent.action.BOOT_COMPLETED")){ //se il telefono si riavvia reset l'alarm
             database=new SqliteManager(context);
             LinkedList<AlarmClass> allarmi_attivi=database.getAlarms();
@@ -74,8 +79,11 @@ public class AlertReceiver extends BroadcastReceiver {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "gcmAlert")
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("Attenzione! La tua prenotazione sta per terminare!")
+                .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-        Intent i = new Intent(context.getApplicationContext(), PrenotazioniAttiveActivity.class);
+        Intent i=null;
+        if(logged==true)  i = new Intent(context.getApplicationContext(), PrenotazioniAttiveActivity.class);
+        else i = new Intent(context.getApplicationContext(), MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pi);
         mNotificationManager.notify(id, builder.build());
