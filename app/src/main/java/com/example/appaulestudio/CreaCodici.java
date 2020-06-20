@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.nfc.FormatException;
@@ -24,6 +25,9 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,6 +42,7 @@ import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,6 +92,7 @@ public class CreaCodici extends AppCompatActivity {
     Spinner materieDocente;
     ArrayAdapter<Corso> adapter;
     CalendarView calendario;
+    ImageView img_info;
 
     Gruppo[] array_gruppi=null;
     String nome_docente, cognome_docente, universita, nomeUniversita, matricola_docente, gruppi, ore, partecipanti, nomeGruppo, dataStringa=null;
@@ -103,7 +109,31 @@ public class CreaCodici extends AppCompatActivity {
         numeroOre = findViewById(R.id.numeroOre);
         materieDocente = findViewById(R.id.materieDocente);
         creaCodici= findViewById(R.id.btnCreaCodici);
+        img_info=findViewById(R.id.img_why);
 
+        //informazioni
+        img_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog d = new Dialog(CreaCodici.this);
+                d.setCancelable(true);
+                d.setContentView(R.layout.dialog_warning);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                ImageView img=d.findViewById(R.id.img_dialog_warning);
+                LinearLayout ll_bottoni=d.findViewById(R.id.ll_dialog_warning_bottoni);
+                TextView txt= d.findViewById(R.id.txt_dialog_warning);
+
+                img.setVisibility(View.GONE);
+                ll_bottoni.setVisibility(View.GONE);
+                String s="Se viene compilata la casella, il nome dei gruppi creati sarà 'Gruppo#-testoInserito' con # numero pregressivo del gruppo. Se non viene compilata, il suffisso viene sostituito dal nome della materia";
+                SpannableString ss=new SpannableString(s);
+                ss.setSpan(new ForegroundColorSpan(Color.argb(255,47, 163, 78)),62,85, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                txt.setText(ss, TextView.BufferType.SPANNABLE);
+                d.show();
+            }
+        });
+
+        //calendario
         formatter= new SimpleDateFormat("yyyy-MM-dd");
         calendario.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
 
@@ -125,6 +155,7 @@ public class CreaCodici extends AppCompatActivity {
             }
         });
 
+        //pulsante
         listener= new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -175,14 +206,11 @@ public class CreaCodici extends AppCompatActivity {
                     MyToast.makeText(getApplicationContext(), "Numero di ore errato!", false).show();
                     return;
                 }
-                /*else if(){
-                    MyToast.makeText(getApplicationContext(), "Data errata!", false).show();
-                    return;
-                }*/
                 else new creaGruppi().execute();
             }
         };
         creaCodici.setOnClickListener(listener);
+
     }
 
     @Override
@@ -228,7 +256,7 @@ public class CreaCodici extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Crea nuovi gruppi");
         final Dialog d = new Dialog(CreaCodici.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -338,19 +366,12 @@ public class CreaCodici extends AppCompatActivity {
 // PDF
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case STORAGE_CODE:{
-                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                    savePdf();
-                }
-                else{
-                    //permesso non accordato dalla finestra di pop un e mostro errore
-                    MyToast.makeText(getApplicationContext(), "Hai negato il permesso quindi non posso procedere", false).show();
-                }
+                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) savePdf();
+                else MyToast.makeText(getApplicationContext(), "Impossibile salvare il file: hai negato il permesso!", false).show();
             }
         }
-
     }
 
     public void dialogPdfCodici(){
@@ -366,9 +387,7 @@ public class CreaCodici extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(Build.VERSION.SDK_INT>Build.VERSION_CODES.M){
-                    if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)==
-                            PackageManager.PERMISSION_DENIED){
-                        //il permesso va richiesto
+                    if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_DENIED){
                         String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE};
                         requestPermissions(permissions, STORAGE_CODE);
                     }

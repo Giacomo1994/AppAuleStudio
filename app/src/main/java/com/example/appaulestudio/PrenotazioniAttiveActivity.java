@@ -207,7 +207,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Le mie prenotazioni");
         final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -600,8 +600,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     //////CALENDARIO
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
-            } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) MyToast.makeText(getApplicationContext(),"Non puoi accedere al calendario! Hai negato il permesso!",false).show();
+            else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CALENDAR}, 1);
         } else dialog_pick_calendar(get_account_from_calendar());
     }
 
@@ -812,19 +812,19 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             String entrata_uscita=s.substring(0,first-1);
 
             if(!nome_aula.equals(p.getAula())){
-                MyToast.makeText(getApplicationContext(),"Hai sbagliato aula!", false).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile procedere\nHai sbagliato aula!", false).show();
                 return;
             }
-            if(entrata_uscita.equals("entrata") && richiesta==10){
-                MyToast.makeText(getApplicationContext(),"Non sei in aula!", false).show();
+            if(entrata_uscita.equals("tavolo") && richiesta!=10){
+                MyToast.makeText(getApplicationContext(),"Impossibile procedere\nNon sei abilitato ad effettuare l'operazione!", false).show();
                 return;
             }
             if(entrata_uscita.equals("entrata") && richiesta!=0 && richiesta!=5){
-                MyToast.makeText(getApplicationContext(),"Non sei abilitato ad entrare in aula!", false).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile procedere\nNon sei abilitato ad entrare in aula!", false).show();
                 return;
             }
-            if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6 && richiesta!=10){
-                MyToast.makeText(getApplicationContext(),"Non sei abilitato ad uscire dall'aula!", false).show();
+            if(entrata_uscita.equals("uscita") && richiesta!=2 && richiesta!=3 && richiesta!=6){
+                MyToast.makeText(getApplicationContext(),"Impossibile procedere\nNon sei abilitato ad uscire dall'aula!", false).show();
                 return;
             }
             if(richiesta==10){
@@ -861,8 +861,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     public void scanQRcode(){
         if (ActivityCompat.checkSelfPermission(PrenotazioniAttiveActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(PrenotazioniAttiveActivity.this, Manifest.permission.CAMERA)) {
-            } else{ ActivityCompat.requestPermissions(PrenotazioniAttiveActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.CAMERA}, 2); }
+            if (ActivityCompat.shouldShowRequestPermissionRationale(PrenotazioniAttiveActivity.this, Manifest.permission.CAMERA)) MyToast.makeText(getApplicationContext(),"Non puoi accedere alla camera! Hai negato il permesso!",false).show();
+            else ActivityCompat.requestPermissions(PrenotazioniAttiveActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.CAMERA}, 2);
         }
         else {
            startScan();

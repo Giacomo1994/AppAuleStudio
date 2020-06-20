@@ -21,8 +21,16 @@ public class Gruppo implements Parcelable {
         this.componenti_max = componenti_max;
         this.ore_disponibili = ore_disponibili;
         this.data_scadenza = data_scadenza;
-
     }
+    public Gruppo(String codice_gruppo, String nome_gruppo, String nome_corso, String nome_docente, String cognome_docente, String data_scadenza) {
+        this.codice_gruppo = codice_gruppo;
+        this.nome_gruppo = nome_gruppo;
+        this.nome_corso = nome_corso;
+        this.nome_docente = nome_docente;
+        this.cognome_docente = cognome_docente;
+        this.data_scadenza = data_scadenza;
+    }
+
     public Gruppo(Gruppo gruppo){
         this.codice_gruppo=gruppo.getCodice_gruppo();
         this.nome_gruppo=gruppo.getNome_gruppo();
@@ -43,7 +51,10 @@ public class Gruppo implements Parcelable {
         componenti_max = in.readInt();
         ore_disponibili = in.readInt();
         data_scadenza = in.readString();
+        nome_docente=in.readString();
+        cognome_docente=in.readString();
     }
+
 
     public static final Creator<Gruppo> CREATOR = new Creator<Gruppo>() {
         @Override
@@ -152,5 +163,9 @@ public class Gruppo implements Parcelable {
         parcel.writeInt(componenti_max);
         parcel.writeDouble(ore_disponibili);
         parcel.writeString(data_scadenza);
+        parcel.writeString(nome_docente);
+        parcel.writeString(cognome_docente);
     }
+
+
 }

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -43,8 +44,9 @@ public class IscrizioneActivity extends AppCompatActivity {
     TextView output;
     Button annulla_dialog, conferma_dialog, iscriviti;
     ImageView close_dialog;
-    String str_codice_gruppo, str_nome_gruppo, nomeProf, cognomeProf, nomeCorso;
+    String codiceGruppo, nomeGruppo, nomeProf, cognomeProf, nomeCorso, scadenza;
     String strUniversita, strNomeUniversita, strMatricola, strNome, strCognome;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,8 @@ public class IscrizioneActivity extends AppCompatActivity {
         iscriviti = findViewById(R.id.iscriviti);
         codice_gruppo = findViewById(R.id.codice_gruppo);
         output= findViewById(R.id.output);
+
+        intent=getIntent();
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
@@ -65,8 +69,8 @@ public class IscrizioneActivity extends AppCompatActivity {
         iscriviti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                str_codice_gruppo=codice_gruppo.getText().toString().trim();
-                if(str_codice_gruppo.equals("")){
+                codiceGruppo=codice_gruppo.getText().toString().trim();
+                if(codiceGruppo.equals("")){
                     MyToast.makeText(getApplicationContext(),"Inserisci un codice!",false).show();
                     return;
                 }
@@ -87,7 +91,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Iscrizione a gruppo");
         final Dialog d = new Dialog(IscrizioneActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -149,7 +153,7 @@ public class IscrizioneActivity extends AppCompatActivity {
                 urlConnection.setRequestMethod("POST");  //dico che la richiesta è di tipo POST
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
-                params = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8");
+                params = "codice_gruppo=" + URLEncoder.encode(codiceGruppo, "UTF-8");
                 dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(params);
                 dos.flush();
@@ -172,7 +176,8 @@ public class IscrizioneActivity extends AppCompatActivity {
                     nomeProf=json_data.getString("nome");
                     cognomeProf=json_data.getString("cognome");
                     nomeCorso=json_data.getString("nome_corso");
-                    str_nome_gruppo=json_data.getString("nome_gruppo");
+                    nomeGruppo=json_data.getString("nome_gruppo");
+                    scadenza=json_data.getString("data_scadenza");
                 }
                 return "OK";
             } catch (Exception e) {
@@ -202,7 +207,7 @@ public class IscrizioneActivity extends AppCompatActivity {
             close_dialog = d.findViewById(R.id.close_dialog);
             annulla_dialog = d.findViewById(R.id.annulla_dialog);
             conferma_dialog = d.findViewById(R.id.conferma_dialog);
-            txt_gruppo.setText(str_nome_gruppo);
+            txt_gruppo.setText(nomeGruppo);
             txt_docente.setText(nomeProf+" "+cognomeProf);
             txt_corso.setText(nomeCorso);
             d.show();
@@ -241,7 +246,7 @@ public class IscrizioneActivity extends AppCompatActivity {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
 
-                String parametri = "codice_gruppo=" + URLEncoder.encode(str_codice_gruppo, "UTF-8") +
+                String parametri = "codice_gruppo=" + URLEncoder.encode(codiceGruppo, "UTF-8") +
                         "&matricola=" + URLEncoder.encode(strMatricola, "UTF-8")+
                         "&codice_universita=" + URLEncoder.encode(strUniversita, "UTF-8");
 
@@ -273,6 +278,14 @@ public class IscrizioneActivity extends AppCompatActivity {
             }
             else{
                 MyToast.makeText(getApplicationContext(),result,true).show();
+                Gruppo g=new Gruppo(codiceGruppo,nomeGruppo, nomeCorso,nomeProf,cognomeProf,scadenza);
+                intent.putExtra("codiceGruppo",codiceGruppo);
+                intent.putExtra("nomeGruppo",nomeGruppo);
+                intent.putExtra("nomeCorso",nomeCorso);
+                intent.putExtra("nomeProf",nomeProf);
+                intent.putExtra("cognomeProf",cognomeProf);
+                intent.putExtra("scadenza",scadenza);
+                setResult(Activity.RESULT_OK,intent);
                 finish();
             }
         }

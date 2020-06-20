@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     static final String URL_UNIVERSITA="http://pmsc9.altervista.org/progetto/login_listaUniversita.php";
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login.php";
     static final String URL_RECUPERA_PASSWORD="http://pmsc9.altervista.org/progetto/recupero_password.php";
+    static final String URL_REFRESH_TOKEN="http://pmsc9.altervista.org/progetto/login_refreshToken.php";
 
     ImageView studente_docente;
     TextView txt_toRegistrazione, txt_toPassword;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     RadioButton radioStudente,radioDocente;
 
     Universita universita=null, universita_recupero=null;
-    String matricola, password, token=null;
+    String matricola, password;
     boolean isStudente;
     boolean studentePassato;
     boolean is_logged=false, is_studente=false;
@@ -54,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         radioStudente=findViewById(R.id.radioButton);
         radioDocente=findViewById(R.id.radioDocente);
         studente_docente = findViewById(R.id.imageView9);
-
         action_bar();
 
         //radio button
@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     studente_docente.setImageDrawable(getResources().getDrawable(R.drawable.docente));
                 }
-
             }
         });
 
@@ -92,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         txt_toRegistrazione.setText(ss);
         txt_toRegistrazione.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //link a recupero password
+        //recupero password
         String stringa_topw="Password dimenticata?";
         SpannableString ss_topw=new SpannableString(stringa_topw);
 
@@ -175,14 +174,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initUI();
 
-        //reindirizzamento
+        //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         is_logged=settings.getBoolean("logged", false);
         is_studente = settings.getBoolean("studente", false);
+
+        //firebase token
+        /*FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                token = instanceIdResult.getToken();
+            }
+        });*/
+
+        //reindirizzamento
         if(is_logged==true&&is_studente==true){
             Intent i=new Intent(MainActivity.this, Home.class);
             i.putExtra("start_from_login",false);
             startActivityForResult(i,-1);
+            new refreshToken().execute();
             return;
         }
         else if(is_logged==true&&is_studente==false){
@@ -192,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         else new riempiUniversita().execute();
-
     }
 
     @Override
@@ -222,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //TASK ASINCRONO PER RIEMPIRE SPINNER UNIVERSITA
+
     private class riempiUniversita extends AsyncTask<Void, Void, Universita[]> {
         @Override
         protected Universita[] doInBackground(Void... strings) {
@@ -282,17 +291,13 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-    //TASK ASINCRONO PER LOGIN UTENTE
+
     private class loginUtente extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... strings) {
             try {
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this,new OnSuccessListener<InstanceIdResult>() {
-                    @Override
-                    public void onSuccess(InstanceIdResult instanceIdResult) {
-                        token = instanceIdResult.getToken();
-                    }
-                });
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                String pref_token=settings.getString("token",null);
                 URL url=new URL(URL_LOGIN);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
@@ -303,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
                 String parametri = "universita=" + URLEncoder.encode(universita.getCodice(), "UTF-8")
                         + "&matricola=" + URLEncoder.encode(matricola, "UTF-8")
                         + "&password=" + URLEncoder.encode(password, "UTF-8")
-                        + "&token=" + URLEncoder.encode(token, "UTF-8")
+                        + "&token=" + URLEncoder.encode(pref_token, "UTF-8")
                         + "&flag_studente=" + URLEncoder.encode(""+isStudente, "UTF-8");
                 DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
                 dos.writeBytes(parametri);
@@ -358,7 +363,6 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("matricola",user.getMatricola());
                 editor.putString("nome", user.getNome());
                 editor.putString("cognome", user.getCognome());
-                editor.putString("token", token);
                 editor.putBoolean("logged", true);
                 if(user.isStudente()==true) {
                     editor.putString("latitudine", ""+universita.getLatitudine());
@@ -429,6 +433,49 @@ public class MainActivity extends AppCompatActivity {
             else if(result.equals("Utente inesistente: impossibile inviare email")) MyToast.makeText(getApplicationContext(), result, false).show();
             else MyToast.makeText(getApplicationContext(), "E-mail inviata: controlla la tua casella di posta", true).show();
         }
+    }
+
+    private class refreshToken extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... strings) {
+            try {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                String pref_matricola=settings.getString("matricola",null);
+                String pref_universita=settings.getString("universita",null);
+                String pref_token=settings.getString("token",null);
+                URL url=new URL(URL_REFRESH_TOKEN);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(1000);
+                urlConnection.setConnectTimeout(1500);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "universita=" + URLEncoder.encode(pref_universita, "UTF-8")
+                        + "&matricola=" + URLEncoder.encode(pref_matricola, "UTF-8")
+                        + "&token=" + URLEncoder.encode(pref_token, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream is = urlConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                String result = sb.toString();
+                return result;
+
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) { }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

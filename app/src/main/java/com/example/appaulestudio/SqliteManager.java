@@ -59,15 +59,6 @@ public class SqliteManager {
 
 
 //EVENTI_CALENDARIO
-    public boolean is_prenotazione_sincronizzata(int id_prenotazione){
-        ArrayList<CalendarEvent> eventi=new ArrayList<CalendarEvent>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String sql = "SELECT * FROM eventi_calendario WHERE id_prenotazione="+id_prenotazione;
-        Cursor cursor = db.rawQuery(sql, null);  //creazione cursore
-        if(cursor==null ||cursor.getCount()==0) return false;
-        else return true;
-    }
-
     public void insertEventoCalendario(int id_prenotazione, int id_calendar, int id_evento){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         String sql="INSERT OR IGNORE INTO eventi_calendario (id_prenotazione, id_calendar, id_evento) "+
@@ -98,7 +89,7 @@ public class SqliteManager {
     }
 
 //GRUPPI_OFFLINE
-    public void insertGruppi(Gruppo[] gruppi){
+    public void updateGruppi(Gruppo[] gruppi){
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         if(gruppi.length==0){
             String sql="DELETE FROM gruppi_offline";
@@ -108,8 +99,8 @@ public class SqliteManager {
         for(Gruppo g:gruppi){
             String sql="INSERT OR IGNORE INTO gruppi_offline "+
                     "VALUES ('" + g.getCodice_gruppo() + "', '" + g.getNome_gruppo() +"', '" + g.getNome_corso() +"', '"
-                    + g.getNome_docente() +"', '" + g.getCognome_docente() +"', " + g.getOre_disponibili() +", '" + g.getData_scadenza() +"')";
-            String sql1="UPDATE gruppi_offline set ore_disponibili="+g.getOre_disponibili()+", data_scadenza='"+g.getData_scadenza()+"' where codice_gruppo='"+g.getCodice_gruppo()+"'";
+                    + g.getNome_docente() +"', '" + g.getCognome_docente() +"', '" + g.getData_scadenza() +"')";
+            String sql1="UPDATE gruppi_offline set data_scadenza='"+g.getData_scadenza()+"' where codice_gruppo='"+g.getCodice_gruppo()+"'";
             db.execSQL(sql);
             db.execSQL(sql1);
         }
@@ -123,6 +114,14 @@ public class SqliteManager {
         }
         db.execSQL(sql2);
 
+    }
+
+    public void insertGruppo(Gruppo g){
+        SQLiteDatabase db=dbHelper.getWritableDatabase();
+        String sql="INSERT OR REPLACE INTO gruppi_offline "+
+                "VALUES ('" + g.getCodice_gruppo() + "', '" + g.getNome_gruppo() +"', '" + g.getNome_corso() +"', '"
+                + g.getNome_docente() +"', '" + g.getCognome_docente() +"', '" + g.getData_scadenza() +"')";
+        db.execSQL(sql);
     }
 
     public void deleteGruppo(Gruppo g){
@@ -145,12 +144,11 @@ public class SqliteManager {
             String nome_corso=cursor.getString(cursor.getColumnIndex("nome_corso"));
             String nome_docente=cursor.getString(cursor.getColumnIndex("nome_docente"));
             String cognome_docente=cursor.getString(cursor.getColumnIndex("cognome_docente"));
-            double ore_disponibili=cursor.getDouble(cursor.getColumnIndex("ore_disponibili"));
             String data_scadenza=cursor.getString(cursor.getColumnIndex("data_scadenza"));
             String date_now=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 
             if(date_now.compareTo(data_scadenza)<=0){
-                Gruppo g=new Gruppo(""+codice_gruppo,""+nome_gruppo,"","",100,ore_disponibili,""+data_scadenza);
+                Gruppo g=new Gruppo(""+codice_gruppo,""+nome_gruppo,"","",0,0,""+data_scadenza);
                 g.setNome_corso(nome_corso);
                 g.setNome_docente(nome_docente);
                 g.setCognome_docente(cognome_docente);

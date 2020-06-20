@@ -82,9 +82,9 @@ public class HomeDocente extends AppCompatActivity {
                     if(fatto==true && millisUntilFinished<28000){
                         ll_start.setVisibility(View.GONE);
                         getSupportActionBar().show();
-                        if(risultato==0 || risultato==2) MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare i corsi",false).show();
+                        if(risultato==0 || risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
                         else if(risultato==1) MyToast.makeText(getApplicationContext(), "Non hai in carico nessun insegnamento",false).show();
-                        else if(risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile aggiornare il numero dei gruppi",false).show();
+                        else if(risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e aggiornare il numero dei gruppi",false).show();
                         cancel();
                     }
                 }
@@ -139,7 +139,7 @@ public class HomeDocente extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("I miei corsi");
         final Dialog d = new Dialog(HomeDocente.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -239,7 +239,7 @@ public class HomeDocente extends AppCompatActivity {
                     fatto=true;
                     risultato=0;
                 }
-                else MyToast.makeText(getApplicationContext(), "Errore: impossibile mostrare i corsi",false).show();
+                else MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
                 return;
             }
             if(array_corso.length==0){
@@ -327,7 +327,7 @@ public class HomeDocente extends AppCompatActivity {
             fatto=true;
             risultato=3;
             if(result==null) {
-                if(created==true) MyToast.makeText(getApplicationContext(), "Impossibile aggiornare il numero dei gruppi",false).show();
+                if(created==true) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e aggiornare il numero dei gruppi",false).show();
                 else risultato=2;
             }
 
@@ -382,7 +382,8 @@ public class HomeDocente extends AppCompatActivity {
     private void aggiorna_pagina(){
         created=true;
         creaGruppi.setEnabled(true);
-        new listaCorsi().execute();
+        if(corsoArrayList==null) new listaCorsi().execute();
+        else new dettagliCorsi().execute();
     }
 
 

@@ -117,6 +117,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         txt_dist=findViewById(R.id.txt_distance);
         txt_dur=findViewById(R.id.txt_duration);
         ll_dist_dur.setVisibility(View.GONE);
+
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         lat_uni=Double.parseDouble(settings.getString("latitudine", null));
@@ -132,19 +133,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         MyToast.makeText(getApplicationContext(),strIngresso+" "+strPausa
                 +" "+settings.getString("slot",null)+" "+settings.getString("first_slot",null)
                 +" "+settings.getString("last_update",null),true).show();
+
         //intent
         intent = getIntent();
         bundle = intent.getBundleExtra("bundle_aule");
-        if(bundle!=null) {
-            array_aule = bundle.getParcelableArrayList("aule");
-        }else{
-            Log.i("mylog","Il bundle è null");
-        }
+        array_aule = bundle.getParcelableArrayList("aule");
+
+
         //spinner
         array_aule.add(0, new Aula(strUniversita,strNomeUniversita,"",lat_uni,lng_uni,0,0,0,""));
         adapter = new ArrayAdapter<>(MapActivity.this, android.R.layout.simple_list_item_1, array_aule);
         spinner_map.setAdapter((SpinnerAdapter) adapter);
-
         spinner_map.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -156,6 +155,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
+        //back home
         btn_to_home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -177,7 +177,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Mappa Aule");
         final Dialog d = new Dialog(MapActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -241,6 +241,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
+
+        //IMPOSTO MAPPA
         UiSettings uiSettings = gmap.getUiSettings();
         uiSettings.setZoomControlsEnabled(true);
         uiSettings.setCompassEnabled(true);
@@ -250,6 +252,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         } catch (Exception e) { }
         uiSettings.setMyLocationButtonEnabled(true);
 
+        //AGGIUNGO MARKERS
         for(Aula a : array_aule){
             Marker marker=null;
             if(!a.getNome().equals(strNomeUniversita)) marker=gmap.addMarker(new MarkerOptions().position(new LatLng(a.getLatitudine(), a.getLongitudine())).title(a.getNome()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
@@ -257,6 +260,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             markerList.add(marker);
         }
 
+        //MARKER CLICK LISTENER
         gmap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {

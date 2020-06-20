@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="5dp"
+        android:layout_weight="1"
         android:visibility="visible" />
 
     <LinearLayout
@@ -31,8 +32,8 @@
         <Button
             android:id="@+id/btn_account_conferma"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="20dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
             android:text="Conferma" />
@@ -40,10 +41,10 @@
         <Button
             android:id="@+id/btn_account_indietro"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Indietro" />
+            android:text="annulla" />
     </LinearLayout>
 
 </LinearLayout>

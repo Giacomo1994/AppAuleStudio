@@ -55,7 +55,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
                 "\t\"nome_corso\"\tTEXT,\n" +
                 "\t\"nome_docente\"\tTEXT,\n" +
                 "\t\"cognome_docente\"\tTEXT,\n" +
-                "\t\"ore_disponibili\"\tREAL,\n" +
                 "\t\"data_scadenza\"\tTEXT)";
         db.execSQL(sql4);
 

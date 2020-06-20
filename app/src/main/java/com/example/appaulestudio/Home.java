@@ -54,7 +54,7 @@ public class Home extends AppCompatActivity{
     TextView nomeAula_home,luogoAula_home,postiLiberi_home,flagGruppi_home, statoAula_home;
     ImageView immagine_home;
     Button mappa;
-    ProgressBar bar;
+    Dialog dialogLoading;
 
     Aula[] array_aule=null;
     ArrayList<Aula> aule_da_aggiornare=new ArrayList<Aula>();
@@ -70,11 +70,11 @@ public class Home extends AppCompatActivity{
         ll_home=findViewById(R.id.ll_home);
         elencoAule= findViewById(R.id.elencoAule);
         mappa= findViewById(R.id.mappa);
-        bar=findViewById(R.id.bar);
         ll_offline=findViewById(R.id.ll_home_offline);
         ll_offline.setVisibility(View.GONE);
         ll_start.setVisibility(View.VISIBLE);
         ll_home.setVisibility(View.GONE);
+        dialogLoading();
         //prendo preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
@@ -98,7 +98,7 @@ public class Home extends AppCompatActivity{
         if(intent.hasExtra("start_from_login") && intent.getBooleanExtra("start_from_login",true)==true) from_login=true;
         else from_login=false;
 
-        //if(from_login==false)
+
         if(start_app==true){
             getSupportActionBar().hide();
             new CountDownTimer(30000, 1000) {
@@ -117,6 +117,7 @@ public class Home extends AppCompatActivity{
             }.start();
         }
         else{
+            dialogLoading.show();
             ll_start.setVisibility(View.GONE);
             ll_home.setVisibility(View.VISIBLE);
         }
@@ -156,7 +157,7 @@ public class Home extends AppCompatActivity{
 
     protected void onRestart() {
         super.onRestart();
-        bar.setVisibility(ProgressBar.VISIBLE);
+        dialogLoading.show();
         ll_offline.setVisibility(View.GONE);
         new listaAule().execute();
         new check_last_update_universita().execute();
@@ -173,7 +174,7 @@ public class Home extends AppCompatActivity{
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Home");
         final Dialog d = new Dialog(Home.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -380,7 +381,7 @@ public class Home extends AppCompatActivity{
 
         @Override
         protected void onPostExecute(Aula[] array_aula) {
-            bar.setVisibility(ProgressBar.GONE);
+            dialogLoading.dismiss();
             array_aule=array_aula;
             if (array_aula == null) {
                 ll_offline.setVisibility(View.VISIBLE);
@@ -487,7 +488,14 @@ public class Home extends AppCompatActivity{
         }
     }
 
+    private void dialogLoading(){
+        dialogLoading= new Dialog(Home.this);
+        dialogLoading.setCancelable(false);
+        dialogLoading.setContentView(R.layout.dialog_loading);
+        dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialogLoading.getWindow().setDimAmount(0);
 
+    }
     //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -501,7 +509,7 @@ public class Home extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 2) {
             ll_offline.setVisibility(View.GONE);
-            bar.setVisibility(ProgressBar.VISIBLE);
+            dialogLoading.show();
             new listaAule().execute();
             new check_last_update_universita().execute();
         }

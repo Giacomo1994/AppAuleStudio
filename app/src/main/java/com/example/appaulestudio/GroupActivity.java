@@ -1,5 +1,6 @@
 package com.example.appaulestudio;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -51,11 +52,13 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo, strNomeUniversita;
+    boolean offline=false;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
     LinearLayout ll_offline;
     Button bnt_iscriviti;
+    boolean gruppiAggiornati=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +74,7 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
-                startActivity(i);
+                startActivityForResult(i,10);
             }
         });
 
@@ -92,14 +95,6 @@ public class GroupActivity extends AppCompatActivity {
         registerForContextMenu(gruppiPerStudente);
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        ll_offline.setVisibility(View.GONE);
-        bnt_iscriviti.setVisibility(View.VISIBLE);
-        new listaGruppi().execute();
-    }
-
     @SuppressLint("WrongConstant")
     public void action_bar(){
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -111,7 +106,7 @@ public class GroupActivity extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("I miei gruppi");
         final Dialog d = new Dialog(GroupActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -208,12 +203,13 @@ public class GroupActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
-            if(array_gruppo==null){//prendo i dati da sql locale perchè non riesco ad accedere ai dati in remoto
+            //offline
+            if(array_gruppo==null){
+                offline=true;
                 ll_offline.setVisibility(View.VISIBLE);
                 bnt_iscriviti.setVisibility(View.GONE);
                 ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
-                if(arrayList_gruppo==null || arrayList_gruppo.size()==0)
-                    MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
+                if(arrayList_gruppo==null || arrayList_gruppo.size()==0) MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
                 else{
                     ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, arrayList_gruppo ){
                         @Override
@@ -232,8 +228,10 @@ public class GroupActivity extends AppCompatActivity {
                 }
                 return;
             }
+            //online
             if(array_gruppo.length==0){
                 MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
+                return;
             }
             ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
                 @Override
@@ -249,7 +247,10 @@ public class GroupActivity extends AppCompatActivity {
                 }
             };
             gruppiPerStudente.setAdapter(adapter);
-            database.insertGruppi(array_gruppo);
+            if(gruppiAggiornati==false){
+                database.updateGruppi(array_gruppo);
+                gruppiAggiornati=true;
+            }
         }
     }
 
@@ -323,16 +324,20 @@ public class GroupActivity extends AppCompatActivity {
             TextView eti_componenti=d.findViewById(R.id.eti_dettagli_componenti);
             ListView list_componenti=d.findViewById(R.id.list_dettagli_componenti);
             Button btnok=d.findViewById(R.id.btn_dettagli_gruppo);
+
             txt_nome_gruppo.setText(g.getNome_gruppo());
             txt_codice_gruppo.setText(g.getCodice_gruppo());
             txt_corso.setText(g.getNome_corso());
             txt_docente.setText(g.getNome_docente()+" "+g.getCognome_docente());
-            int ore_int= (int) g.getOre_disponibili();
-            int ore_round= (int) Math.ceil(g.getOre_disponibili());
-            if(ore_int==ore_round) txt_ore.setText(""+ore_int+"h");
+            if(offline==true) txt_ore.setText("Informazione non disponibile");
             else{
-                int min=(int)((g.getOre_disponibili()-(double)ore_int)*60);
-                txt_ore.setText(""+ore_int+"h "+min+"min");
+                int ore_int= (int) g.getOre_disponibili();
+                int ore_round= (int) Math.ceil(g.getOre_disponibili());
+                if(ore_int==ore_round) txt_ore.setText(""+ore_int+"h");
+                else{
+                    int min=(int)((g.getOre_disponibili()-(double)ore_int)*60);
+                    txt_ore.setText(""+ore_int+"h "+min+"min");
+                }
             }
             try {
                 txt_scadenza.setText(new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(g.getData_scadenza())));
@@ -414,6 +419,21 @@ public class GroupActivity extends AppCompatActivity {
         }
     }
 
+    //INTENT DI RITORNO
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==10 && resultCode==Activity.RESULT_OK) {
+            String codiceGruppo=data.getStringExtra("codiceGruppo");
+            String nomeGruppo=data.getStringExtra("nomeGruppo");
+            String nomeCorso=data.getStringExtra("nomeCorso");
+            String nomeProf=data.getStringExtra("nomeProf");
+            String cognomeProf=data.getStringExtra("cognomeProf");
+            String scadenza=data.getStringExtra("scadenza");
+            database.insertGruppo(new Gruppo(codiceGruppo,nomeGruppo,nomeCorso,nomeProf,cognomeProf,scadenza));
+            new listaGruppi().execute();
+        }
+    }
 
     //CONTEXT MENU
     @Override
@@ -454,6 +474,7 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(i);
         }
         if (item.getItemId() == 2) {
+            offline=false;
             ll_offline.setVisibility(View.GONE);
             bnt_iscriviti.setVisibility(View.VISIBLE);
             new listaGruppi().execute();

@@ -2,9 +2,10 @@ package com.example.appaulestudio;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -28,11 +29,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
@@ -49,84 +52,72 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.time.LocalTime;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-
+import java.util.Locale;
 public class PrenotazioneGruppoActivity extends AppCompatActivity {
-    String params;
-
-    Spinner spinnerTavoli;
-    CheckBox checkBoxFascia;
-    ListView listaDisponibilitaActivity;
-    ListAdapter adapterDisponibilita;
-    LocalTime primaFascia, ultimaFascia;
-    public DatePickerDialog.OnDateSetListener listener;
-    TextView txtDataMostrata;
-    int anno,mese,giorno;
-    int giornoSelezionatoInt;
-    int slotMin;
-    String primoSlot;
-    Button btnIscriviti, btnHome;
-    Button btnCercaDisponibilita;
-    String studente;
-    ArrayAdapter adapterComponenti;
-    ArrayAdapter adapterSpinner;
-    String risultato,risultato2; int n;
-    Button btnGruppo, btnComponenti, btncheckComponenti;
-    ListView listacomponenti;
-    TextView gruppoSelezionato;
-    TextView txtNomeComponente, txtCognomeComponente;
-    CheckBox checkComponente;
-    Dialog d,dialogCheckComponenti;
-    TextView nomeAula, output, componenti, txtStatoAula;
-    Button btnIndietro,btnAvanti;
-    TextView titoloDialogErrore;
-    TextView txtOreResidue, txtOreResidueNumero;
-    SubsamplingScaleImageView piantaAula;
-    ArrayList<Orario_Ufficiale> orariUfficiali;
-    String nomeStudente, matricolaStudente,codiceUniversita, cognomeStudente;
-    Aula aula;
-    Intent intent;
-    ArrayList<Tavolo> tavoli;
-    ArrayList<Tavolo> tavoliEffettivi;
-    ArrayList<Prenotazione> prenotazioni;
-    Button btnPrenota;
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioni_gruppi_tavoli.php";
     static final String URL_GRUPPI_DA_MATRICOLA="http://pmsc9.altervista.org/progetto/gruppi_da_matricola.php";
     static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     static final String URL_PRENOTAZIONI_FUTURE="http://pmsc9.altervista.org/progetto/prenotazioni_gruppi_future.php";
     static final String URL_PRENOTAZIONE_GRUPPI="http://pmsc9.altervista.org/progetto/prenotazione_gruppi_prenota.php";
-    GridView grigliaGruppi;
+
+    boolean mostra_dialog_data=false;
+    TableLayout ll_form;
+    LinearLayout ll_btn;
+    SubsamplingScaleImageView piantaAula;
+    Calendar cal_primaFascia, cal_ultimaFascia;
+    Spinner spinnerTavoli;
+    CheckBox checkBoxFascia;
+    ListView listacomponenti;
+    ListAdapter adapterDisponibilita;
+    TextView nomeAula, output, componenti,titoloDialogErrore, txtOreResidueNumero,txtDataMostrata, gruppoSelezionato,txtNomeComponente, txtCognomeComponente;
+    int giornoSelezionatoInt,slotMin,n;
+    Button btnIscriviti, btnHome,btnCercaDisponibilita, btnData;
+    ArrayAdapter adapterComponenti,adapterSpinner;
+    Button btnGruppo, btnComponenti, btncheckComponenti;
+    CheckBox checkComponente;
+    Dialog dialogCheckComponenti;
+    ArrayList<Orario_Ufficiale> orariUfficiali;
+    String studente,risultato,risultato2,primoSlot,nomeStudente, matricolaStudente,codiceUniversita, nomeUniversita, cognomeStudente, params;
+    Aula aula;
+    Intent intent;
     Gruppo[] array_gruppo;
-    User[] array_componenti;
-    User[] array_dinamico, array_copia;
-    Gruppo gruppo,provaGruppo;
+    User[] array_componenti,array_dinamico, array_copia;
+    Gruppo gruppo;
     HashMap<Integer,Tavolo> tavoliMap;
-    ArrayList<String> fasceDinamico;
-    ArrayList<String> fasce;
-    ArrayList<Tavolo> tavoliDinamico;
+    ArrayList<String> fasceDinamico,fasce, fasceOrarie;
+    ArrayList<Tavolo> tavoliDinamico,tavoli,tavoliEffettivi;
+    ArrayList<Prenotazione> prenotazioni;
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prenotazione_gruppo);
-
         initUI();
-
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initUI(){
-        btnPrenota=findViewById(R.id.btnPrenota);
-        listaDisponibilitaActivity=findViewById(R.id.listaDisponibilitaActivity);
+        mostra_dialog_data=true;
+        btnData=findViewById(R.id.btnData);
+        btnComponenti=findViewById(R.id.btnComponenti);
+        txtOreResidueNumero=findViewById(R.id.txtOreResidueNumero);
+        btnGruppo=findViewById(R.id.btnGruppo);
+        componenti=findViewById(R.id.componenti);
+        gruppoSelezionato=findViewById(R.id.gruppoSelezionato);
+        nomeAula=findViewById(R.id.nomeAula);
+        output=findViewById(R.id.output);
+        piantaAula=findViewById(R.id.piantaAula);
+        ll_form=findViewById(R.id.tl_form_pren_gruppo);
+        ll_btn=findViewById(R.id.ll_btn_pren_gruppo);
+
         fasceDinamico=new ArrayList<>();
         tavoliDinamico=new ArrayList<>();
         array_gruppo=null;
@@ -134,469 +125,144 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         tavoli=new ArrayList<Tavolo>();
         tavoliEffettivi=new ArrayList<>();
         prenotazioni=new ArrayList<>();
-        piantaAula=findViewById(R.id.piantaAula);
 
-        provaGruppo=new Gruppo("h37cg76f0a",
-                "gruppo prova4", "3",
-                "b", 3,
-                10, "2020-08-09");
-        componenti=findViewById(R.id.componenti);
-        gruppoSelezionato=findViewById(R.id.gruppoSelezionato);
-        nomeAula=findViewById(R.id.nomeAula);
-        output=findViewById(R.id.output);
-        piantaAula=findViewById(R.id.piantaAula);
-        primaFascia=null;ultimaFascia=null;
-
+        //intent
         intent =getIntent();
         Bundle bundle=intent.getBundleExtra("dati");
         aula=bundle.getParcelable("aula");
         nomeAula.setText(aula.getNome());
+        orariUfficiali=bundle.getParcelableArrayList("orari");
+        Collections.sort(orariUfficiali);
+
+        //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         nomeStudente=settings.getString("nome", null);
         cognomeStudente=settings.getString("cognome",null);
         matricolaStudente=settings.getString("matricola", null);
         codiceUniversita=settings.getString("universita", null);
+        nomeUniversita=settings.getString("nome_universita", null);
         slotMin=Integer.parseInt(settings.getString("slot", null));
         primoSlot=settings.getString("first_slot", null);
+        action_bar();
 
-        setTitle(nomeStudente+" "+cognomeStudente);
-        orariUfficiali=bundle.getParcelableArrayList("orari");
-        Collections.sort(orariUfficiali);
-
-        new load_image().execute();
-        new prendiGruppi().execute();
-        btnComponenti=findViewById(R.id.btnComponenti);
-        txtOreResidue=findViewById(R.id.txtOreResidue);
-        txtOreResidueNumero=findViewById(R.id.txtOreResidueNumero);
-        btnGruppo=findViewById(R.id.btnGruppo);
-
+        //scegli gruppo
         btnGruppo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tavoliEffettivi.clear();
-                riempiLista();
-                //if(array_gruppo!=null)
-                scegliGruppo();
-                //else{
-                //dialogErrore();
-                //}
+                if(array_gruppo!=null) dialogGruppo();
+                else MyToast.makeText(getApplicationContext(), "Impossibile mostrare i gruppi!", false).show();
             }
         });
 
+        //scegli componenti
         btnComponenti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                //ho selezionato il gruppo nel dialog e ho dei componenti
-                if(gruppo!=null) {
-                    scegliComponenti();
-                }
-                else{
-                    //se non seleziono prima il gruppo o il gruppo non ha utenti o
-                    //non andava la connessione quando ho chiesto i partecipanti
-                    Toast.makeText(getApplicationContext(), "Seleziona prima un gruppo o" +
-                                    " riprova più tardi: connessione lenta",
-                            Toast.LENGTH_LONG).show();
-                }
+                if(gruppo==null) MyToast.makeText(getApplicationContext(), "Seleziona prima un gruppo!", false).show();
+                else if(array_componenti==null)MyToast.makeText(getApplicationContext(), "Impossibile mostrare i componenti", false).show();
+                else dialogComponenti();
             }
         });
 
 
-        giornoSelezionatoInt=1;
+        //scegli data
+        Calendar time_now=Calendar.getInstance();
+        String string_now=new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(time_now.getTime());
+        if(orariUfficiali.get(0).getApertura()==null || string_now.compareTo(orariUfficiali.get(0).getApertura())>=0) orariUfficiali.remove(0);
+        else orariUfficiali.remove(orariUfficiali.size()-1);
+        giornoSelezionatoInt=-1;
         txtDataMostrata=findViewById(R.id.txtDataMostrata);
-        txtStatoAula=findViewById(R.id.txtStatoAula);
-        btnAvanti=findViewById(R.id.btnAvanti);
-        btnIndietro=findViewById(R.id.btnIndietro);
-
-
-        Adapter adapter;
-        Calendar c = Calendar.getInstance();
-        anno=c.get(Calendar.YEAR);
-        //il mese parte da zero
-        mese=c.get(Calendar.MONTH)+1;
-        giorno=c.get(Calendar.DAY_OF_MONTH);
-        //output.setText(""+anno+""+mese+""+giorno);
-        //txtDataMostrata.setText("Oggi");
-        if(giornoSelezionatoInt==1){
-            btnIndietro.setVisibility(View.GONE);
-        }
-        if(giornoSelezionatoInt==6){
-            btnAvanti.setVisibility(View.GONE);
-        }
-        mostraData(giornoSelezionatoInt);
-        btnAvanti.setOnClickListener(new View.OnClickListener() {
+        btnData.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                btnIndietro.setVisibility(View.VISIBLE);
-                giornoSelezionatoInt++;
-                mostraData(giornoSelezionatoInt);
-                tavoliEffettivi.clear();
-                riempiLista();
-            }
-        });
-        btnIndietro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btnAvanti.setVisibility(View.VISIBLE);
-                giornoSelezionatoInt--;
-                mostraData(giornoSelezionatoInt);
-                tavoliEffettivi.clear();
-                riempiLista();
+            public void onClick(View v) {
+                dialogData();
             }
         });
 
-
+        //cerca disponibilità e prenota
         btnCercaDisponibilita=findViewById(R.id.btnCercaDisponibilita);
         btnCercaDisponibilita.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(giornoSelezionatoInt>0) {
-                    definiscoOrari();
-                    //output.setText(primoSlot+" "+primaFascia.toString()+" "+ultimaFascia);
-
-                    new prendiTavoli().execute();
-                    //dopo aver preso tavoli prende prenotazioni e poi crea la mappa con tavoli e fasce orarie
-                    //verifico che il numero di posti sia>= a quello che mi serve
-                    //smistaPrenotazioni();
-                    //riempiLista();
-
-
-                }
-
-
-            }
-        });
-
-
-        btnPrenota.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(tavoliEffettivi.isEmpty()==false && fasceDinamico.isEmpty()==false) {
-                    //output.append("Sto prenotando");
-                    ArrayList<Tavolo> tavoliPrenotare = new ArrayList<>();
-                    for (String s : fasceDinamico) {
-                        for (Tavolo t : tavoliDinamico) {
-                            if (t.getFasciaOraria().compareTo(s.substring(0, 5)) == 0) {
-                                tavoliPrenotare.add(t);
-
-                            }
-                            //output.append(" Sub "+s.substring(0,5)+" "+t.getFasciaOraria());
-                        }
-                    }
-                    //output.setText(tavoliPrenotare.toString());
-                    ArrayList<Prenotazione> prenotazioni = new ArrayList<>();
-                    //creo il vettore di prenotazioni
-                    ArrayList<Object> tavoliOrdinati;
-                    tavoliOrdinati = new ArrayList<>(tavoliPrenotare.stream().sorted(new Comparator<Tavolo>() {
-                        @Override
-                        public int compare(Tavolo a, Tavolo b) {
-                            return a.getFasciaOraria().compareTo(b.getFasciaOraria());
-                        }
-                    }).collect(Collectors.toList()));
-                    //output.setText(tavoliOrdinati.toString());
-
-                    for (Object t : tavoliOrdinati) {
-                        LocalTime LOCALorario_prenotazione = LocalTime.parse(((Tavolo) t).getFasciaOraria());
-                        LocalTime LOCALorario_fine_prenotazione = LocalTime.parse(((Tavolo) t).getFasciaOraria()).plusMinutes(slotMin);
-                        String orario_prenotazione = orariUfficiali.get(giornoSelezionatoInt).getData() + " " + LOCALorario_prenotazione + ":00";
-                        String orario_fine_prenotazione = orariUfficiali.get(giornoSelezionatoInt).getData() + " " + LOCALorario_fine_prenotazione + ":00";
-                        Prenotazione p = new Prenotazione(
-                                aula.getIdAula(), ((Tavolo) t).getNum_tavolo(), orario_prenotazione,
-                                orario_fine_prenotazione, 1);
-                        prenotazioni.add(p);
-                    }
-                    //se riesco si concatena
-                    //ArrayList<Prenotazione> prenotazioniFinale = concatenaPrenotazioni(prenotazioni);
-
-                    //output.append(fasceDinamico.toString());
-                    //output.append(tavoliPrenotare.toString());
-                    if(fasceDinamico.size()!=tavoliPrenotare.size()){
-                        //errore
-                    }
-
-                    else{
-                        //prenota
-                        //devo controllare che ci siano ancora abbastanza posti liberi nei tavoli
-                        //devo controllare che le persone non abbiano altre prenotazioni in quelle ore
-                        //creo i json
-
-                        JSONObject parametri = new JSONObject();
-                        //dati generali
-                        try {
-                            parametri.put("codice_universita", codiceUniversita);
-                            parametri.put("id_aula", aula.getIdAula());
-                            parametri.put("data", orariUfficiali.get(giornoSelezionatoInt).getData());
-                            parametri.put("creatore", matricolaStudente);
-                            parametri.put("gruppo", gruppo.getCodice_gruppo());
-                            parametri.put("nome_gruppo", gruppo.getNome_gruppo());
-                            parametri.put("numero_partecipanti", array_dinamico.length);
-                        }
-                        catch (JSONException e) {}
-                        //dati studenti
-                        JSONArray jsonArrayStudenti = new JSONArray();
-                        try {
-                            for (User u : array_dinamico) {
-                                JSONObject studente = new JSONObject();
-                                studente.put("matricola", u.getMatricola());
-                                jsonArrayStudenti.put(studente);
-                            }
-                            parametri.put("partecipanti", jsonArrayStudenti);
-                        }
-                        catch (JSONException e) {}
-
-                        //inserisco slots
-                        JSONArray jsonArraySlots = new JSONArray();
-                        try {
-                            for (Prenotazione p : prenotazioni) {
-                                JSONObject slot = new JSONObject();
-                                slot.put("tavolo", p.getNum_tavolo());
-                                slot.put("inizio", p.getOrario_prenotazione());
-                                slot.put("fine", p.getOrario_fine_prenotazione());
-                                jsonArraySlots.put(slot);
-                            }
-                            parametri.put("slots", jsonArraySlots);
-                        }
-                        catch (JSONException e) {}
-                        //converto tutto a stringa e passo come unico parametro
-                        params=parametri.toString();
-                        //output.append(params);
-                        new prenotaGruppi().execute();
-
-
-
-                    }
-                }
-                else {
-                    MyToast.makeText(getApplicationContext(), "Selezionare le fasce orarie per cui si desidera prenotare!", MyToast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    public void dialogErrore(){
-        Dialog dErrore = new Dialog(PrenotazioneGruppoActivity.this);
-        dErrore.setTitle("Errore ricerca Gruppi");
-        dErrore.setCancelable(false);
-        dErrore.setContentView(R.layout.dialog_errore_gruppi);
-        btnIscriviti=dErrore.findViewById(R.id.btnIscriviti);
-        titoloDialogErrore=dErrore.findViewById(R.id.txtTitoloDialogErrore);
-        btnHome=dErrore.findViewById(R.id.btnHome);
-        dErrore.show();
-        btnHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i= new Intent(PrenotazioneGruppoActivity.this,
-                        Home.class);
-                startActivity(i);
-                finish();
-            }
-        });
-        btnIscriviti.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i= new Intent(PrenotazioneGruppoActivity.this,
-                        IscrizioneActivity.class);
-                startActivity(i);
-                finish();
-            }
-        });
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void definiscoOrari(){
-        LocalTime apertura=LocalTime.parse(orariUfficiali.get(giornoSelezionatoInt).getApertura());
-        LocalTime chiusura=LocalTime.parse(orariUfficiali.get(giornoSelezionatoInt).getChiusura());
-        primaFascia=LocalTime.parse(primoSlot);
-        ultimaFascia=primaFascia;
-        boolean trovata=false;
-        while(trovata==false) {
-            if (apertura.isAfter(primaFascia)) {
-                primaFascia = primaFascia.plusMinutes(slotMin);
-                trovata = false;
-            } else
-                trovata = true;
-        }
-        if(chiusura.isAfter(ultimaFascia.plusMinutes(slotMin))){
-            //non ci sono ore prenotabili
-        }
-        boolean chiusuraTrovata=false;
-        ultimaFascia=ultimaFascia.plusMinutes(slotMin);
-        while(chiusuraTrovata==false) {
-            if (!chiusura.isBefore(ultimaFascia)) {
-                ultimaFascia = ultimaFascia.plusMinutes(slotMin);
-                chiusuraTrovata = false;
-            } else
-                chiusuraTrovata = true;
-        }
-        ultimaFascia=ultimaFascia.minusMinutes(slotMin);
-    }
-    public void mostraData(int indiceGiorno){
-        //ho array di date e orari
-        orariUfficiali.get(indiceGiorno).getData();
-        txtDataMostrata.setText(orariUfficiali.get(indiceGiorno).getData());
-        if(orariUfficiali.get(indiceGiorno).getApertura()==null){
-            txtStatoAula.setText("L'aula è chiusa");
-            txtDataMostrata.setTextColor(getResources().getColor(R.color.rosso_scuro));
-
-        }
-        else{
-            txtStatoAula.setText("L'aula apre alle "+orariUfficiali.get(indiceGiorno).getApertura()+
-                    " e chiude alle "+orariUfficiali.get(indiceGiorno).getChiusura());
-            txtDataMostrata.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-        }
-        if(indiceGiorno==1){
-            btnIndietro.setVisibility(View.GONE);
-        }
-        if(indiceGiorno==6){
-            btnAvanti.setVisibility(View.GONE);
-        }
-    }
-
-//COMPONENTI GRUPPO
-    public void scegliComponenti(){
-        //ora uso solo la matricola per la verifica
-        dialogCheckComponenti = new Dialog(PrenotazioneGruppoActivity.this);
-        dialogCheckComponenti.setTitle("Seleziona il gruppo con cui vuoi studiare");
-        dialogCheckComponenti.setCancelable(false);
-        dialogCheckComponenti.setContentView(R.layout.dialog_check_componenti);
-        btncheckComponenti=dialogCheckComponenti.findViewById(R.id.btnCheckComponenti);
-        listacomponenti=dialogCheckComponenti.findViewById(R.id.listaComponenti);
-        adapterComponenti= new ArrayAdapter<User>(PrenotazioneGruppoActivity.this,
-                R.layout.row_layout_componenti, array_componenti){
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                //return super.getView(position, convertView, parent);
-                User item = getItem(position);
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_componenti
-                        , parent, false);
-                //txtComponenti = convertView.findViewById(R.id.txtComponente);
-                checkComponente=convertView.findViewById(R.id.checkComponente);
-                txtNomeComponente=convertView.findViewById(R.id.txtNomeComponente);
-                txtCognomeComponente=convertView.findViewById(R.id.txtCognomeComponente);
-                //txtUniversitaComponente=convertView.findViewById(R.id.txtUniversitaComponente);
-                //txtComponenti.setText(item.getNome()+" "+item.getCognome());
-                if(contiene(array_dinamico, item)==true){
-                    checkComponente.setChecked(true);
-                }
+                if(gruppo==null) MyToast.makeText(getApplicationContext(),"Per favore, seleziona un gruppo!", false).show();
+                else if(array_componenti==null) MyToast.makeText(getApplicationContext(),"Per favore, seleziona dei partecipanti!", false).show();
+                else if(giornoSelezionatoInt==-1) MyToast.makeText(getApplicationContext(),"Per favore, seleziona una data!", false).show();
                 else{
-                    checkComponente.setChecked(false);
+                    definiscoOrari();
+                    new prendiTavoli().execute();
                 }
-                checkComponente.setText(item.getMatricola());
-                txtNomeComponente.setText(item.getNome());
-                txtCognomeComponente.setText(item.getCognome());
-                //txtUniversitaComponente.setText(item.getUniversita());
-                //all inizio l array dinamico li contiene tutti e sono tutti checked
-
-                checkComponente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        tavoliEffettivi.clear();
-                        riempiLista();
-
-                        output.setText("");
-                        output.append(array_componenti.length+"COMPONENTI");
-                        array_copia=array_dinamico;
-                        studente = compoundButton.getText().toString();
-
-
-                        //se lo toglie
-                        if(b==false){
-                            //controllo che almeno uno studente rimanga nel gruppo
-                            if(array_dinamico.length==1 && array_componenti.length==1){
-                                compoundButton.setChecked(true);
-                                output.append(array_dinamico.length+"SELEZIONATI");
-                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
-                                Toast.makeText(getApplicationContext(), "Almeno un componente",
-                                        Toast.LENGTH_LONG).show();
-
-                            }
-                            else if(array_dinamico.length==2){
-                                compoundButton.setChecked(true);
-                                output.append(array_dinamico.length+"SELEZIONATI");
-                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
-                                Toast.makeText(getApplicationContext(), "Almeno due componenti",
-                                        Toast.LENGTH_LONG).show();
-                            }
-                            //tolgo lo studente
-                            else {
-
-                                //output.setText(studente);
-                                array_dinamico = rimuoviUser(array_copia, studente);
-                                output.append(array_dinamico.length+"SELEZIONATI");
-                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
-                                if (array_dinamico.length == 0) {
-
-                                    Toast.makeText(getApplicationContext(), "Seleziona almeno un componente",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                                else {
-                                    /*output.setText("");
-                                    for (User s : array_dinamico) {
-                                        output.setText(s.getMatricola());
-                                    }*/
-                                }
-
-
-                            }
-                        }
-                        //se lo inserisce
-                        else{
-                            array_dinamico=aggiungiUser(array_copia,studente);
-                            output.append("\ninserisco "+array_dinamico.length+"SELE\n");
-                            componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
-                            for (User s : array_dinamico) {
-                                output.append(s.getMatricola());
-                            }
-                        }
-                    }
-                });
-                return convertView;
-
-            }
-
-        };
-        listacomponenti.setAdapter(adapterComponenti);
-        dialogCheckComponenti.show();
-        //bottone di OK del dialog
-        btncheckComponenti.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialogCheckComponenti.cancel();
-            }
-        });
-    }
-    public void scegliGruppo(){
-        d = new Dialog(PrenotazioneGruppoActivity.this);
-        d.setTitle("Seleziona il gruppo con cui vuoi studiare");
-        d.setCancelable(false);
-        d.setContentView(R.layout.dialog_scegli_gruppo);
-        grigliaGruppi=d.findViewById(R.id.grigliaGruppi);
-
-        GridViewAdapter booksAdapter = new GridViewAdapter(PrenotazioneGruppoActivity.this, array_gruppo);
-        grigliaGruppi.setAdapter(booksAdapter);
-
-
-        d.show();
-        grigliaGruppi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //prendo il gruppo che lo studente seleziona
-                gruppo= new Gruppo(array_gruppo[i]);
-                gruppoSelezionato.setText(gruppo.getNome_gruppo());
-                txtOreResidue.setText("Ore residue:   ");
-                txtOreResidueNumero.setText(""+gruppo.getOre_disponibili());
-                d.cancel();
-                new prendiUtenti().execute();
-
-
 
             }
         });
+
+        //task iniziali
+        if(chiusa_tutta_la_settimana()==true) dialogWarning("L'aula è chiusa tutta la settimana\nNon ci sono date disponibili per la prenotazione");
+        start();
     }
-    public boolean contiene(User[] array_partecipanti, User s){
+
+    private void start(){
+        mostra_dialog_data=true;
+        ll_form.setVisibility(View.GONE);
+        ll_btn.setVisibility(View.GONE);
+        piantaAula.setVisibility(View.GONE);
+        new load_image().execute();
+        new prendiGruppi().execute();
+        giornoSelezionatoInt=-1;
+        txtDataMostrata.setText("");
+    }
+
+    @SuppressLint("WrongConstant")
+    public void action_bar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.my_action_bar);
+        getSupportActionBar().setElevation(0);
+        View view = getSupportActionBar().getCustomView();
+        TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
+        ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
+        txt_actionbar.setText("Prenotazione gruppo");
+        final Dialog d = new Dialog(PrenotazioneGruppoActivity.this);
+        d.setCancelable(true);
+        d.setContentView(R.layout.dialog_user);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
+        txt_nome.setText(nomeStudente+" "+cognomeStudente);
+        TextView txt_matricola=d.findViewById(R.id.txt_dialog_user_matricola);
+        txt_matricola.setText(matricolaStudente);
+        TextView txt_universita=d.findViewById(R.id.txt_dialog_user_università);
+        txt_universita.setText(nomeUniversita);
+        Button btn_logout=d.findViewById(R.id.btn_logout);
+        Button btn_continue=d.findViewById(R.id.btn_continue);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("logged", false);
+                editor.commit();
+                Intent i = new Intent(PrenotazioneGruppoActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+        btn_continue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+
+        image_actionbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.show();
+            }
+        });
+    }
+
+
+    //GRUPPO
+    private boolean contiene(User[] array_partecipanti, User s){
         //boolean contiene=false;
         String matricola=s.getMatricola();
         for(int i=0; i<array_partecipanti.length;i++){
@@ -606,7 +272,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         }
         return false;
     }
-    public User[] rimuoviUser(User[] array_passato, String matricola){
+    private User[] rimuoviUser(User[] array_passato, String matricola){
         String matricolaUtente="";
         //dovrebbe essere sempre uno perchè la matricola è univoca
         int elementiDaRimuovere=0;
@@ -636,9 +302,8 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
 
             return array_presenti;
         }
-
     }
-    public User[] aggiungiUser(User[] array_passato, String matricola){
+    private User[] aggiungiUser(User[] array_passato, String matricola){
         String matricolaAggiungere=matricola;
         //controllo che non ci sia(dovrebbe essere impossibile)
         for(int i=0; i<array_passato.length;i++){
@@ -658,192 +323,61 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 return array_presenti;
             }
         }
-
         return null;
-
     }
-
-//TAVOLI DISPONIBILI
-    public void riempiLista(){
-    if(tavoliEffettivi.isEmpty()){
-        //MyToast.makeText(getApplicationContext(),"Non ci sono tavoli disponibili nel giorno selezionato con il numero di posti desiderato", MyToast.LENGTH_LONG).show();
-    }
-    tavoliDinamico.clear();
-    fasceDinamico.clear();
-    fasce= new ArrayList<>();
-    for(Tavolo t: tavoliEffettivi){
-        String fascia= t.getFasciaOraria();
-        if(!fasce.contains(fascia)){
-            fasce.add(fascia);
+    private boolean oreDisponibili(){
+        int ore_selezionate=0;
+        for(String f:fasceDinamico){
+            ore_selezionate+=slotDifference(f.substring(0,5),f.substring(6,11));
         }
+        if(ore_selezionate>gruppo.getOre_disponibili()*60) return false;
+        return true;
     }
-    //output.append(fasce.toString());
-    //output.append("entro in riempi lista");
-    adapterDisponibilita = new ArrayAdapter<String>(PrenotazioneGruppoActivity.this, R.layout.row_layout_fasce_disponibili, (List<String>) fasce) {
 
-        //@SuppressLint("ResourceAsColor")
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            //return
-            //super.getView(position, convertView, parent);
-            String item = getItem(position);
-            ArrayList<Tavolo> tavoliFasciaSelezionata= new ArrayList<>();
-            tavoliFasciaSelezionata.clear();
-            for(Tavolo t:tavoliEffettivi){
-                if(t.getFasciaOraria().compareTo(item)==0){
-                    tavoliFasciaSelezionata.add(t);
-                    //tavoliDinamico.add(t);
-                }
-            }
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_fasce_disponibili
-                    , parent, false);
-
-            checkBoxFascia = convertView.findViewById(R.id.checkBoxFascia);
-            spinnerTavoli = convertView.findViewById(R.id.spinnerTavoli);
-            if(position==0){
-                checkBoxFascia.setText(item+"-"+LocalTime.parse(item).plusMinutes(slotMin));
-            }
-            else if(position!=0 && item.compareTo(getItem(position-1))!=0){
-                checkBoxFascia.setText(item+"-"+LocalTime.parse(item).plusMinutes(slotMin));
-            }
-
-            adapterSpinner = new ArrayAdapter(PrenotazioneGruppoActivity.this, android.R.layout.simple_list_item_1, tavoliFasciaSelezionata);
-            spinnerTavoli.setAdapter(adapterSpinner);
-            spinnerTavoli.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    Tavolo t = (Tavolo) parent.getItemAtPosition(position);
-                    String fascia = t.getFasciaOraria();
-                        /*if(!tavoliDinamico.isEmpty()) {
-                            for (Tavolo tavolo : tavoliDinamico) {
-                                if (tavolo.getFasciaOraria() == fascia) {
-                                    tavoliDinamico.remove(tavolo);
-                                }
-                            }
-                            tavoliDinamico.add(t);
-                        }*/
-                    ArrayList<Tavolo> tavoliDaRimuovere=new ArrayList<>();
-                    for(Tavolo tavolo:tavoliDinamico){
-                        if(fascia.equals(tavolo.getFasciaOraria())){
-                            tavoliDaRimuovere.add(tavolo);
-                        }
-                    }
-                    for(Tavolo tavolo:tavoliDaRimuovere){
-                        tavoliDinamico.remove(tavolo);
-                    }
-                    //if(presente==false) {
-                    tavoliDinamico.add(t);
-                    //}
-
-
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                }
-            });
-            checkBoxFascia.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    String f=compoundButton.getText().toString();
-                    if(b==true){
-                        //lo sta aggiungendo
-                        if(!fasceDinamico.contains(f)){
-                            if((gruppo.getOre_disponibili()*60)<(slotMin*(fasceDinamico.size()+1))){
-                                //il gruppo non ha abbastanza ore
-                                MyToast.makeText(getApplicationContext(),"Ore residue insufficienti per effettuale la prenotazione", Toast.LENGTH_LONG).show();
-                                compoundButton.setChecked(false);
-                            }
-                            else {
-                                fasceDinamico.add(f);
-                            }
-
-                        }
-                    }
-                    if(b==false){
-                        //lo sta togliendo
-                        if(fasceDinamico.contains(f)){
-                            fasceDinamico.remove(f);
-
-                        }
-                    }
-                    //output.setText(fasceDinamico.toString());
-                    //output.append(tavoliDinamico.toString());
-                    //output.append(tavoliDinamico.toString());
-                }
-
-            });
-
-
-            return convertView;
-        }
-    };
-    listaDisponibilitaActivity.setAdapter(adapterDisponibilita);
-
-
-}
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void smistaPrenotazioni(){
+    //TAVOLI DISPONIBILI
+    private void smistaPrenotazioni(){
         tavoliMap.clear();
-        LocalTime fasciaAnalizzata; fasciaAnalizzata=primaFascia;
         int index=0;
+        //se non ci sono prenotazioni allora tutti i tavoli sono liberi
         if(prenotazioni.isEmpty()){
-            output.append("non ci sono prenotazioni");
-            //non ci sono prenotazioni quindi ci sono tutti i posti liberi
-            while(fasciaAnalizzata.isBefore(ultimaFascia)){
-
+            for(int i=0;i<=fasceOrarie.size()-2;i++){
+                String fascia=fasceOrarie.get(i);
                 for(Tavolo t: tavoli) {
-
-                    Tavolo tAggiornato=new Tavolo(t); tAggiornato.setFasciaOraria(fasciaAnalizzata.toString());
+                    Tavolo tAggiornato=new Tavolo(t);
+                    tAggiornato.setFasciaOraria(fascia);
                     tAggiornato.setPosti_liberi(t.getPosti_totali());
                     tavoliMap.put(index, tAggiornato);
                     index++;
                 }
-                fasciaAnalizzata=fasciaAnalizzata.plusMinutes(slotMin);
             }
         }
         else {
-            //ci sono prenotazioni e devo smistarle per fasce orarie
             Tavolo tAggiornato;
-            while (fasciaAnalizzata.isBefore(ultimaFascia)) {
-                //output.append("\nanalizzo fascia" + fasciaAnalizzata + "\n");
+            //guardo per ogni fascia oraria tranne l'ultima quante prenotazioni ci sono per ogni tavolo
+            for(int i=0;i<=fasceOrarie.size()-2;i++){
+                String fascia=fasceOrarie.get(i);
                 for (Tavolo t : tavoli) {
                     int occupati = 0;
                     for (Prenotazione p : prenotazioni) {
-                        //output.append(p.getOrario_prenotazione()+" "+orariUfficiali.get(giornoSelezionatoInt).getData() + " " + fasciaAnalizzata + ":00"+"\n");
-                        // if (p.getOrario_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fasciaAnalizzata + ":00")<=0
-                        //         &&p.getOrario_fine_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fasciaAnalizzata.plusMinutes(slotMin) + ":00")>=0
-                        if( p.getOrario_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fasciaAnalizzata + ":00")<=0
-                                && p.getOrario_fine_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fasciaAnalizzata.plusMinutes(slotMin) + ":00")>=0
-                                && p.getNum_tavolo() == t.getNum_tavolo()) {
-                            occupati++;
-                        }
+                        if(p.getOrario_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fascia)<=0
+                           && p.getOrario_fine_prenotazione().compareTo(orariUfficiali.get(giornoSelezionatoInt).getData()  + " " + fascia)>0
+                           && p.getNum_tavolo() == t.getNum_tavolo()) occupati++;
                     }
                     tAggiornato = new Tavolo(t);
-                    tAggiornato.setFasciaOraria(fasciaAnalizzata.toString());
+                    tAggiornato.setFasciaOraria(fascia);
                     tAggiornato.setPosti_liberi(t.getPosti_totali() - occupati);
-                    //output.append("----"+tAggiornato.getNum_tavolo()+" "+tAggiornato.getFasciaOraria()+"\n");
                     tavoliMap.put(index,tAggiornato);
                     index++;
-                    //output.append(index+" "+tAggiornato.toString());
                 }
-                fasciaAnalizzata = fasciaAnalizzata.plusMinutes(slotMin);
-
             }
-            //output.append(tavoliMap.values().toString());
         }
-        //output.append(tavoliMap.values().toString());
         tavoliEffettivi= new ArrayList<>(creaListaTavoliFinale(tavoliMap));
         if(tavoliEffettivi.isEmpty()){
-            MyToast.makeText(getApplicationContext(), "Non ci sono tavoli disponibili", MyToast.LENGTH_SHORT).show();
+            MyToast.makeText(getApplicationContext(), "Non ci sono tavoli disponibili", false).show();
         }
-        //output.setText(tavoliEffettivi.toString());
-        //ora devo stamparli
-        riempiLista();
+        else dialogLista();
     }
-    public ArrayList<Tavolo> creaListaTavoliFinale(HashMap<Integer,Tavolo> tavoliMap){
+    private ArrayList<Tavolo> creaListaTavoliFinale(HashMap<Integer,Tavolo> tavoliMap){
         ArrayList<Tavolo> tavoli= new ArrayList<>();
         for(Tavolo t: tavoliMap.values()){
             if(t.getPosti_liberi()>=array_dinamico.length){
@@ -853,30 +387,30 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         return tavoli;
     }
 
-//TASK ASINCRONI
+    //TASK ASINCRONI
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
-    @Override
-    protected Bitmap doInBackground(Void... voids) {
-        try {
-            String uri="http://pmsc9.altervista.org/progetto/immagini/plant_"+aula.getIdAula()+".png";
-            URL url = new URL(uri);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.connect();
-            InputStream inputStream = connection.getInputStream();
-            Bitmap image = BitmapFactory.decodeStream(inputStream);
-            return image;
-        } catch (Exception e) {
-            return null;
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
+            try {
+                String uri="http://pmsc9.altervista.org/progetto/immagini/plant_"+aula.getIdAula()+".png";
+                URL url = new URL(uri);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                InputStream inputStream = connection.getInputStream();
+                Bitmap image = BitmapFactory.decodeStream(inputStream);
+                return image;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        protected void onPostExecute(Bitmap result) {
+            if(result!=null){
+                piantaAula.setImage(ImageSource.bitmap(result));
+                piantaAula.setVisibility(View.VISIBLE);
+            }
+
         }
     }
-    protected void onPostExecute(Bitmap result) {
-        if(result==null){
-            Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Errore Immagine</b></font>"), Toast.LENGTH_LONG).show();
-            return;
-        }
-        piantaAula.setImage(ImageSource.bitmap(result));
-    }
-}
 
     private class prendiGruppi extends AsyncTask<Void, Void, Gruppo[]> {
 
@@ -944,24 +478,13 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             super.onPostExecute(array_gruppo);
-            if (array_gruppo.length==0) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Nessun gruppo disponibile</b></font>"), Toast.LENGTH_LONG).show();
-                dialogErrore();
-                //componenti.setText(risultato+array_gruppo.length);
-                return;
+            if(array_gruppo==null) dialogWarning("Sei offline! Impossibile procedere!");
+            else if (array_gruppo.length==0) dialogWarning("Impossibile procedere!\nNon sei iscritto ad alcun gruppo");
+            else{
+                ll_form.setVisibility(View.VISIBLE);
+                ll_btn.setVisibility(View.VISIBLE);
+                dialogGruppo();
             }
-            //ci sono dei gruppi quindi facciamo subito selezionare uno
-            scegliGruppo();
-            //componenti.setText(risultato+array_gruppo.length);
-            return;
-            //componenti.setText(array_gruppo.length);
-            /*Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Gruppi disponibili</b></font>"), Toast.LENGTH_LONG).show();
-
-            for (Gruppo g:array_gruppo){
-                output.append(g.getCodice_gruppo());
-            }*/
-
-
         }
     }
 
@@ -997,13 +520,8 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 }
                 is.close();
                 String result = sb.toString();
-
-
-
                 JSONArray jArrayCorsi = new JSONArray(result);
-
                 array_componenti = new User[jArrayCorsi.length()];
-
                 n=array_componenti.length;
                 for (int i = 0; i < jArrayCorsi.length(); i++) {
                     JSONObject json_data = jArrayCorsi.getJSONObject(i);
@@ -1015,10 +533,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                             json_data.getString("password"),
                             true);
                 }
-
                 return array_componenti;
-
-
             } catch (Exception e) {
                 return null;
             }
@@ -1028,17 +543,15 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         protected void onPostExecute(User[] array_componenti) {
             super.onPostExecute(array_componenti);
             if (array_componenti == null) {
-                Toast.makeText(getApplicationContext(), Html.fromHtml("<font color='#eb4034' ><b>Nessun utente disponibile</b></font>"), Toast.LENGTH_LONG).show();
-
+                MyToast.makeText(getApplicationContext(),"Errore nel caricamento dei partecipanti: riprova!", false).show();
+                componenti.setText("");
+                PrenotazioneGruppoActivity.this.array_componenti=null;
+                array_dinamico=null;
                 return;
             }
-            //iniazializzo l'arrau degli effettivi partecipanti
             array_dinamico=array_componenti;
             componenti.setText(+array_componenti.length+"/"+array_componenti.length);
-            //componenti.setText(risultato+" "+n);
-            for(User s: array_componenti) {
-                //componenti.append(s.getNome()+"\n");
-            }
+            dialogComponenti();
         }
     }
 
@@ -1093,24 +606,16 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 return result;
 
             } catch (Exception e) {
-                MyToast.makeText(getApplicationContext(), "Errore nel caricamento", MyToast.LENGTH_LONG).show();
+                MyToast.makeText(getApplicationContext(), "Errore nel caricamento: riprova!", false).show();
                 return null;
             }
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         protected void onPostExecute(String s) {
-
-            //output.append(prenotazioni.toString());
-            if(tavoli==null){
-                Toast.makeText(getApplicationContext(), "Nessun tavolo disponibile", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                smistaPrenotazioni();
-            }
+            if(tavoli==null) MyToast.makeText(getApplicationContext(), "Nessun tavolo disponibile", false).show();
+            else smistaPrenotazioni();
         }
-
     }
 
     private class prendiTavoli extends AsyncTask<Void, Void, ArrayList<Tavolo>> {
@@ -1163,14 +668,8 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(ArrayList<Tavolo> result) {
-            if (result == null) {//problema di connessione
-                Toast.makeText(getApplicationContext(), "Sei offline! Impossibile prenotare!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            else {
-                //output.setText(tavoli.toString());
-                new prendiPrenotazioni().execute();
-            }
+            if (result == null) MyToast.makeText(getApplicationContext(), "Sei offline! Riprova!", false).show();
+            else new prendiPrenotazioni().execute();
         }
     }
 
@@ -1225,10 +724,463 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             else{
                 MyToast.makeText(getApplicationContext(), result+"", false).show();
                 tavoliEffettivi.clear();
-                riempiLista();
                 return;
             }
 
         }
     }
+
+    //date e orari
+    public void definiscoOrari(){
+        fasceOrarie=fasceOrarie();
+    }
+    private Calendar stringToCalendar(String dateString){
+        try{
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat format_time=new SimpleDateFormat("HH:mm:ss", Locale.ITALY);
+        calendar.setTime(format_time.parse(dateString));
+        return calendar;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    private String calendarToString(Calendar calendar) {
+        SimpleDateFormat format_time=new SimpleDateFormat("HH:mm:ss", Locale.ITALY);
+        return format_time.format(calendar.getTime());
+    }
+    private class Comparatore implements Comparator<Tavolo>{
+        @Override
+        public int compare(Tavolo a, Tavolo b) {
+            return a.getFasciaOraria().compareTo(b.getFasciaOraria());
+        }
+    }
+    private String dataItaliana(String dataStraniera){
+        try {
+            Date d= new SimpleDateFormat("yyyy-MM-dd").parse(dataStraniera);
+            return new SimpleDateFormat("E", Locale.ITALY).format(d).toUpperCase()+" "+dataStraniera.substring(8,10)+"/"+dataStraniera.substring(5,7)+"/"+dataStraniera.substring(0,4);
+        } catch (ParseException e) {
+           return null;
+        }
+
+    }
+    private String oreToMinuti(double oreDisponibili){
+        int ore_int= (int) oreDisponibili;
+        int ore_round= (int) Math.ceil(oreDisponibili);
+        if(ore_int==ore_round) return ore_int+"h";
+        else{
+            int min=(int)((oreDisponibili-(double)ore_int)*60);
+            return ore_int+"h "+min+"min";
+        }
+    }
+    private boolean chiusa_tutta_la_settimana(){
+        for(Orario_Ufficiale uf:orariUfficiali){
+            if(uf.getApertura()==null) continue;
+            else return false;
+        }
+        return true;
+    }
+    private ArrayList<String> fasceOrarie(){
+        ArrayList<String> fasce=new ArrayList<String>();
+        Calendar cal_apertura=stringToCalendar(orariUfficiali.get(giornoSelezionatoInt).getApertura());
+        Calendar cal_chiusura=stringToCalendar(orariUfficiali.get(giornoSelezionatoInt).getChiusura());
+        cal_primaFascia=stringToCalendar(primoSlot);
+        cal_ultimaFascia= (Calendar) cal_primaFascia.clone();
+        boolean trovata=false;
+        while(trovata==false) {
+            if (cal_apertura.after(cal_primaFascia)) {
+                cal_primaFascia.add(Calendar.MINUTE,slotMin);
+                trovata = false;
+            } else trovata = true;
+        }
+        boolean chiusuraTrovata=false;
+        cal_ultimaFascia.add(Calendar.MINUTE,slotMin);
+        while(chiusuraTrovata==false) {
+            if (!cal_chiusura.before(cal_ultimaFascia)) {
+                cal_ultimaFascia.add(Calendar.MINUTE,slotMin);
+                chiusuraTrovata = false;
+            } else chiusuraTrovata = true;
+        }
+        cal_ultimaFascia.add(Calendar.MINUTE,-slotMin);
+
+        if(!orariUfficiali.get(giornoSelezionatoInt).getApertura().equals(calendarToString(cal_primaFascia))) fasce.add(orariUfficiali.get(giornoSelezionatoInt).getApertura());
+        if(!orariUfficiali.get(giornoSelezionatoInt).getChiusura().equals(calendarToString(cal_ultimaFascia))) fasce.add(orariUfficiali.get(giornoSelezionatoInt).getChiusura());
+
+        boolean trovato=false;
+        Calendar cal= (Calendar) cal_primaFascia.clone();
+        while(trovato==false){
+            if(cal.after(cal_ultimaFascia)) trovato=true;
+            else{
+                fasce.add(calendarToString(cal));
+                cal.add(Calendar.MINUTE,slotMin);
+            }
+        }
+        Collections.sort(fasce);
+        return fasce;
+    }
+    private String slotSuccessivo(String slot){
+        for(int i=0;i<fasceOrarie.size();i++){
+            if(fasceOrarie.get(i).equals(slot)) return fasceOrarie.get(i+1);
+        }
+        return null;
+    }
+    private int slotDifference(String slot1, String slot2){
+        Calendar cal1= stringToCalendar(slot1+":00");
+        Calendar cal2= stringToCalendar(slot2+":00");
+        long difference=cal2.getTimeInMillis()-cal1.getTimeInMillis();
+        difference=difference/60000;
+        return (int)difference;
+
+    }
+
+    //dialog
+    private void dialogData(){
+        mostra_dialog_data=false;
+        final Dialog dialog_data = new Dialog(PrenotazioneGruppoActivity.this);
+        dialog_data.setCancelable(true);
+        dialog_data.setContentView(R.layout.dialog_scegli_gruppo);
+        dialog_data.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        TextView textView=dialog_data.findViewById(R.id.et_dialog_gruppi);
+        textView.setText("Seleziona una data");
+        ListView list_data=dialog_data.findViewById(R.id.lv_pren_gruppi);
+        ArrayAdapter<Orario_Ufficiale> adpter_gruppi=new ArrayAdapter<Orario_Ufficiale>(PrenotazioneGruppoActivity.this, R.layout.row_layout_scegli_gruppo,orariUfficiali){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                Orario_Ufficiale item=getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_scegli_gruppo, parent, false);
+                TextView txt_data=convertView.findViewById(R.id.nomeGruppo);
+                ImageView img_data=convertView.findViewById(R.id.imgGroup);
+                txt_data.setText(dataItaliana(item.getData()));
+                img_data.setImageDrawable(getResources().getDrawable(R.drawable.calendario));
+                return convertView;
+            }
+        };
+        list_data.setAdapter(adpter_gruppi);
+        list_data.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(orariUfficiali.get(position).getApertura()==null)
+                    MyToast.makeText(getApplicationContext(),"L'aula è chiusa nella data selezionata!\n Selezionare un'altra data",false).show();
+                else {
+                    giornoSelezionatoInt = position;
+                    txtDataMostrata.setText(dataItaliana(orariUfficiali.get(position).getData()));
+                    dialog_data.dismiss();
+                }
+            }
+        });
+        dialog_data.show();
+    }
+    private void dialogGruppo(){
+        final Dialog dialog_gruppi = new Dialog(PrenotazioneGruppoActivity.this);
+        dialog_gruppi.setCancelable(true);
+        dialog_gruppi.setContentView(R.layout.dialog_scegli_gruppo);
+        dialog_gruppi.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        ListView list_gruppi=dialog_gruppi.findViewById(R.id.lv_pren_gruppi);
+        ArrayAdapter<Gruppo> adpter_gruppi=new ArrayAdapter<Gruppo>(PrenotazioneGruppoActivity.this, R.layout.row_layout_scegli_gruppo,array_gruppo){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                Gruppo item=getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_scegli_gruppo, parent, false);
+                TextView txt_nome_gruppi=convertView.findViewById(R.id.nomeGruppo);
+                txt_nome_gruppi.setText(item.getNome_gruppo());
+                return convertView;
+            }
+        };
+        list_gruppi.setAdapter(adpter_gruppi);
+        list_gruppi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                gruppo= new Gruppo(array_gruppo[i]);
+                gruppoSelezionato.setText(gruppo.getNome_gruppo());
+                txtOreResidueNumero.setText(oreToMinuti(gruppo.getOre_disponibili()));
+                dialog_gruppi.dismiss();
+                new prendiUtenti().execute();
+            }
+        });
+        dialog_gruppi.show();
+    }
+    private void dialogComponenti(){
+        dialogCheckComponenti = new Dialog(PrenotazioneGruppoActivity.this);
+        dialogCheckComponenti.setCancelable(true);
+        dialogCheckComponenti.setContentView(R.layout.dialog_check_componenti);
+        dialogCheckComponenti.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        btncheckComponenti=dialogCheckComponenti.findViewById(R.id.btnCheckComponenti);
+        listacomponenti=dialogCheckComponenti.findViewById(R.id.listaComponenti);
+        adapterComponenti= new ArrayAdapter<User>(PrenotazioneGruppoActivity.this, R.layout.row_layout_componenti, array_componenti){
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                User item = getItem(position);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_componenti, parent, false);
+                checkComponente=convertView.findViewById(R.id.checkComponente);
+                txtNomeComponente=convertView.findViewById(R.id.txtNomeComponente);
+                txtCognomeComponente=convertView.findViewById(R.id.txtCognomeComponente);
+                if(contiene(array_dinamico, item)==true) checkComponente.setChecked(true);
+                else checkComponente.setChecked(false);
+
+                checkComponente.setText(item.getMatricola());
+                txtNomeComponente.setText(item.getNome());
+                txtCognomeComponente.setText(item.getCognome());
+
+                checkComponente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        array_copia=array_dinamico;
+                        studente = compoundButton.getText().toString();
+
+                        //se lo toglie
+                        if(b==false){
+                            //controllo che almeno uno studente rimanga nel gruppo
+                            if(array_dinamico.length==1 && array_componenti.length==1){
+                                compoundButton.setChecked(true);
+                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
+                                MyToast.makeText(getApplicationContext(), "Deve essere presente almeno un componente", false).show();
+
+                            }
+                            else if(array_dinamico.length==2){
+                                compoundButton.setChecked(true);
+                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
+                                MyToast.makeText(getApplicationContext(), "Devono essere presenti almeno due componenti", false).show();
+                            }
+                            //tolgo lo studente
+                            else {
+                                array_dinamico = rimuoviUser(array_copia, studente);
+                                componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
+                                if (array_dinamico.length == 0) MyToast.makeText(getApplicationContext(), "Seleziona almeno un componente", false).show();
+                            }
+                        }
+                        //se lo inserisce
+                        else{
+                            array_dinamico=aggiungiUser(array_copia,studente);
+                            componenti.setText(+array_dinamico.length+"/"+array_componenti.length);
+                        }
+                    }
+                });
+                return convertView;
+
+            }
+
+        };
+        listacomponenti.setAdapter(adapterComponenti);
+        dialogCheckComponenti.show();
+        //bottone di OK del dialog
+        btncheckComponenti.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogCheckComponenti.dismiss();
+                if(mostra_dialog_data==true) dialogData();
+            }
+        });
+    }
+    private void dialogLista(){
+        tavoliDinamico.clear();
+        fasceDinamico.clear();
+        fasce= new ArrayList<>();
+        for(Tavolo t: tavoliEffettivi){
+            String fascia= t.getFasciaOraria();
+            if(!fasce.contains(fascia)) fasce.add(fascia);
+        }
+        final Dialog dialog_prenotazione = new Dialog(PrenotazioneGruppoActivity.this);
+        dialog_prenotazione.setCancelable(true);
+        dialog_prenotazione.setContentView(R.layout.dialog_prenotazione_gruppo);
+        dialog_prenotazione.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        ListView lista_disponibilita=dialog_prenotazione.findViewById(R.id.dialog_lista_disponibilita);
+        Button btn_prenota_dialog=dialog_prenotazione.findViewById(R.id.dialog_btn_prenota);
+        btn_prenota_dialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(tavoliEffettivi.isEmpty()==false && fasceDinamico.isEmpty()==false) {
+                    ArrayList<Tavolo> tavoliPrenotare = new ArrayList<>();
+                    for (String s : fasceDinamico) {
+                        for (Tavolo t : tavoliDinamico) {
+                            if (t.getFasciaOraria().substring(0,5).compareTo(s.substring(0,5)) == 0) tavoliPrenotare.add(t);
+                        }
+                    }
+
+                    ArrayList<Prenotazione> prenotazioni = new ArrayList<>();
+                    ArrayList<Tavolo> tavoliOrdinati=tavoliPrenotare;
+                    Collections.sort(tavoliOrdinati,new Comparatore());
+
+                    for (Tavolo t : tavoliOrdinati) {
+                        String orario_prenotazione = orariUfficiali.get(giornoSelezionatoInt).getData() + " " + t.getFasciaOraria();
+                        String orario_fine_prenotazione = orariUfficiali.get(giornoSelezionatoInt).getData() + " " + slotSuccessivo(t.getFasciaOraria());
+                        Prenotazione p = new Prenotazione(aula.getIdAula(), t.getNum_tavolo(), orario_prenotazione, orario_fine_prenotazione, 1);
+                        prenotazioni.add(p);
+                    }
+                    if(fasceDinamico.size()!=tavoliPrenotare.size()){ }
+                    else{
+                        JSONObject parametri = new JSONObject();
+                        //dati generali
+                        try {
+                            parametri.put("codice_universita", codiceUniversita);
+                            parametri.put("id_aula", aula.getIdAula());
+                            parametri.put("data", orariUfficiali.get(giornoSelezionatoInt).getData());
+                            parametri.put("creatore", matricolaStudente);
+                            parametri.put("gruppo", gruppo.getCodice_gruppo());
+                            parametri.put("nome_gruppo", gruppo.getNome_gruppo());
+                            parametri.put("numero_partecipanti", array_dinamico.length);
+                        }
+                        catch (JSONException e) {}
+                        //dati studenti
+                        JSONArray jsonArrayStudenti = new JSONArray();
+                        try {
+                            for (User u : array_dinamico) {
+                                JSONObject studente = new JSONObject();
+                                studente.put("matricola", u.getMatricola());
+                                jsonArrayStudenti.put(studente);
+                            }
+                            parametri.put("partecipanti", jsonArrayStudenti);
+                        }
+                        catch (JSONException e) {}
+
+                        //inserisco slots
+                        JSONArray jsonArraySlots = new JSONArray();
+                        try {
+                            for (Prenotazione p : prenotazioni) {
+                                JSONObject slot = new JSONObject();
+                                slot.put("tavolo", p.getNum_tavolo());
+                                slot.put("inizio", p.getOrario_prenotazione());
+                                slot.put("fine", p.getOrario_fine_prenotazione());
+                                jsonArraySlots.put(slot);
+                            }
+                            parametri.put("slots", jsonArraySlots);
+                        }
+                        catch (JSONException e) {}
+                        params=parametri.toString();
+                        //output.setText(params);
+                        new prenotaGruppi().execute();
+                    }
+                    dialog_prenotazione.dismiss();
+                }
+                else MyToast.makeText(getApplicationContext(), "Non hai selezionato nessuna fascia oraria!", false).show();
+            }
+        });
+        adapterDisponibilita = new ArrayAdapter<String>(PrenotazioneGruppoActivity.this, R.layout.row_layout_fasce_disponibili, (List<String>) fasce) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                String item = getItem(position);
+                ArrayList<Tavolo> tavoliFasciaSelezionata= new ArrayList<>();
+                tavoliFasciaSelezionata.clear();
+                for(Tavolo t:tavoliEffettivi){
+                    if(t.getFasciaOraria().compareTo(item)==0){
+                        tavoliFasciaSelezionata.add(t);
+                    }
+                }
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_fasce_disponibili, parent, false);
+                checkBoxFascia = convertView.findViewById(R.id.checkBoxFascia);
+                spinnerTavoli = convertView.findViewById(R.id.spinnerTavoli);
+                checkBoxFascia.setText(item.substring(0,item.length()-3)+"-"+slotSuccessivo(item).substring(0,item.length()-3));
+
+                adapterSpinner = new ArrayAdapter(PrenotazioneGruppoActivity.this, android.R.layout.simple_list_item_1, tavoliFasciaSelezionata);
+                spinnerTavoli.setAdapter(adapterSpinner);
+                //aggiungo rimuovo/tavolo
+                spinnerTavoli.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        Tavolo t = (Tavolo) parent.getItemAtPosition(position);
+                        String fascia = t.getFasciaOraria();
+
+                        ArrayList<Tavolo> tavoliDaRimuovere=new ArrayList<>();
+                        for(Tavolo tavolo:tavoliDinamico){
+                            if(fascia.equals(tavolo.getFasciaOraria())){
+                                tavoliDaRimuovere.add(tavolo);
+                            }
+                        }
+                        for(Tavolo tavolo:tavoliDaRimuovere){
+                            tavoliDinamico.remove(tavolo);
+                        }
+                        tavoliDinamico.add(t);
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
+                //aggiungo/rimuovo fascia
+                checkBoxFascia.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        String f=compoundButton.getText().toString();
+                        if(b==true){
+                            if(!fasceDinamico.contains(f)){
+                                fasceDinamico.add(f);
+                                if(oreDisponibili()==false){
+                                    MyToast.makeText(getApplicationContext(), "Ore disponibili esaurite", false).show();
+                                    compoundButton.setChecked(false);
+                                    fasceDinamico.remove(f);
+                                }
+                            }
+                        }
+                        if(b==false && fasceDinamico.contains(f) )fasceDinamico.remove(f);
+                    }
+                });
+                return convertView;
+            }
+        };
+        lista_disponibilita.setAdapter(adapterDisponibilita);
+        dialog_prenotazione.show();
+    }
+    private void dialogWarning(final String message){
+        final Dialog d = new Dialog(PrenotazioneGruppoActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_warning);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        Button btn=d.findViewById(R.id.btn_dialog_warning);
+        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
+        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
+        txt_warning.setText(message);
+        if(message.equals("Sei offline! Impossibile procedere!")) btn_aggiorna.setVisibility(View.VISIBLE);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrenotazioneGruppoActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+                d.dismiss();
+            }
+        });
+        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                start();
+                d.dismiss();
+            }
+        });
+        d.show();
+        return;
+    }
+
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
+        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            start();
+        }
+        if(item.getItemId() == 3){
+            Intent i = new Intent(this, GroupActivity.class);
+            startActivity(i);
+            finish();
+        }
+        if(item.getItemId() == 4){
+            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
+            startActivity(i);
+            finish();
+        }
+        return true;
+    }
+
 }

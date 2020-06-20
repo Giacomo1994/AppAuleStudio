@@ -217,7 +217,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("I miei gruppi");
         final Dialog d = new Dialog(GestioneGruppiDocenteActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -486,13 +486,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                             array_copia = array_dinamico;
                             studente = compoundButton.getText().toString();
                             //se lo toglie
-                            if (b == false) {
-                                array_dinamico = rimuoviUser(array_copia, studente);
-                                if (array_dinamico.length == 0) {
-                                    Toast.makeText(getApplicationContext(), "Non ci sono piu componenti nel gruppo",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            }
+                            if (b == false) array_dinamico = rimuoviUser(array_copia, studente);
                             else array_dinamico = aggiungiUser(array_copia, studente);
 
                             User[] prova = null;
@@ -753,7 +747,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppi) {
             if (array_gruppi==null) {
-                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server", false).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server\nErrore nel caricamento dei gruppi", false).show();
                 return;
             }
             if (array_gruppi.length==0) {
@@ -813,7 +807,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             super.onPostExecute(array_componenti);
             if (array_componenti == null) {
                 componenti=array_componenti;
-                MyToast.makeText(getApplicationContext(), "Sei offline! Non puoi aggiornare il gruppo.",false).show();
+                MyToast.makeText(getApplicationContext(), "Impossibile contattare il server\nVerifica la connessione per aggiornare il gruppo",false).show();
                 //creaDialogGruppo();
                 return;
             }
@@ -864,7 +858,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             if(result==null || !result.equals("Gruppo aggiornato")){
-                MyToast.makeText(getApplicationContext(),"Errore nell'aggiornamento del gruppo",false).show();
+                MyToast.makeText(getApplicationContext(),"Impossibile contattare il server\nErrore nell'aggiornamento del gruppo",false).show();
                 return;
             }
             else MyToast.makeText(getApplicationContext(), "Gruppo aggiornato",true).show();
@@ -914,7 +908,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            if(result==null) MyToast.makeText(getApplicationContext(),"Errore nell'aggiornamento del gruppo",false).show();
+            if(result==null) MyToast.makeText(getApplicationContext(),"Impossibile contattare il server\nErrore nell'aggiornamento del gruppo",false).show();
             else MyToast.makeText(getApplicationContext(), "Studenti eliminati",true).show();
         }
     }

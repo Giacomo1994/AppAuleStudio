@@ -80,7 +80,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     Aula aula;
     HashMap<Integer, Orario> orari_default;
     LinkedList<Orario_Speciale> orari_speciali;
-    LinkedList<Orario_Ufficiale> orari_giusti;
+    LinkedList<Orario_Ufficiale> orari_giusti, orari_da_passare;
     String strNome, strCognome, strMatricola, strUniversita, strNomeUniversita;
     boolean connesso=false, offline=false;
 
@@ -136,7 +136,7 @@ public class InfoAulaActivity extends AppCompatActivity {
                 Intent intent= new Intent(InfoAulaActivity.this, PrenotazioneGruppoActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("aula", aula);
-                bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_giusti));
+                bundle.putParcelableArrayList("orari", new ArrayList<Orario_Ufficiale>(orari_da_passare));
                 intent.putExtra("dati", bundle);
                 startActivityForResult(intent, 61);
             }
@@ -188,7 +188,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
         txt_actionbar.setText("Informazioni Aula");
         final Dialog d = new Dialog(InfoAulaActivity.this);
-        d.setCancelable(false);
+        d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
         d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         TextView txt_nome=d.findViewById(R.id.txt_dialog_user_nome);
@@ -515,6 +515,29 @@ public class InfoAulaActivity extends AppCompatActivity {
             Collections.sort(orari_ufficiali);
             orari_giusti=orari_ufficiali;
 
+            //ultimo orario
+            orari_da_passare= new LinkedList<>(orari_ufficiali);
+            Orario_Ufficiale uf=null;
+            if(orari_speciali.size()==0){
+                Calendar c=Calendar.getInstance();
+                c.add(Calendar.DAY_OF_YEAR,7);
+                String data=new SimpleDateFormat("yyyy-MM-dd",Locale.ITALY).format(c.getTime());
+                String giorno=new SimpleDateFormat("E", Locale.ITALY).format(c.getTime()).toUpperCase();
+                uf=new Orario_Ufficiale(data,giorno,orari_default.get(daysOfWeekInt[0]).getApertura(),orari_default.get(daysOfWeekInt[0]).getChiusura());
+            }
+            else{
+                uf=lastDay(orari_speciali.getLast());
+                if(uf==null){
+                    Calendar c=Calendar.getInstance();
+                    c.add(Calendar.DAY_OF_YEAR,7);
+                    String data=new SimpleDateFormat("yyyy-MM-dd",Locale.ITALY).format(c.getTime());
+                    String giorno=new SimpleDateFormat("E", Locale.ITALY).format(c.getTime()).toUpperCase();
+                    uf=new Orario_Ufficiale(data,giorno,orari_default.get(daysOfWeekInt[0]).getApertura(),orari_default.get(daysOfWeekInt[0]).getChiusura());
+                }
+            }
+            orari_da_passare.addLast(uf);
+
+
             if(connesso==true && checkAulaAperta()==true){
                 new check_posti().execute();
             }
@@ -590,6 +613,15 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private Orario_Ufficiale lastDay(Orario_Speciale os){
+        Calendar c=Calendar.getInstance();
+        c.add(Calendar.DAY_OF_YEAR,7);
+        String data=new SimpleDateFormat("yyyy-MM-dd",Locale.ITALY).format(c.getTime());
+        String giorno=new SimpleDateFormat("E", Locale.ITALY).format(c.getTime());
+        if(data.equals(os.getData())) return new Orario_Ufficiale(data,giorno,os.getApertura(),os.getChiusura());
+        else return null;
     }
 
 

@@ -13,7 +13,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/imageView12"
+            android:id="@+id/img_dialog_warning"
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:srcCompat="@drawable/warning" />
@@ -29,6 +29,7 @@
         android:textSize="20sp" />
 
     <LinearLayout
+        android:id="@+id/ll_dialog_warning_bottoni"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">

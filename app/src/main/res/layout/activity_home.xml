@@ -86,12 +86,6 @@
             android:text="vai a mappa aule"
             android:textColor="@color/button_text" />
 
-        <ProgressBar
-            android:id="@+id/bar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
         <ListView
             android:id="@+id/elencoAule"
             android:layout_width="match_parent"

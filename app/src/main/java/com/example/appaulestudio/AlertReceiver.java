@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.PowerManager;
 import android.widget.Toast;
@@ -61,31 +62,43 @@ public class AlertReceiver extends BroadcastReceiver {
         }
     }
 
-// mostra notifica
+
     public void showNotification(){
+        //accensione schermo
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        boolean isScreenOn = Build.VERSION.SDK_INT >= 20 ? pm.isInteractive() : pm.isScreenOn(); // check if screen is on
+        boolean isScreenOn = Build.VERSION.SDK_INT >= 20 ? pm.isInteractive() : pm.isScreenOn();
         if (!isScreenOn) {
             PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "myApp:notificationLock");
-            wl.acquire(3000); //set your time in milliseconds
+            wl.acquire(3000);
         }
 
+        //notification channel
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("gcmAlert", "giacoJacky", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("YOUR_NOTIFICATION_CHANNEL_DESCRIPTION");
+            channel.setVibrationPattern(new long[] { 1000, 1000, 1000, 1000, 1000});
+            channel.setLightColor(Color.GREEN);
+            channel.enableVibration(true);
+            channel.enableLights(true);
             mNotificationManager.createNotificationChannel(channel);
         }
+
+        //costruzione notifica
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "gcmAlert")
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("Attenzione! La tua prenotazione sta per terminare!")
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_MAX);
+
+        //intent
         Intent i=null;
         if(logged==true)  i = new Intent(context.getApplicationContext(), PrenotazioniAttiveActivity.class);
         else i = new Intent(context.getApplicationContext(), MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pi);
+
+        //trigger notifica
         mNotificationManager.notify(id, builder.build());
         id++;
     }
