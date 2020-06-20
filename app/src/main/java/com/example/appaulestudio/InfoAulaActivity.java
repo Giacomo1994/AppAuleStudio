@@ -469,7 +469,7 @@ public class InfoAulaActivity extends AppCompatActivity {
 
 
     //METODO --> STAMPA IN UI TABELLA ORARI
-    public void stampa_orari(HashMap<Integer,Orario> orari_default,LinkedList<Orario_Speciale> orari_speciali){
+    private void stampa_orari(HashMap<Integer,Orario> orari_default,LinkedList<Orario_Speciale> orari_speciali){
         //PREPARAZIONE
         try {
             if (orari_speciali == null) orari_speciali = new LinkedList<Orario_Speciale>();
@@ -572,7 +572,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     }
 
     // METODO --> mostra servizi, presi da aula passata con intent
-    public  void getServizi(){
+    private  void getServizi(){
         FlexboxLayout layout=findViewById(R.id.infoAula_serviziDisponibili);
         String[] servizi=aula.getServizi().split(",");
 
@@ -601,7 +601,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     }
 
     // METODO --> controlla se aula è aperta o chiusa
-    public boolean checkAulaAperta(){
+    private boolean checkAulaAperta(){
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();
         String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);

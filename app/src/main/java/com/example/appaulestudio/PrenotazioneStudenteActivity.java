@@ -521,7 +521,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     }
 
     //METODO: creazione alarm
-    public String create_alarm(int id_prenotazione){
+    private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

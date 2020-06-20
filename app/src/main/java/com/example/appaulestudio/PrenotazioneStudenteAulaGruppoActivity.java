@@ -595,7 +595,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     }
 
 
-    public String create_alarm(int id_prenotazione){
+    private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data+" "+inizio;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -620,7 +620,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         return strOra;
     }
 
-    public void initDateTime(){
+    private void initDateTime(){
         Calendar c=Calendar.getInstance();
         Date d=c.getTime();
         String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
@@ -650,7 +650,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
     }
 
-    public void getSlot(){
+    private void getSlot(){
         slot.clear();
 
         Calendar cc=Calendar.getInstance();
@@ -696,7 +696,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     }
 
-    public String getSlotIntermedi(){
+    private String getSlotIntermedi(){
         LinkedList<String> slotIntermedi=new LinkedList<String>();
         String result=null;
         if(inizio.equals("A prenotazione confermata")){
