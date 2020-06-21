@@ -225,7 +225,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         }
     }
 
-    private class checkUtenteFromUniversita extends AsyncTask<Void, Void, String> {
+    /*private class checkUtenteFromUniversita extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... strings) {
             try {
@@ -270,7 +270,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
             else if(result.equals("Permission granted")) new registraUtente().execute();
             else MyToast.makeText(getApplicationContext(), "Errore: Non risulti iscritto all'università. Controlla i campi inseriti!", false).show();
         }
-    }
+    }*/
 
     //registra nella tabella utente il nuovo utente
     private class registraUtente extends AsyncTask<Void, Void, String> {

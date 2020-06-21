@@ -66,11 +66,13 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     Button btn_prenota;
     LinearLayout linear_spinner, linear_activity;
     ImageView pick_time;
+    Dialog dialogLoading;
 
     SqliteManager database;
     Intent intent;
     Bundle bundle;
     Aula aula=null;
+    Tavolo tavolo;
 
     ArrayList<Orario_Ufficiale> orari_ufficiali;
     ArrayList<Tavolo> tavoli;
@@ -81,8 +83,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     String inizio=null, fine=null, nuova_fine=null;
     String strMatricola, strNome, strCognome, strUniversita, strNomeUniversita, FIRST_SLOT;
     int ingresso, pausa, slot_min;
-    boolean aperta=false;
-    Tavolo tavolo;
+    boolean aperta=false, immagineMostrata=false;
 
 
     @Override
@@ -105,6 +106,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         slot=new LinkedList<String>();
         prenotazioni=new LinkedList<Prenotazione>();
         tavoli=null;
+        dialogLoading();
 
         //database
         database=new SqliteManager(this);
@@ -133,7 +135,10 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         //esecuzione
         initDateTime();
         new load_image().execute();
-        if(aperta==true) new getTavoli().execute();
+        if(aperta==true){
+            dialogLoading.show();
+            new getTavoli().execute();
+        }
         else{
             dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
             linear_spinner.setVisibility(View.GONE);
@@ -177,7 +182,12 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     private void restart(){
         initDateTime();
-        if(aperta==true) new getTavoli().execute();
+        imgView.setVisibility(View.VISIBLE);
+        if(immagineMostrata==false) new load_image().execute();
+        if(aperta==true){
+            dialogLoading.show();
+            new getTavoli().execute();
+        }
         else{
             dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
             return;
@@ -233,50 +243,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         });
     }
 
-    private void dialogWarning(final String message){
-        final Dialog d = new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
-        d.setCancelable(false);
-        d.setContentView(R.layout.dialog_warning);
-        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-        Button btn=d.findViewById(R.id.btn_dialog_warning);
-        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
-        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
-        txt_warning.setText(message);
-        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!") ||
-                message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile per l'orario indicato!") ||
-                message.equals("Tavolo non più disponibile!") || message.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato"))
-            btn_aggiorna.setVisibility(View.VISIBLE);
-        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
-            btn_aggiorna.setText("Continua");
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(PrenotazioneStudenteAulaGruppoActivity.this, Home.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-                d.dismiss();
-            }
-        });
-        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(message.equals("Sei offline! Impossibile prenotare!")){
-                    new load_image().execute();
-                    restart();
-                    d.dismiss();
-                }
-                else{
-                    restart();
-                    d.dismiss();
-                }
-
-            }
-        });
-        d.show();
-        return;
-    }
-
-
+    //TASK ASINCRONI
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(Void... voids) {
@@ -293,8 +260,11 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Bitmap result) {
-            if(result==null) return;
-            imgView.setImage(ImageSource.bitmap(result));
+            if(result==null) imgView.setVisibility(View.GONE);
+            else{
+                imgView.setImage(ImageSource.bitmap(result));
+                immagineMostrata=true;
+            }
         }
     }
 
@@ -351,6 +321,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<Tavolo> result) {
             if (result == null) {//problema di connessione
                 dialogWarning("Sei offline! Impossibile prenotare!");
+                dialogLoading.dismiss();
                 return;
             }
             else {
@@ -416,6 +387,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(LinkedList<Prenotazione> result) {
+            dialogLoading.dismiss();
             if (result == null) {//problema di connessione
                 dialogWarning("Sei offline! Impossibile prenotare!");
                 linear_activity.removeAllViews();
@@ -594,7 +566,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         }
     }
 
-
+    //METODI
     private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data+" "+inizio;
@@ -742,6 +714,58 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
         return result;
     }
 
+    //DIALOG
+    private void dialogWarning(final String message){
+        final Dialog d = new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_warning);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        Button btn=d.findViewById(R.id.btn_dialog_warning);
+        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
+        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
+        txt_warning.setText(message);
+        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!") ||
+                message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile per l'orario indicato!") ||
+                message.equals("Tavolo non più disponibile!") || message.equals("Impossibile procedere: hai già una prenotazione attiva nell'orario indicato"))
+            btn_aggiorna.setVisibility(View.VISIBLE);
+        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
+            btn_aggiorna.setText("Continua");
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrenotazioneStudenteAulaGruppoActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+                d.dismiss();
+            }
+        });
+        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(message.equals("Sei offline! Impossibile prenotare!")){
+                    new load_image().execute();
+                    restart();
+                    d.dismiss();
+                }
+                else{
+                    restart();
+                    d.dismiss();
+                }
+
+            }
+        });
+        d.show();
+        return;
+    }
+
+    private void dialogLoading(){
+        dialogLoading= new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
+        dialogLoading.setCancelable(false);
+        dialogLoading.setContentView(R.layout.dialog_loading);
+        dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialogLoading.getWindow().setDimAmount(0);
+
+    }
 
     //OPTIONS MENU
     @Override

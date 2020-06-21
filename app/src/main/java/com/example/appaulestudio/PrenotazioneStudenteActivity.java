@@ -70,6 +70,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     Button btn_prenota;
     LinearLayout linear_spinner;
     ImageView pick_time;
+    Dialog dialogLoading;
 
     SqliteManager database;
     Intent intent;
@@ -82,6 +83,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     int ingresso;
     boolean aperta=false;
     Tavolo tavolo;
+    boolean immagine_mostrata=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +100,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         pick_time=findViewById(R.id.pick_time_st);
         txt_num_posti=findViewById(R.id.txt_num_posti_s);
         txt_num_posti.setText("");
+        dialogLoading();
 
         database=new SqliteManager(this);
         intent =getIntent();
@@ -126,12 +129,11 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         for(int i=0;i<orari_ufficiali.size();i++){
             if(orari_ufficiali.get(i).getData().equals(date_now)){
                 if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
-                    //se oggi e domani è chiusa oppure oggi è aperta, domani è chiusa ma oggi siamo oltre orario chiusura
                     dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
                     aperta=false;
                 }
                 else{
-                    //se l'aula è chiusa ma aprirà di oggi oppure apre domani
+                    dialogLoading.show();
                     new get_tavoli().execute();
                     aperta=true;
                 }
@@ -170,31 +172,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         restart();
-    }
-
-    private void restart(){
-        tavoli=null;
-        linear_spinner.setVisibility(View.GONE);
-        tab_layout.setVisibility(View.GONE);
-        btn_prenota.setVisibility(View.GONE);
-        Calendar c=Calendar.getInstance();
-        Date d=c.getTime();
-        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
-        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
-        for(int i=0;i<orari_ufficiali.size();i++){
-            if(orari_ufficiali.get(i).getData().equals(date_now)){
-                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
-                    dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
-                    aperta=false;
-                }
-                else{
-                    //se l'aula è chiusa ma aprirà di oggi oppure apre domani
-                    new get_tavoli().execute();
-                    aperta=true;
-                }
-                break;
-            }
-        }
     }
 
     @SuppressLint("WrongConstant")
@@ -246,49 +223,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         });
     }
 
-    private void dialogWarning(final String message){
-        final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);
-        d.setCancelable(false);
-        d.setContentView(R.layout.dialog_warning);
-        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-        Button btn=d.findViewById(R.id.btn_dialog_warning);
-        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
-        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
-        txt_warning.setText(message);
-        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!")
-                || message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile") || message.equals("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!"))
-            btn_aggiorna.setVisibility(View.VISIBLE);
-        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
-            btn_aggiorna.setText("Continua");
-
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(PrenotazioneStudenteActivity.this, Home.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-                d.dismiss();
-            }
-        });
-        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(message.equals("Sei offline! Impossibile prenotare!")){
-                    new load_image().execute();
-                    restart();
-                    d.dismiss();
-                }
-                else{
-                    restart();
-                    d.dismiss();
-                }
-            }
-        });
-        d.show();
-        return;
-    }
-
-
+    //TASK ASINCRONI
     private class load_image extends AsyncTask<Void, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(Void... voids) {
@@ -305,12 +240,14 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Bitmap result) {
-            if(result==null) return;
-            imgView.setImage(ImageSource.bitmap(result));
+            if(result==null) imgView.setVisibility(View.GONE);
+            else{
+                imgView.setImage(ImageSource.bitmap(result));
+                immagine_mostrata=true;
+            }
         }
     }
 
-    //TASK ASINCRONO PRENOTA
     private class prenota extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -398,7 +335,6 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-    //TASK ASINCRONO TAVOLI DISPONIBILI
     private class get_tavoli extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -450,6 +386,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(String result) {
+            dialogLoading.dismiss();
             if(tavoli==null){
                 dialogWarning("Sei offline! Impossibile prenotare!");
                 return;
@@ -520,7 +457,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         }
     }
 
-    //METODO: creazione alarm
+    //METODI
     private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
@@ -544,6 +481,77 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
         String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
         return strOra;
+    }
+
+    private void dialogWarning(final String message){
+        final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_warning);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+        Button btn=d.findViewById(R.id.btn_dialog_warning);
+        Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
+        TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
+        txt_warning.setText(message);
+        if(message.equals("Sei offline! Impossibile prenotare!") || message.equals("Sei offline! Impossibile procedere con la prenotazione!")
+                || message.equals("Impossibile procedere con la prenotazione! Il tavolo non è più disponibile") || message.equals("Impossibile procedere: Hai già una prenotazione attiva nell'orario specificato!"))
+            btn_aggiorna.setVisibility(View.VISIBLE);
+        if(!message.equals("Sei offline! Impossibile prenotare!") && !message.equals("Sei offline! Impossibile procedere con la prenotazione!"))
+            btn_aggiorna.setText("Continua");
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrenotazioneStudenteActivity.this, Home.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+                d.dismiss();
+            }
+        });
+        btn_aggiorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    restart();
+                    d.dismiss();
+            }
+        });
+        d.show();
+        return;
+    }
+
+    private void restart(){
+        if(immagine_mostrata==false) new load_image().execute();
+        tavoli=null;
+        imgView.setVisibility(View.VISIBLE);
+        linear_spinner.setVisibility(View.GONE);
+        tab_layout.setVisibility(View.GONE);
+        btn_prenota.setVisibility(View.GONE);
+        Calendar c=Calendar.getInstance();
+        Date d=c.getTime();
+        String date_now=new SimpleDateFormat("yyyy-MM-dd", Locale.ITALY).format(d);
+        String time_now =new SimpleDateFormat("HH:mm:ss", Locale.ITALY).format(d);
+        for(int i=0;i<orari_ufficiali.size();i++){
+            if(orari_ufficiali.get(i).getData().equals(date_now)){
+                if((orari_ufficiali.get(i).getApertura()==null&&orari_ufficiali.get(i+1).getApertura()==null) || (orari_ufficiali.get(i+1).getApertura()==null&& time_now.compareTo(orari_ufficiali.get(i).getChiusura()) > 0)){
+                    dialogWarning("Il servizio di prenotazione non è disponibile a causa della chiusura dell'aula oggi e domani!");
+                    aperta=false;
+                }
+                else{
+                    dialogLoading.show();
+                    new get_tavoli().execute();
+                    aperta=true;
+                }
+                break;
+            }
+        }
+    }
+
+    private void dialogLoading(){
+        dialogLoading= new Dialog(PrenotazioneStudenteActivity.this);
+        dialogLoading.setCancelable(false);
+        dialogLoading.setContentView(R.layout.dialog_loading);
+        dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialogLoading.getWindow().setDimAmount(0);
+
     }
 
     //OPTIONS MENU
