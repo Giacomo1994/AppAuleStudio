@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         android:gravity="center_horizontal"
-        android:text="Seleziona gruppo"
+        android:text="@string/dialog_scegligruppo"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />

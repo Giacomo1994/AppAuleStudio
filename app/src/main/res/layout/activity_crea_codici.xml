@@ -34,8 +34,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
                     android:layout_marginRight="10dp"
-                    android:text="Seleziona corso "
+                    android:text="@string/crea_codici_1"
                     android:textSize="18sp" />
 
                 <Spinner
@@ -49,6 +50,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:orientation="horizontal">
 
@@ -56,14 +58,15 @@
                     android:id="@+id/numeroPartecipanti"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Numero massimo di iscritti"
-                    android:inputType="number"
-                    android:numeric="integer" />
+                    android:hint="@string/crea_codici_2"
+                    android:importantForAutofill="no"
+                    android:inputType="number" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:orientation="horizontal">
 
@@ -71,14 +74,15 @@
                     android:id="@+id/numeroOre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Ore disponibili"
-                    android:inputType="number"
-                    android:numeric="integer" />
+                    android:hint="@string/crea_codici_3"
+                    android:importantForAutofill="no"
+                    android:inputType="number" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:orientation="horizontal">
 
@@ -86,14 +90,16 @@
                     android:id="@+id/numeroGruppi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Numero di gruppi"
-                    android:inputType="number"
-                    android:numeric="integer" />
+                    android:hint="@string/crea_codici_4"
+                    android:importantForAutofill="no"
+                    android:inputType="number" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
                 android:orientation="horizontal">
 
                 <EditText
@@ -101,8 +107,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Nome dei gruppi (opzionale)"
+                    android:hint="@string/crea_codici_5"
                     android:inputType="textPersonName"
+                    android:importantForAutofill="no"
                     android:textSize="18sp" />
 
                 <ImageView
@@ -110,6 +117,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_marginTop="5dp"
+                    android:contentDescription="@string/crea_codici_6"
                     app:srcCompat="@drawable/question" />
 
             </LinearLayout>
@@ -124,7 +132,7 @@
                     android:id="@+id/dataScadenza"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Seleziona la data di scadenza dei gruppi"
+                    android:text="@string/crea_codici_7"
                     android:textSize="18sp" />
 
                 <CalendarView
@@ -145,6 +153,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/button_layout"
-        android:text="Crea i gruppi" />
+        android:text="@string/crea_codici_8" />
 
 </LinearLayout>

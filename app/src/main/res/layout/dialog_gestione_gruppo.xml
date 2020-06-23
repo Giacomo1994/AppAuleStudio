@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
-        android:text="TextView"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -20,12 +19,12 @@
         android:id="@+id/txt_elimina_componente"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Rimuovi componente:" />
+        android:text="@string/dialog_gestione_gruppo_1" />
 
     <ListView
         android:id="@+id/listaStudenti"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginBottom="10dp"
         android:layout_weight="1"
         android:divider="@color/grigio_chiaro"
@@ -43,15 +42,13 @@
             android:id="@+id/oreResidueDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/dataScadenzaDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <TableLayout
@@ -67,15 +64,17 @@
                 android:id="@+id/textView28"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="Nuova data di scadenza:" />
+                android:text="@string/dialog_gestione_gruppo_2" />
 
             <Button
                 android:id="@+id/btnNuovaScadenza"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginRight="10dp"
-                android:background="@android:drawable/ic_menu_month" />
+                android:background="@android:drawable/ic_menu_month"
+                android:layout_marginEnd="10dp" />
 
             <TextView
                 android:id="@+id/nuovaScadenza"
@@ -92,7 +91,7 @@
                 android:id="@+id/textView26"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Ore da aggiungere:" />
+                android:text="@string/dialog_gestione_gruppo_3" />
 
             <EditText
                 android:id="@+id/oreDaAggiungere"
@@ -100,6 +99,8 @@
                 android:layout_height="wrap_content"
                 android:layout_span="2"
                 android:layout_weight="1"
+                android:hint="@string/dialog_gestione_gruppo_4"
+                android:importantForAutofill="no"
                 android:inputType="number" />
         </TableRow>
 
@@ -113,21 +114,24 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnOK"
+            android:id="@+id/btnAnnulla"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="OK" />
+            android:text="@string/dialog_gestione_gruppo_5" />
 
         <Button
-            android:id="@+id/btnAnnulla"
+            android:id="@+id/btnOK"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="ANNULLA" />
+            android:text="@android:string/ok" />
     </LinearLayout>
 
 </LinearLayout>

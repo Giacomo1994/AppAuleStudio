@@ -41,7 +41,7 @@
                     android:id="@+id/textView23"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Corso:" />
+                    android:text="@string/dialog_dettagli_gruppo_1" />
 
                 <TextView
                     android:id="@+id/txt_dettagli_corso"
@@ -57,7 +57,7 @@
                     android:id="@+id/textView35"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Docente:" />
+                    android:text="@string/dialog_dettagli_gruppo_2" />
 
                 <TextView
                     android:id="@+id/txt_dettagli_docente"
@@ -73,7 +73,7 @@
                     android:id="@+id/textView37"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Scadenza:" />
+                    android:text="@string/dialog_dettagli_gruppo_3" />
 
                 <TextView
                     android:id="@+id/txt_dettagli_scadenza"
@@ -89,8 +89,9 @@
                     android:id="@+id/textView41"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
                     android:layout_marginRight="10dp"
-                    android:text="Ore disponibili:" />
+                    android:text="@string/dialog_dettagli_gruppo_4" />
 
                 <TextView
                     android:id="@+id/txt_dettagli_ore"
@@ -107,14 +108,14 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="3dp"
         android:gravity="center_horizontal"
-        android:text="Componenti"
+        android:text="@string/dialog_dettagli_gruppo_5"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp" />
 
     <ListView
         android:id="@+id/list_dettagli_componenti"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1" />
 
     <Button

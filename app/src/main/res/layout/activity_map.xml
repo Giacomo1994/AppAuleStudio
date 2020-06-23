@@ -15,11 +15,11 @@
 
         <Button
             android:id="@+id/btn_to_listaaule"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="torna a lista aule" />
+            android:text="@string/activity_map_1" />
     </LinearLayout>
 
     <LinearLayout
@@ -39,8 +39,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:text="Seleziona aula:" />
+                android:text="@string/activity_map_2" />
 
             <Spinner
                 android:id="@+id/spinner_map"
@@ -63,7 +64,9 @@
                 android:id="@+id/img_distance"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="5dp"
+                android:contentDescription="@string/icon"
                 app:srcCompat="@drawable/auto" />
 
             <TextView
@@ -71,13 +74,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="15dp"
+                android:layout_marginEnd="10dp"
                 android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/img_duration"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="5dp"
+                android:contentDescription="@string/icon"
                 app:srcCompat="@drawable/clock" />
 
             <TextView
@@ -92,15 +98,14 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </LinearLayout>

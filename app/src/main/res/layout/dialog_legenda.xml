@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
-        android:text="Legenda"
+        android:text="@string/dialog_legenda_1"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -24,14 +24,16 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_corso" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Prenotazione in corso" />
+            android:text="@string/dialog_legenda_2" />
     </LinearLayout>
 
     <LinearLayout
@@ -43,14 +45,16 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_futura" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Prenotazione futura" />
+            android:text="@string/dialog_legenda_3" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,14 +66,16 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_terminata" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Prenotazione terminata" />
+            android:text="@string/dialog_legenda_4" />
     </LinearLayout>
 
     <LinearLayout

@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="nome aula"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -24,7 +23,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="indirizzo"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -34,19 +32,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:contentDescription="@string/icon"
         app:srcCompat="@drawable/scuola" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:foregroundGravity="center">
 
         <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:foregroundGravity="center">
 
             <TableRow
                 android:id="@+id/row_luogo"
@@ -57,13 +53,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Luogo:" />
+                    android:text="@string/dialog_marker_1" />
 
                 <TextView
                     android:id="@+id/marker_luogo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView" />
+                    android:layout_weight="1" />
             </TableRow>
 
             <TableRow
@@ -75,13 +71,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Posti totali:" />
+                    android:text="@string/dialog_marker_2" />
 
                 <TextView
                     android:id="@+id/marker_posti"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView" />
+                    android:layout_weight="1" />
             </TableRow>
 
             <TableRow
@@ -93,13 +89,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Posti liberi:" />
+                    android:text="@string/dialog_marker_3" />
 
                 <TextView
                     android:id="@+id/marker_posti_liberi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView" />
+                    android:layout_weight="1" />
             </TableRow>
 
             <TableRow
@@ -111,17 +107,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
                     android:layout_marginRight="5dp"
-                    android:text="Attualmente:" />
+                    android:text="@string/dialog_marker_4" />
 
                 <TextView
                     android:id="@+id/marker_aperta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView" />
+                    android:layout_weight="1" />
             </TableRow>
         </TableLayout>
-    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -130,23 +126,28 @@
 
         <Button
             android:id="@+id/button_indicazioni"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:layout_marginTop="15dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:width="120dp"
             android:background="@drawable/button_layout"
-            android:text="INDICAZIONI" />
+            android:text="@string/dialog_marker_5" />
 
         <Button
             android:id="@+id/button_aula"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:width="120dp"
             android:background="@drawable/button_layout"
-            android:text="info aula" />
+            android:text="@string/dialog_marker_6" />
     </LinearLayout>
 </LinearLayout>

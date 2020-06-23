@@ -33,7 +33,7 @@
                         <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
                             android:id="@+id/img_plant"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="0dp"
                             android:layout_gravity="center"
                             android:layout_marginBottom="10dp"
                             android:layout_weight="1" />
@@ -50,7 +50,7 @@
                                     android:id="@+id/textView17"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Seleziona tavolo disponibile:" />
+                                    android:text="@string/activity_pren_singolo_1" />
 
                                 <Spinner
                                     android:id="@+id/spinner_tavoli"
@@ -84,7 +84,7 @@
                                             android:id="@+id/textView22"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Data:"
+                                            android:text="@string/activity_pren_singolo_2"
                                             android:textSize="16sp" />
 
                                         <TextView
@@ -103,8 +103,9 @@
                                             android:id="@+id/textView24"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
+                                            android:layout_marginEnd="10dp"
                                             android:layout_marginRight="10dp"
-                                            android:text="Ora inizio:"
+                                            android:text="@string/activity_pren_singolo_3"
                                             android:textSize="16sp" />
 
                                         <TextView
@@ -124,7 +125,7 @@
                                             android:id="@+id/textView27"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Ora fine:"
+                                            android:text="@string/activity_pren_singolo_4"
                                             android:textSize="16sp" />
 
                                         <LinearLayout
@@ -144,7 +145,9 @@
                                                     android:id="@+id/pick_time_st"
                                                     android:layout_width="20dp"
                                                     android:layout_height="20dp"
+                                                    android:layout_marginStart="10dp"
                                                     android:layout_marginLeft="10dp"
+                                                    android:contentDescription="@string/icon"
                                                     app:srcCompat="@mipmap/pick_time" />
 
                                         </LinearLayout>
@@ -163,7 +166,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:background="@drawable/button_layout"
-            android:text="Conferma"
+            android:text="@string/activity_pren_singolo_5"
             android:textColor="@color/button_text"
             android:visibility="visible" />
 </LinearLayout>

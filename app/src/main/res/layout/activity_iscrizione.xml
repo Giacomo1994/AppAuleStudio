@@ -19,23 +19,27 @@
             android:id="@+id/textView16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
-            android:text="Codice gruppo:" />
+            android:text="@string/activity_iscrizione_1" />
 
         <EditText
             android:id="@+id/codice_gruppo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/activity_iscrizione_2"
+            android:importantForAutofill="no"
             android:inputType="textPersonName" />
     </LinearLayout>
 
     <Button
         android:id="@+id/iscriviti"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:background="@drawable/button_layout"
-        android:text="ISCRIVITI"
+        android:text="@string/activity_iscrizione_3"
         android:textColor="@color/button_text" />
 </LinearLayout>

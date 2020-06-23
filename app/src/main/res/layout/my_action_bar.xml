@@ -17,7 +17,6 @@
         android:id="@+id/txt_actionbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
         android:textColor="@color/bianco"
         android:textSize="24sp"
         app:fontFamily="@font/el_messiri_medium" />

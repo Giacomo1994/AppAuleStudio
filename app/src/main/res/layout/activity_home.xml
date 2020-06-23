@@ -44,6 +44,7 @@
                 android:id="@+id/imageView13"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/home_docente_1"
                 app:srcCompat="@drawable/logo_size" />
         </LinearLayout>
 
@@ -63,7 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:text="Caricamento..."
+                android:text="@string/home_docente_2"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -83,13 +84,13 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:background="@drawable/button_layout"
-            android:text="vai a mappa aule"
+            android:text="@string/home_studente_1"
             android:textColor="@color/button_text" />
 
         <ListView
             android:id="@+id/elencoAule"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:background="#fafafafa"
             android:divider="#FAFAFAFA"
@@ -110,15 +111,16 @@
                 android:id="@+id/imageView14"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
+                android:contentDescription="@string/warning_img"
                 app:srcCompat="@drawable/warning" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Impossibile contattare il server!\n I dati potrebbero non essere aggiornati!"
+                android:text="@string/warning_text"
                 android:textColor="#EC0000"
                 android:textSize="12sp" />
         </LinearLayout>

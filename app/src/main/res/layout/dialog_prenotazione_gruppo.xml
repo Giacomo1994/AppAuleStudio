@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         android:gravity="center_horizontal"
-        android:text="Seleziona fasce orarie"
+        android:text="@string/dialog_prengruppo_1"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -26,5 +26,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/button_layout"
-        android:text="Prenota" />
+        android:text="@string/dialog_prengruppo_2" />
 </LinearLayout>

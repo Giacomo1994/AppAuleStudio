@@ -16,6 +16,7 @@
             android:id="@+id/img_dialog_warning"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:contentDescription="@string/icon"
             app:srcCompat="@drawable/warning" />
     </LinearLayout>
 
@@ -25,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:gravity="center"
-        android:text="Non hai nessuna prenotazione da visualizzare!"
+        android:text="@string/dialog_warning_1"
         android:textSize="20sp" />
 
     <LinearLayout
@@ -36,21 +37,23 @@
 
         <Button
             android:id="@+id/btn_dialog_warning"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="torna alla home" />
+            android:text="@string/dialog_warning_2" />
 
         <Button
             android:id="@+id/btn_dialog_aggiorna"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Aggiorna pagina"
+            android:text="@string/dialog_warning_3"
             android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

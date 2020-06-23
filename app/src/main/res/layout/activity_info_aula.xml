@@ -45,7 +45,9 @@
                         android:id="@+id/imageView"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginRight="5dp"
+                        android:contentDescription="@string/icon"
                         app:srcCompat="@drawable/posizione" />
 
                     <TextView
@@ -65,7 +67,9 @@
                         android:id="@+id/imageView2"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginRight="5dp"
+                        android:contentDescription="@string/icon"
                         app:srcCompat="@drawable/group" />
 
                     <TextView
@@ -85,7 +89,9 @@
                         android:id="@+id/imageView4"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginRight="5dp"
+                        android:contentDescription="@string/icon"
                         app:srcCompat="@drawable/posto" />
 
                     <TextView
@@ -119,7 +125,9 @@
                         android:id="@+id/imageView5"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginRight="5dp"
+                        android:contentDescription="@string/icon"
                         app:srcCompat="@drawable/calendario" />
 
                     <TextView
@@ -168,7 +176,9 @@
                         android:id="@+id/imageView6"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginRight="5dp"
+                        android:contentDescription="@string/icon"
                         app:srcCompat="@drawable/servizi" />
 
                     <TextView
@@ -176,7 +186,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:text="Servizi Disponibili"
+                        android:text="@string/activity_infoaula_1"
                         android:textSize="18sp" />
                 </LinearLayout>
 
@@ -212,37 +222,40 @@
 
         <Button
             android:id="@+id/infoAula_toNotifica"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Avvisami quando si libera un posto"
+            android:text="@string/activity_infoaula_2"
             android:textColor="@color/button_text"
             android:visibility="gone" />
 
         <Button
             android:id="@+id/infoAula_toPrenSingolo"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Prenota Posto"
+            android:text="@string/activity_infoaula_3"
             android:textColor="@color/button_text"
             android:visibility="gone" />
 
         <Button
             android:id="@+id/infoAula_toPrenGruppo"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Prenota per Gruppo"
+            android:text="@string/activity_infoaula_4"
             android:textColor="@color/button_text"
             android:visibility="gone" />
     </LinearLayout>
@@ -262,15 +275,16 @@
             android:id="@+id/imageView14"
             android:layout_width="25dp"
             android:layout_height="25dp"
+            android:contentDescription="@string/warning_img"
             app:srcCompat="@drawable/warning" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Impossibile contattare il server!\n I dati potrebbero non essere aggiornati!"
+            android:text="@string/warning_text"
             android:textColor="#EC0000"
             android:textSize="12sp" />
     </LinearLayout>

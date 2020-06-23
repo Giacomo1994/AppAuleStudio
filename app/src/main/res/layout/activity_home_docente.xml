@@ -32,7 +32,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
@@ -40,6 +40,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/home_docente_1"
                 app:srcCompat="@drawable/logo_size" />
         </LinearLayout>
 
@@ -57,7 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:text="Caricamento..."
+                android:text="@string/home_docente_2"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -72,7 +73,7 @@
         <ListView
             android:id="@+id/elencoCorsi2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:divider="#FAFAFAFA"
             android:dividerHeight="10dp">
@@ -86,7 +87,7 @@
             android:layout_gravity="center_horizontal"
             android:background="@drawable/button_layout"
             android:padding="5dp"
-            android:text="CREA GRUPPI"
+            android:text="@string/home_docente_3"
             android:visibility="visible" />
     </LinearLayout>
 </LinearLayout>

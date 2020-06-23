@@ -4,13 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp">
+
     <TextView
         android:id="@+id/et_dialog_gruppi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         android:gravity="center_horizontal"
-        android:text="Seleziona componeneti"
+        android:text="@string/dialog_componenti_1"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -18,7 +19,7 @@
     <ListView
         android:id="@+id/listaComponenti"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="@color/colorPrimary"
         android:dividerHeight="0.5dp"
@@ -36,6 +37,6 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="50dp"
         android:background="@drawable/button_layout"
-        android:text="Conferma" />
+        android:text="@string/dialog_componenti_2" />
 
 </LinearLayout>

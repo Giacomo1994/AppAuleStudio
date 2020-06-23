@@ -70,14 +70,16 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/dropdown" />
 
                     <TextView
                         android:id="@+id/textView21"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:text="Gruppo"
+                        android:text="@string/activity_pren_gruppo_1"
                         android:textSize="16sp" />
 
                     <TextView
@@ -100,14 +102,16 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/dropdown"
                         android:visibility="invisible" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:text="Ore residue"
+                        android:text="@string/activity_pren_gruppo_2"
                         android:textSize="16sp" />
 
                     <TextView
@@ -131,14 +135,16 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/dropdown" />
 
                     <TextView
                         android:id="@+id/textView25"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:text="Partecipanti"
+                        android:text="@string/activity_pren_gruppo_3"
                         android:textSize="16sp" />
 
                     <TextView
@@ -162,14 +168,16 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/dropdown" />
 
                     <TextView
                         android:id="@+id/textView39"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="15dp"
                         android:layout_marginRight="15dp"
-                        android:text="Data"
+                        android:text="@string/activity_pren_gruppo_4"
                         android:textSize="16sp" />
 
                     <TextView
@@ -194,11 +202,11 @@
 
         <Button
             android:id="@+id/btnCercaDisponibilita"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
-            android:text="Cerca Disponibilità" />
+            android:text="@string/activity_pren_gruppo_5" />
 
     </LinearLayout>
 

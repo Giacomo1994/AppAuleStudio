@@ -49,7 +49,7 @@
                     android:id="@+id/textView17_studgruppo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Seleziona tavolo disponibile:" />
+                    android:text="@string/activity_pren_singolo_1" />
 
                 <Spinner
                     android:id="@+id/spinner_tavoli_studgruppo"
@@ -82,7 +82,7 @@
                         android:id="@+id/textView22_studgruppo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Data:"
+                        android:text="@string/activity_pren_singolo_2"
                         android:textSize="16sp" />
 
                     <TextView
@@ -102,8 +102,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="10dp"
-                        android:text="Ora inizio:"
-                        android:textSize="16sp" />
+                        android:text="@string/activity_pren_singolo_3"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="10dp" />
 
                     <TextView
                         android:id="@+id/pren_et_inizio_studgruppo"
@@ -123,7 +124,7 @@
                         android:id="@+id/textView27_studgruppo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ora fine:"
+                        android:text="@string/activity_pren_singolo_4"
                         android:textSize="16sp" />
 
                     <LinearLayout
@@ -144,7 +145,9 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_marginLeft="5dp"
-                            app:srcCompat="@mipmap/pick_time" />
+                            android:contentDescription="@string/icon"
+                            app:srcCompat="@mipmap/pick_time"
+                            android:layout_marginStart="5dp" />
                     </LinearLayout>
 
                 </TableRow>
@@ -161,7 +164,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:background="@drawable/button_layout"
-        android:text="Conferma"
+        android:text="@string/activity_pren_singolo_5"
         android:textColor="@color/button_text" />
 
 </LinearLayout>
