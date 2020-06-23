@@ -157,20 +157,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         database=new SqliteManager(PrenotazioniAttiveActivity.this);
         //qrScan = new IntentIntegrator(this);
 
-        //intent
-        intent_ricevuto=getIntent();
-        if(intent_ricevuto.getAction()!=null && intent_ricevuto.getAction().equals("salva_prenotazione")){
-            int id_prenotazione_intent=intent_ricevuto.getIntExtra("id_prenotazione",-1);
-            String orario_prenotazione_intent=intent_ricevuto.getStringExtra("orario_prenotazione");
-            String nome_aula_intent=intent_ricevuto.getStringExtra("nome_aula");
-            int tavolo_intent=intent_ricevuto.getIntExtra("tavolo",-1);
-            String gruppo_intent=intent_ricevuto.getStringExtra("gruppo");
-            String orario_alarm_intent=intent_ricevuto.getStringExtra("orario_alarm");
-            database.insertPrenotazione(id_prenotazione_intent,orario_prenotazione_intent, nome_aula_intent, tavolo_intent, gruppo_intent);
-            database.insertAlarm(id_prenotazione_intent,orario_alarm_intent);
-            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
-        }
-
         //preferenze
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
@@ -182,6 +168,21 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         pausa=Integer.parseInt(settings.getString("pausa", null))-300;
         offline=settings.getBoolean("offline",false);
         action_bar();
+
+        //intent
+        intent_ricevuto=getIntent();
+        if(intent_ricevuto.getAction()!=null && intent_ricevuto.getAction().equals("salva_prenotazione")){
+            int id_prenotazione_intent=intent_ricevuto.getIntExtra("id_prenotazione",-1);
+            String orario_prenotazione_intent=intent_ricevuto.getStringExtra("orario_prenotazione");
+            String nome_aula_intent=intent_ricevuto.getStringExtra("nome_aula");
+            int tavolo_intent=intent_ricevuto.getIntExtra("tavolo",-1);
+            String gruppo_intent=intent_ricevuto.getStringExtra("gruppo");
+            //String orario_alarm_intent=intent_ricevuto.getStringExtra("orario_alarm");
+            database.insertPrenotazione(id_prenotazione_intent,orario_prenotazione_intent, nome_aula_intent, tavolo_intent, gruppo_intent);
+            String orario_alarm=create_alarm_singolo(id_prenotazione_intent,orario_prenotazione_intent);
+            database.insertAlarm(id_prenotazione_intent,orario_alarm);
+            MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
+        }
 
         //task asincrono
         new getPrenotazioni().execute();
@@ -788,6 +789,31 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
         String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
         return strTarget;
+    }
+
+    private String create_alarm_singolo(int id_prenotazione, String orario_prenotazione){
+        //cancel_alarm(id_prenotazione);
+        String myTime = orario_prenotazione;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date d = null;
+        try {
+            d = df.parse(myTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        cal.add(Calendar.SECOND,ingresso);
+
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id_prenotazione, intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
+
+        String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
+        return strOra;
     }
 
     public void cancel_alarm(Prenotazione prenotazione){

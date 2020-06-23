@@ -318,7 +318,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
 
             int id_prenotazione=Integer.parseInt(result);
-            String orario_alarm=create_alarm(id_prenotazione);
+            //String orario_alarm=create_alarm(id_prenotazione);
             //database.insertPrenotazione(id_prenotazione,data_prenotazione+" "+orario_inizio_prenotazione, ""+aula.getNome(), tavolo.getNum_tavolo(), "null");
             //database.insertAlarm(id_prenotazione,orario_alarm);
             //MyToast.makeText(getApplicationContext(), "Prenotazione avvenuta con successo!", true).show();
@@ -329,7 +329,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
             i.putExtra("nome_aula", aula.getNome());
             i.putExtra("tavolo", tavolo.getNum_tavolo());
             i.putExtra("gruppo", "null");
-            i.putExtra("orario_alarm", orario_alarm);
+            //i.putExtra("orario_alarm", orario_alarm);
             startActivity(i);
             finish();
         }
@@ -458,7 +458,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
     }
 
     //METODI
-    private String create_alarm(int id_prenotazione){
+    /*private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data_prenotazione+" "+orario_inizio_prenotazione;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -481,7 +481,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
 
         String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
         return strOra;
-    }
+    }*/
 
     private void dialogWarning(final String message){
         final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);

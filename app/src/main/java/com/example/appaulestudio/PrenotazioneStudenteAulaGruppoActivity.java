@@ -548,7 +548,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
             }
             else{
                 int id_prenotazione=Integer.parseInt(result);
-                String orario_alarm=create_alarm(id_prenotazione);
+                //String orario_alarm=create_alarm(id_prenotazione);
                 Intent i=new Intent(PrenotazioneStudenteAulaGruppoActivity.this,PrenotazioniAttiveActivity.class);
                 i.setAction("salva_prenotazione");
                 i.putExtra("id_prenotazione", id_prenotazione);
@@ -556,7 +556,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 i.putExtra("nome_aula", aula.getNome());
                 i.putExtra("tavolo", tavolo.getNum_tavolo());
                 i.putExtra("gruppo", "null");
-                i.putExtra("orario_alarm", orario_alarm);
+                //i.putExtra("orario_alarm", orario_alarm);
                 startActivity(i);
                 finish();
             }
@@ -567,7 +567,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     }
 
     //METODI
-    private String create_alarm(int id_prenotazione){
+    /*private String create_alarm(int id_prenotazione){
         //cancel_alarm(id_prenotazione);
         String myTime = data+" "+inizio;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -590,7 +590,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
         String strOra=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal.getTime());
         return strOra;
-    }
+    }*/
 
     private void initDateTime(){
         Calendar c=Calendar.getInstance();
