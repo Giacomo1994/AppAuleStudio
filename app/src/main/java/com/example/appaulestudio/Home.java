@@ -122,7 +122,8 @@ public class Home extends AppCompatActivity{
             ll_home.setVisibility(View.VISIBLE);
         }
 
-        new check_last_update_universita().execute();
+        if(from_login==false) new check_last_update_universita().execute();
+
         new listaAule().execute();
 
         //listener listview
@@ -159,7 +160,7 @@ public class Home extends AppCompatActivity{
         super.onRestart();
         dialogLoading.show();
         ll_offline.setVisibility(View.GONE);
-        new listaAule().execute();
+        if(from_login==false) new listaAule().execute();
         new check_last_update_universita().execute();
     }
 
@@ -490,7 +491,7 @@ public class Home extends AppCompatActivity{
 
     private void dialogLoading(){
         dialogLoading= new Dialog(Home.this);
-        dialogLoading.setCancelable(false);
+        dialogLoading.setCancelable(true);
         dialogLoading.setContentView(R.layout.dialog_loading);
         dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialogLoading.getWindow().setDimAmount(0);

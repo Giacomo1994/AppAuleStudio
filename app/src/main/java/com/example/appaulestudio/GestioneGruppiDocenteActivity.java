@@ -58,6 +58,7 @@ import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
@@ -316,6 +317,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
     public void mostraGruppi(){
         if(gruppiAttivi!=null) {
+            if(gruppiAttivi.length>0) Arrays.sort(gruppiAttivi);
             adapter = new ArrayAdapter<Gruppo>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_lista_gruppi_docente, gruppiAttivi) {
 
                 //@SuppressLint("ResourceAsColor")
@@ -348,6 +350,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             listaAttivi.setAdapter(adapter);
         }
         if(gruppiInScadenza!=null) {
+            if(gruppiInScadenza.length>0) Arrays.sort(gruppiInScadenza);
             adapterInScadenza = new ArrayAdapter<Gruppo>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_lista_gruppi_docente, gruppiInScadenza) {
 
                 //@SuppressLint("ResourceAsColor")
@@ -379,6 +382,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             listaInScadenza.setAdapter(adapterInScadenza);
         }
         if(gruppiScaduti!=null) {
+            if(gruppiScaduti.length>0) Arrays.sort(gruppiScaduti);
             adapterScaduti = new ArrayAdapter<Gruppo>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_lista_gruppi_docente, gruppiScaduti) {
 
                 //@SuppressLint("ResourceAsColor")

@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import java.util.Date;
 
-public class Gruppo implements Parcelable {
+public class Gruppo implements Parcelable, Comparable<Gruppo>{
 
     private String codice_gruppo, nome_gruppo, codice_corso, matricola_docente, nome_docente, cognome_docente, nome_corso;
     private int componenti_max;
@@ -168,4 +168,8 @@ public class Gruppo implements Parcelable {
     }
 
 
+    @Override
+    public int compareTo(Gruppo o) {
+        return nome_gruppo.compareTo(o.getNome_gruppo());
+    }
 }

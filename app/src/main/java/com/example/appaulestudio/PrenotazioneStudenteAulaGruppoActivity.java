@@ -760,7 +760,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
 
     private void dialogLoading(){
         dialogLoading= new Dialog(PrenotazioneStudenteAulaGruppoActivity.this);
-        dialogLoading.setCancelable(false);
+        dialogLoading.setCancelable(true);
         dialogLoading.setContentView(R.layout.dialog_loading);
         dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialogLoading.getWindow().setDimAmount(0);
