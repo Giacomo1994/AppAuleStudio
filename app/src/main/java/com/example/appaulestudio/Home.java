@@ -158,10 +158,10 @@ public class Home extends AppCompatActivity{
 
     protected void onRestart() {
         super.onRestart();
-        dialogLoading.show();
         ll_offline.setVisibility(View.GONE);
-        if(from_login==false) new listaAule().execute();
-        new check_last_update_universita().execute();
+        dialogLoading.show();
+        new listaAule().execute();
+        if(from_login==false) new check_last_update_universita().execute();
     }
 
     @SuppressLint("WrongConstant")
@@ -512,7 +512,7 @@ public class Home extends AppCompatActivity{
             ll_offline.setVisibility(View.GONE);
             dialogLoading.show();
             new listaAule().execute();
-            new check_last_update_universita().execute();
+            if(from_login==false) new check_last_update_universita().execute();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);

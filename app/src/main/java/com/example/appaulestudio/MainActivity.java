@@ -28,26 +28,28 @@ public class MainActivity extends AppCompatActivity {
     static final String URL_LOGIN="http://pmsc9.altervista.org/progetto/login.php";
     static final String URL_RECUPERA_PASSWORD="http://pmsc9.altervista.org/progetto/recupero_password.php";
     static final String URL_REFRESH_TOKEN="http://pmsc9.altervista.org/progetto/login_refreshToken.php";
+    static final String URL_VALIDAZIONE_MAIL="http://pmsc9.altervista.org/progetto/validazione_utente_richiesta.php";
 
     ImageView studente_docente;
-    TextView txt_toRegistrazione, txt_toPassword;
+    TextView txt_toRegistrazione, txt_toPassword, txt_toValidazione;
     Spinner spinner;
     ArrayAdapter<Universita> adapter=null;
     EditText txtMatricola, txtPassword;
     Button btn_login;
     RadioButton radioStudente,radioDocente;
 
-    Universita universita=null, universita_recupero=null;
+    Universita universita=null, universita_recupero=null, universita_validazione=null;
     String matricola, password;
     boolean isStudente;
     boolean studentePassato;
     boolean is_logged=false, is_studente=false;
-    String rec_matricola=null, rec_mail=null;
+    String rec_matricola=null, rec_mail=null, val_matricola=null, val_mail=null;
 
 
     private void initUI(){
         txt_toRegistrazione=findViewById(R.id.log_toRegistrazione);
         txt_toPassword=findViewById(R.id.log_toPassword);
+        txt_toValidazione = findViewById(R.id.log_toValidazione);
         spinner=findViewById(R.id.log_spinner);
         txtMatricola=findViewById(R.id.log_matricola);
         txtPassword=findViewById(R.id.log_password);
@@ -125,10 +127,6 @@ public class MainActivity extends AppCompatActivity {
                             MyToast.makeText(getApplicationContext(),"Per favore, seleziona un'università", false).show();
                             return;
                         }
-                        if(universita_recupero==null){
-                            MyToast.makeText(getApplicationContext(),"Per favore, seleziona un'università", false).show();
-                            return;
-                        }
                         if(rec_matricola==null || rec_matricola.equals("") || rec_mail==null || rec_mail.equals("")){
                             MyToast.makeText(getApplicationContext(),"Per favore, inserisci tutti i campi", false).show();
                             return;
@@ -145,6 +143,59 @@ public class MainActivity extends AppCompatActivity {
         ss_topw.setSpan(clickableSpan_topw, 0, stringa_topw.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         txt_toPassword.setText(ss_topw);
         txt_toPassword.setMovementMethod(LinkMovementMethod.getInstance());
+
+        //validazione
+        String stringa_toval="Se non hai ricevuto la mail di validazione premi qui";
+        SpannableString ss_toval=new SpannableString(stringa_toval);
+        ClickableSpan clickableSpan_toval = new ClickableSpan() {
+            @Override
+            public void onClick(View view) {
+                final Dialog d = new Dialog(MainActivity.this);
+                d.setContentView(R.layout.dialog_recupero_password);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                Spinner dialog_spinner=d.findViewById(R.id.dialog_spinner_uni);
+                TextView titolo=d.findViewById(R.id.textView12);
+                titolo.setText("Validazione utente");
+                final EditText dialog_matricola=d.findViewById(R.id.dialog_input_matricola);
+                final EditText dialog_mail=d.findViewById(R.id.dialog_input_mail);
+                Button btn_recupera=d.findViewById(R.id.btn_recupera_pw);
+                btn_recupera.setText("Richiedi e-mail di verifica");
+
+                dialog_spinner.setAdapter(adapter);
+                dialog_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        universita_validazione = (Universita) parent.getItemAtPosition(position);
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
+                btn_recupera.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        val_matricola=dialog_matricola.getText().toString().trim();
+                        val_mail=dialog_mail.getText().toString().trim();
+                        if(universita_validazione==null){
+                            MyToast.makeText(getApplicationContext(),"Per favore, seleziona un'università", false).show();
+                            return;
+                        }
+                        if(val_matricola==null || val_matricola.equals("") || val_mail==null || val_mail.equals("")){
+                            MyToast.makeText(getApplicationContext(),"Per favore, inserisci tutti i campi", false).show();
+                            return;
+                        }
+                        else {
+                            new validazioneUtente().execute();
+                            d.dismiss();
+                        }
+                    }
+                });
+                d.show();
+            }
+        };
+        ss_toval.setSpan(clickableSpan_toval, stringa_toval.length()-3, stringa_toval.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txt_toValidazione.setText(ss_toval);
+        txt_toValidazione.setMovementMethod(LinkMovementMethod.getInstance());
 
         //funzione bottone
         btn_login.setOnClickListener(new View.OnClickListener() {
@@ -397,8 +448,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 URL url=new URL(URL_RECUPERA_PASSWORD);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(3000);
-                urlConnection.setConnectTimeout(3000);
+                urlConnection.setReadTimeout(7000);
+                urlConnection.setConnectTimeout(7000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -432,6 +483,50 @@ public class MainActivity extends AppCompatActivity {
             if(result.equals("Impossibile connettersi") || result.equals("ERROR: Could not connect.")) MyToast.makeText(getApplicationContext(), "Sei offline! Connettiti ad una rete per recuperare la password!", false).show();
             else if(result.equals("Utente inesistente: impossibile inviare email")) MyToast.makeText(getApplicationContext(), result, false).show();
             else MyToast.makeText(getApplicationContext(), "E-mail inviata: controlla la tua casella di posta", true).show();
+        }
+    }
+
+    private class validazioneUtente extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... strings) {
+            try {
+                URL url=new URL(URL_VALIDAZIONE_MAIL);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(7000);
+                urlConnection.setConnectTimeout(7000);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                String parametri = "matricola=" + URLEncoder.encode(val_matricola, "UTF-8")
+                        + "&universita=" + URLEncoder.encode(universita_validazione.getCodice(), "UTF-8")
+                        + "&mail=" + URLEncoder.encode(val_mail, "UTF-8");
+                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
+                dos.writeBytes(parametri);
+                dos.flush();
+                dos.close();
+                urlConnection.connect();
+                InputStream input = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int numRead = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((numRead = input.read(buffer)) != -1) {
+                    baos.write(buffer, 0, numRead);
+                }
+                input.close();
+                String stringaRicevuta = new String(baos.toByteArray());
+                return stringaRicevuta;
+            } catch (Exception e) {
+                Log.e("SimpleHttpURLConnection", e.getMessage());
+                return "Impossibile connettersi";
+            } finally {
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(result.equals("Impossibile connettersi") || result.equals("ERROR: Could not connect.")) MyToast.makeText(getApplicationContext(), "Sei offline! Connettiti ad una rete per procedere!", false).show();
+            else if(result.equals("Utente inesistente: impossibile inviare email di validazione")) MyToast.makeText(getApplicationContext(), result, false).show();
+            else if(result.equals("OK")) MyToast.makeText(getApplicationContext(), "E-mail inviata: controlla la tua casella di posta", true).show();
         }
     }
 
@@ -494,7 +589,12 @@ public class MainActivity extends AppCompatActivity {
                     radioDocente.setChecked(true);
                     radioStudente.setChecked(false);
                 }
-                MyToast.makeText(getApplicationContext(),"Registrazione avvenuta con successo! Effettua Login per accedere alla pagina personale!",true).show();
+                LinearLayout ll_output=findViewById(R.id.ll_log_output);
+                TextView output=findViewById(R.id.log_output);
+                TextView output_title=findViewById(R.id.log_title);
+                ll_output.setVisibility(View.VISIBLE);
+                output_title.setText("Registrazione avvenuta con successo!");
+                output.setText("Ti abbiamo inviato una e-mail per validare il tuo account. Clicca sul link presente nella e-mail prima di procedere con il login.");
             }
         }
     }
