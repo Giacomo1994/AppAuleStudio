@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -503,6 +504,7 @@ public class Home extends AppCompatActivity{
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
         menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
+        menu.add(Menu.FIRST, 5, Menu.FIRST+3, "Contattaci");
         return true;
     }
 
@@ -521,6 +523,14 @@ public class Home extends AppCompatActivity{
         if(item.getItemId() == 4){
             Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
             startActivity(i);
+        }
+        if(item.getItemId() == 5){
+            Intent email = new Intent(Intent.ACTION_SENDTO);
+            email.setData(Uri.parse("mailto:"));
+            email.putExtra(Intent.EXTRA_EMAIL, new String[]{"s255277@studenti.polito.it"});
+            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround");
+            email.putExtra(Intent.EXTRA_TEXT, "Descrivi il tuo problema, ti aiuteremo a risolverlo...");
+            startActivity(Intent.createChooser(email, "Scegli e-mail client..."));
         }
         return true;
     }

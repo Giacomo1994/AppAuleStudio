@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -53,6 +54,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
     EditText txt_matricola,txt_nome,txt_cognome,txt_email,txt_password, txt_password2;
     RadioButton radioStudente,radioDocente;
     ImageView img_reg;
+    Dialog dialogLoading;
 
     Intent intent;
     Universita universita=null;
@@ -75,6 +77,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         radioDocente=findViewById(R.id.radioButton6);
         img_reg=findViewById(R.id.img_registrazione);
         action_bar();
+        dialogLoading();
 
         radioStudente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -130,6 +133,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
                     return;
                 }
+                dialogLoading.show();
                 new registraUtente().execute();
                 //new checkUtenteFromUniversita();
             }
@@ -270,6 +274,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
+            dialogLoading.dismiss();
             if(!result.equals("Utente registrato")) MyToast.makeText(getApplicationContext(), "Errore: "+result, false).show();
             else{
                 intent.putExtra("matricola", matricola);
@@ -279,6 +284,15 @@ public class RegistrazioneActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    private void dialogLoading(){
+        dialogLoading= new Dialog(RegistrazioneActivity.this);
+        dialogLoading.setCancelable(true);
+        dialogLoading.setContentView(R.layout.dialog_loading);
+        dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialogLoading.getWindow().setDimAmount(0);
+
     }
 
 

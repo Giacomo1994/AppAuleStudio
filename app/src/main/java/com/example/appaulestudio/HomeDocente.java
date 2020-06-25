@@ -8,6 +8,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -367,6 +368,7 @@ public class HomeDocente extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 5, Menu.FIRST+1, "Contattaci");
         return true;
     }
 
@@ -374,6 +376,14 @@ public class HomeDocente extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 1) {
             aggiorna_pagina();
+        }
+        if(item.getItemId() == 5){
+            Intent email = new Intent(Intent.ACTION_SENDTO);
+            email.setData(Uri.parse("mailto:"));
+            email.putExtra(Intent.EXTRA_EMAIL, new String[]{"s255277@studenti.polito.it"});
+            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround");
+            email.putExtra(Intent.EXTRA_TEXT, "Descrivi il tuo problema, ti aiuteremo a risolverlo...");
+            startActivity(Intent.createChooser(email, "Scegli e-mail client..."));
         }
 
         return true;
