@@ -237,7 +237,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     }
 
 
-    //ASYNC TASK --> prende posti dipsponibili posti disponibili
+    //ASYNC TASK --> prende posti disponibili
     private class check_posti extends AsyncTask<Void, Void, Integer[]> {
         @Override
         protected Integer[] doInBackground(Void... voids) {
@@ -327,8 +327,8 @@ public class InfoAulaActivity extends AppCompatActivity {
 
                 url = new URL(URL_ORARI_SETTIMANA_SPECIALI);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1500);
-                urlConnection.setConnectTimeout(1000);
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -351,8 +351,8 @@ public class InfoAulaActivity extends AppCompatActivity {
 
                 url = new URL(URL_ORARI_SETTIMANA_DEFAULT);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(1500);
-                urlConnection.setConnectTimeout(1000);
+                urlConnection.setReadTimeout(3000);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);

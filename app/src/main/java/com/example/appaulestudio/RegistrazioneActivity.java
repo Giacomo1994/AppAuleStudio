@@ -232,8 +232,8 @@ public class RegistrazioneActivity extends AppCompatActivity {
             try {
                 URL url = new URL(URL_REGISTRAZIONE);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setReadTimeout(5000);
-                urlConnection.setConnectTimeout(5000);
+                urlConnection.setReadTimeout(7000);
+                urlConnection.setConnectTimeout(7000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);

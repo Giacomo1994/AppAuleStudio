@@ -507,10 +507,8 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             };
             listastudenti.setAdapter(adapterComponenti);
         }
-
-
-
         gestisciGruppoDialog.show();
+        //pulsante data
         btnNuovaScadenza.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -519,6 +517,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
 
             }
         });
+        //pulsante ok
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

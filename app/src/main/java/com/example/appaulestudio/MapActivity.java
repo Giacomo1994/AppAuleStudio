@@ -130,9 +130,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         strIngresso=settings.getString("ingresso",null);
         strPausa=settings.getString("pausa",null);
         //
-        MyToast.makeText(getApplicationContext(),strIngresso+" "+strPausa
+        /*MyToast.makeText(getApplicationContext(),strIngresso+" "+strPausa
                 +" "+settings.getString("slot",null)+" "+settings.getString("first_slot",null)
-                +" "+settings.getString("last_update",null),true).show();
+                +" "+settings.getString("last_update",null),true).show();*/
 
         //intent
         intent = getIntent();
@@ -514,6 +514,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         }
     }
+    public void drawPolylines(){
+        plo=new PolylineOptions();
+        plo.color(Color.RED);
+        plo.width(10);
+        for(LatLng latLng:polylinesPoints){
+            //map.clear();
+            plo.add(latLng);
+            plo.color(Color.GREEN);
+            plo.width(10);
+            plo.geodesic(true);
+        }
+        gmap.addPolyline(plo);
+    }
     //calcola strade
     public void calcolaStrade(List<LatLng> lista_pos){
         DownloadRoads task_roads=new DownloadRoads();
@@ -576,19 +589,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
 
         }
-    }
-    public void drawPolylines(){
-        plo=new PolylineOptions();
-        plo.color(Color.RED);
-        plo.width(10);
-        for(LatLng latLng:polylinesPoints){
-            //map.clear();
-            plo.add(latLng);
-            plo.color(Color.GREEN);
-            plo.width(10);
-            plo.geodesic(true);
-        }
-        gmap.addPolyline(plo);
     }
     public void drawPolylinesRoads(){
         plo=new PolylineOptions();

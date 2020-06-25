@@ -78,9 +78,9 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     CheckBox checkBoxFascia;
     ListView listacomponenti;
     ListAdapter adapterDisponibilita;
-    TextView nomeAula, output, componenti,titoloDialogErrore, txtOreResidueNumero,txtDataMostrata, gruppoSelezionato,txtNomeComponente, txtCognomeComponente;
+    TextView nomeAula, output, componenti, txtOreResidueNumero,txtDataMostrata, gruppoSelezionato,txtNomeComponente, txtCognomeComponente;
     int giornoSelezionatoInt,slotMin,n;
-    Button btnIscriviti, btnHome,btnCercaDisponibilita, btnData;
+    Button btnCercaDisponibilita, btnData;
     ArrayAdapter adapterComponenti,adapterSpinner;
     Button btnGruppo, btnComponenti, btncheckComponenti;
     CheckBox checkComponente;
