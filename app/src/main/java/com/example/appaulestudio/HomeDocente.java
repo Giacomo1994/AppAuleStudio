@@ -368,7 +368,7 @@ public class HomeDocente extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
-        menu.add(Menu.FIRST, 5, Menu.FIRST+1, "Contattaci");
+        menu.add(Menu.FIRST, 5, Menu.FIRST+1, "Assistenza");
         return true;
     }
 
@@ -381,7 +381,7 @@ public class HomeDocente extends AppCompatActivity {
             Intent email = new Intent(Intent.ACTION_SENDTO);
             email.setData(Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_EMAIL, new String[]{"s255277@studenti.polito.it"});
-            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround");
+            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround - Assistenza");
             email.putExtra(Intent.EXTRA_TEXT, "Descrivi il tuo problema, ti aiuteremo a risolverlo...");
             startActivity(Intent.createChooser(email, "Scegli e-mail client..."));
         }

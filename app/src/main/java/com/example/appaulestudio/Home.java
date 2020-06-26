@@ -504,7 +504,7 @@ public class Home extends AppCompatActivity{
         menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
         menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
         menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
-        menu.add(Menu.FIRST, 5, Menu.FIRST+3, "Contattaci");
+        menu.add(Menu.FIRST, 5, Menu.FIRST+3, "Assistenza");
         return true;
     }
 
@@ -528,7 +528,7 @@ public class Home extends AppCompatActivity{
             Intent email = new Intent(Intent.ACTION_SENDTO);
             email.setData(Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_EMAIL, new String[]{"s255277@studenti.polito.it"});
-            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround");
+            email.putExtra(Intent.EXTRA_SUBJECT, "StudyAround - Assistenza");
             email.putExtra(Intent.EXTRA_TEXT, "Descrivi il tuo problema, ti aiuteremo a risolverlo...");
             startActivity(Intent.createChooser(email, "Scegli e-mail client..."));
         }

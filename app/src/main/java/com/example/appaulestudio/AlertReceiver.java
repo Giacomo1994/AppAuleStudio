@@ -88,6 +88,7 @@ public class AlertReceiver extends BroadcastReceiver {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "gcmAlert")
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("Attenzione! La tua prenotazione sta per terminare!")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText("Se ti trovi in aula, sei pregato di liberare la postazione. Se non ti trovi in aula, affrettati ad entrare!"))
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_MAX);
 
