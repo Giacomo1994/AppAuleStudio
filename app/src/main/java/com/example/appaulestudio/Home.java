@@ -391,6 +391,7 @@ public class Home extends AppCompatActivity{
                 mostraOffline();
             } else {
                 ready=0;
+                Arrays.sort(array_aula);
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {

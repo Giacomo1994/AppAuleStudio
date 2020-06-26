@@ -493,7 +493,7 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
                 urlConnection.setDoInput(true);
 
                 String slots=getSlotIntermedi();
-                if(slot==null) return "Errore: il tavolo non è più disponibile per l'orario indicato!";
+                if(slots==null) return "Errore: il tavolo non è più disponibile per l'orario indicato!";
 
                 if(nuova_fine!=null){
                     if(nuova_fine.compareTo(fine)>0 || nuova_fine.compareTo(inizio)<0)

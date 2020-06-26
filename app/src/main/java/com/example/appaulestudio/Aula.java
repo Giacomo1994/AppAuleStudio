@@ -8,7 +8,7 @@ import java.util.Map;
 
 
 
-public class Aula implements Parcelable {
+public class Aula implements Parcelable, Comparable<Aula> {
     private String idAula;
     private String nome;
     private String luogo;
@@ -185,4 +185,9 @@ public class Aula implements Parcelable {
             return new Aula[size];
         }
     };
+
+    @Override
+    public int compareTo(Aula o) {
+        return nome.compareTo(o.getNome());
+    }
 }

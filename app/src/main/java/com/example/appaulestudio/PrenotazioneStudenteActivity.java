@@ -410,6 +410,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
                     txt_num_posti.setText("");
                     nuovo_orario_fine_prenotazione=null;
                     tavolo = (Tavolo) parent.getItemAtPosition(position);
+                    //orario attuale
                     Calendar cal = Calendar.getInstance();
                     Date date = cal.getTime();
                     String dataString = new SimpleDateFormat("yyyy-MM-dd").format(date);
