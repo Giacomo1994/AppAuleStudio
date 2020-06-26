@@ -618,7 +618,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
 
     public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
         if(lista_account==null || lista_account.size()==0){
-            MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare: non hai nessun account di calendario!",false).show();
+            MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare: non hai nessun calendario!",false).show();
             return;
         }
         final Dialog dialog = new Dialog(PrenotazioniAttiveActivity.this);
