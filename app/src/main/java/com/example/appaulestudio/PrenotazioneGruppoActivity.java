@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +56,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -80,6 +82,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     ListAdapter adapterDisponibilita;
     TextView nomeAula, output, componenti, txtOreResidueNumero,txtDataMostrata, gruppoSelezionato,txtNomeComponente, txtCognomeComponente;
     int giornoSelezionatoInt,slotMin,n;
+    boolean img_mostrata=false;
     Button btnCercaDisponibilita, btnData;
     ArrayAdapter adapterComponenti,adapterSpinner;
     Button btnGruppo, btnComponenti, btncheckComponenti;
@@ -91,7 +94,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     Intent intent;
     Gruppo[] array_gruppo;
     User[] array_componenti,array_dinamico, array_copia;
-    Gruppo gruppo;
+    Gruppo gruppo=null;
     HashMap<Integer,Tavolo> tavoliMap;
     ArrayList<String> fasceDinamico,fasce, fasceOrarie;
     ArrayList<Tavolo> tavoliDinamico,tavoli,tavoliEffettivi;
@@ -150,7 +153,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(array_gruppo!=null) dialogGruppo();
-                else MyToast.makeText(getApplicationContext(), "Impossibile mostrare i gruppi!", false).show();
+                else new prendiGruppi().execute();
             }
         });
 
@@ -159,7 +162,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(gruppo==null) MyToast.makeText(getApplicationContext(), "Seleziona prima un gruppo!", false).show();
-                else if(array_componenti==null)MyToast.makeText(getApplicationContext(), "Impossibile mostrare i componenti", false).show();
+                else if(array_componenti==null) new prendiUtenti().execute();
                 else dialogComponenti();
             }
         });
@@ -188,6 +191,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 else if(array_componenti==null) MyToast.makeText(getApplicationContext(),"Per favore, seleziona dei partecipanti!", false).show();
                 else if(giornoSelezionatoInt==-1) MyToast.makeText(getApplicationContext(),"Per favore, seleziona una data!", false).show();
                 else{
+                    Log.i("myLog", "\n"+gruppo.getNome_gruppo()+"\n"+ Arrays.toString(array_dinamico)+"\n"+orariUfficiali.get(giornoSelezionatoInt).getData());
                     definiscoOrari();
                     new prendiTavoli().execute();
                 }
@@ -200,15 +204,13 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         start();
     }
 
-    private void start(){
+    private void start(){ //metodo per aggiornare la pagina
         mostra_dialog_data=true;
-        ll_form.setVisibility(View.GONE);
-        ll_btn.setVisibility(View.GONE);
-        piantaAula.setVisibility(View.GONE);
-        new load_image().execute();
-        new prendiGruppi().execute();
-        giornoSelezionatoInt=-1;
-        txtDataMostrata.setText("");
+        if(!img_mostrata) new load_image().execute(); //se non è riuscito a scaricare l'iimmagine allora la scarica
+        if(array_gruppo==null ) new prendiGruppi().execute(); //se non è riuscito a scaricare i gruppi allora li scarica e mostra dialog
+        else if(gruppo==null) dialogGruppo(); //se è riuscito a scaricarli ma non ne ho selezionato uno allora mostro solo dialog senza scaricare
+        else if(array_dinamico==null) new prendiUtenti().execute(); //se non è riuscito a scaricare componenti allora li scarica e mostra dialog
+        else if(giornoSelezionatoInt==-1) dialogData();
     }
 
     @SuppressLint("WrongConstant")
@@ -406,6 +408,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         protected void onPostExecute(Bitmap result) {
             if(result!=null){
                 piantaAula.setImage(ImageSource.bitmap(result));
+                img_mostrata=true;
                 piantaAula.setVisibility(View.VISIBLE);
             }
 
@@ -478,7 +481,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Gruppo[] array_gruppo) {
             super.onPostExecute(array_gruppo);
-            if(array_gruppo==null) dialogWarning("Sei offline! Impossibile procedere!");
+            if(array_gruppo==null) dialogWarning("Sei offline!\nImpossibile procedere!");
             else if (array_gruppo.length==0) dialogWarning("Impossibile procedere!\nNon sei iscritto ad alcun gruppo");
             else{
                 ll_form.setVisibility(View.VISIBLE);
@@ -1129,7 +1132,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         Button btn_aggiorna=d.findViewById(R.id.btn_dialog_aggiorna);
         TextView txt_warning=d.findViewById(R.id.txt_dialog_warning);
         txt_warning.setText(message);
-        if(message.equals("Sei offline! Impossibile procedere!")) btn_aggiorna.setVisibility(View.VISIBLE);
+        if(message.equals("Sei offline!\nImpossibile procedere!")) btn_aggiorna.setVisibility(View.VISIBLE);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -86,9 +86,6 @@ public class User {
     public String toString() {
         return "User{" +
                 "matricola='" + matricola + '\'' +
-                ", universita='" + universita + '\'' +
-                ", password='" + password + '\'' +
-                ", studente=" + studente +
                 '}';
     }
 }

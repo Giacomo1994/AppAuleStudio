@@ -43,6 +43,8 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:text="@string/dialog_warning_2" />
 
         <Button
@@ -53,6 +55,8 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:text="@string/dialog_warning_3"
             android:visibility="gone" />
     </LinearLayout>
