@@ -71,7 +71,6 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI_FUTURE="http://pmsc9.altervista.org/progetto/prenotazioni_gruppi_future.php";
     static final String URL_PRENOTAZIONE_GRUPPI="http://pmsc9.altervista.org/progetto/prenotazione_gruppi_prenota.php";
 
-    boolean mostra_dialog_data=false;
     TableLayout ll_form;
     LinearLayout ll_btn;
     SubsamplingScaleImageView piantaAula;
@@ -108,7 +107,6 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     }
 
     private void initUI(){
-        mostra_dialog_data=true;
         btnData=findViewById(R.id.btnData);
         btnComponenti=findViewById(R.id.btnComponenti);
         txtOreResidueNumero=findViewById(R.id.txtOreResidueNumero);
@@ -205,7 +203,6 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     }
 
     private void start(){ //metodo per aggiornare la pagina
-        mostra_dialog_data=true;
         if(!img_mostrata) new load_image().execute(); //se non è riuscito a scaricare l'iimmagine allora la scarica
         if(array_gruppo==null ) new prendiGruppi().execute(); //se non è riuscito a scaricare i gruppi allora li scarica e mostra dialog
         else if(gruppo==null) dialogGruppo(); //se è riuscito a scaricarli ma non ne ho selezionato uno allora mostro solo dialog senza scaricare
@@ -837,7 +834,6 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
 
     //dialog
     private void dialogData(){
-        mostra_dialog_data=false;
         final Dialog dialog_data = new Dialog(PrenotazioneGruppoActivity.this);
         dialog_data.setCancelable(true);
         dialog_data.setContentView(R.layout.dialog_scegli_gruppo);
@@ -971,7 +967,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 dialogCheckComponenti.dismiss();
-                if(mostra_dialog_data==true) dialogData();
+                if(giornoSelezionatoInt==-1) dialogData();
             }
         });
     }
