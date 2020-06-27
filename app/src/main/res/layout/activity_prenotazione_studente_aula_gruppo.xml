@@ -46,7 +46,6 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/textView17_studgruppo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/activity_pren_singolo_1" />
@@ -79,7 +78,6 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/textView22_studgruppo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/activity_pren_singolo_2"
@@ -98,13 +96,12 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/textView24_studgruppo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
                         android:layout_marginRight="10dp"
                         android:text="@string/activity_pren_singolo_3"
-                        android:textSize="16sp"
-                        android:layout_marginEnd="10dp" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/pren_et_inizio_studgruppo"
@@ -121,7 +118,6 @@
                     android:gravity="center_vertical">
 
                     <TextView
-                        android:id="@+id/textView27_studgruppo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/activity_pren_singolo_4"

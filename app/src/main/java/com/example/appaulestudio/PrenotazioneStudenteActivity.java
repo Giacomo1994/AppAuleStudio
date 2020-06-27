@@ -55,8 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
-//QUANDO CLICCO SU TAVOLO ESEGUO TASK ASINCRONO
-//QUANDO PRENOTO CON SUCCESSO SALVO IN LOCALE
+
 
 public class PrenotazioneStudenteActivity extends AppCompatActivity {
     static final String URL_TAVOLI="http://pmsc9.altervista.org/progetto/prenotazioneSingolo_tavoli.php";

@@ -89,19 +89,19 @@ public class PrenotazioneStudenteAulaGruppoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_prenotazione_studente_aula_gruppo);
-        imgView=findViewById(R.id.img_plant_studgruppo);
-        txt_nome_aula=findViewById(R.id.pren_nome_aula_studgruppo);
-        txt_data=findViewById(R.id.pren_et_data_studgruppo);
-        txt_inizio=findViewById(R.id.pren_et_inizio_studgruppo);
-        txt_fine=findViewById(R.id.pren_et_fine_studgruppo);
-        tab_layout=findViewById(R.id.pren_tab_layout_studgruppo);
-        btn_prenota=findViewById(R.id.pren_btn_studgruppo);
-        linear_spinner=findViewById(R.id.linear_spinner_studgruppo);
-        linear_activity=findViewById(R.id.ll_studgruppo);
-        spinner=findViewById(R.id.spinner_tavoli_studgruppo);
-        pick_time=findViewById(R.id.pick_time_stgr);
-        txt_num_posti=findViewById(R.id.txt_num_posti_g);
+        setContentView(R.layout.activity_prenotazione_studente);
+        imgView=findViewById(R.id.img_plant);//
+        txt_nome_aula=findViewById(R.id.pren_nome_aula);//
+        txt_data=findViewById(R.id.pren_et_data);//
+        txt_inizio=findViewById(R.id.pren_et_inizio);//
+        txt_fine=findViewById(R.id.pren_et_fine);//
+        tab_layout=findViewById(R.id.pren_tab_layout);//
+        btn_prenota=findViewById(R.id.pren_btn);//
+        linear_spinner=findViewById(R.id.linear_spinner);//
+        linear_activity=findViewById(R.id.ll_pren_stud);//
+        spinner=findViewById(R.id.spinner_tavoli);//
+        pick_time=findViewById(R.id.pick_time_st);//
+        txt_num_posti=findViewById(R.id.txt_num_posti_s);//
         txt_num_posti.setText("");
         slot=new LinkedList<String>();
         prenotazioni=new LinkedList<Prenotazione>();
