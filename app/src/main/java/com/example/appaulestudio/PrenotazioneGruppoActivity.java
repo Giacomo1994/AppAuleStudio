@@ -849,7 +849,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
                 TextView txt_data=convertView.findViewById(R.id.nomeGruppo);
                 ImageView img_data=convertView.findViewById(R.id.imgGroup);
                 txt_data.setText(dataItaliana(item.getData()));
-                img_data.setImageDrawable(getResources().getDrawable(R.drawable.calendario));
+                img_data.setImageDrawable(getResources().getDrawable(R.drawable.calendario1));
                 return convertView;
             }
         };
