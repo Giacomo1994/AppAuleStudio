@@ -499,11 +499,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             ll_cronologia.setVisibility(View.GONE);
             ll_in_corso.setVisibility(View.VISIBLE);
             ArrayList<Prenotazione> lista_prenotazioni=new ArrayList<Prenotazione>();
-            for(Prenotazione p:array_prenotazioni){
-                if(p.getStato()==1 && p.getIn_corso().equals("futura") && !p.getGruppo().equals("null")){
+            for(Prenotazione p:array_prenotazioni){//p.getIn_corso().equals("futura") &&
+                if(p.getStato()==1 && !p.getGruppo().equals("null") && (p.getIn_corso().equals("futura") || p.getIn_corso().equals("in_corso"))){
                     if(database.isAllarmeGiaInserito(p.getId_prenotazione())==false){
                         String orario_alarm=create_alarm(p,true,false);
                         database.insertAlarm(p.getId_prenotazione(),orario_alarm);
+                        MyToast.makeText(getApplicationContext(),"Allarme inserito",true).show();
                     }
                 }
                 lista_prenotazioni.add(p);
