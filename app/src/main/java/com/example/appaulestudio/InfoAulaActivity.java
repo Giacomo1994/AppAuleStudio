@@ -74,6 +74,7 @@ public class InfoAulaActivity extends AppCompatActivity {
     Button btnNotifica, btnPrenotazioneGruppo, btnPrenotazionePosto;
     ImageView imgGruppo;
     LinearLayout ll_offline;
+    Dialog dialogLoading;
 
     Intent intent;
     Bundle bundle;
@@ -101,6 +102,8 @@ public class InfoAulaActivity extends AppCompatActivity {
         imgGruppo=findViewById(R.id.imageView2);
         ll_offline=findViewById(R.id.ll_infoaula_offline);
         ll_offline.setVisibility(View.GONE);
+        dialogLoading();
+        dialogLoading.show();
 
         //intent
         intent = getIntent();
@@ -231,6 +234,7 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazionePosto.setVisibility(View.GONE);
         btnPrenotazioneGruppo.setVisibility(View.GONE);
         ll_offline.setVisibility(View.GONE);
+        dialogLoading.show();
         LinearLayout layout = findViewById(R.id.infAula_linear);
         layout.removeAllViews();
         new mostra_orari().execute();
@@ -286,6 +290,7 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
         }
         protected void onPostExecute(Integer[] result) {
+            dialogLoading.dismiss();
             if(result==null){
                 ll_offline.setVisibility(View.VISIBLE);
                 btnNotifica.setVisibility(View.GONE);
@@ -546,7 +551,9 @@ public class InfoAulaActivity extends AppCompatActivity {
                 if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
                 btnNotifica.setVisibility(View.GONE);
                 infoAula_posti.setText("Posti Totali: "+aula.getPosti_totali());
+                dialogLoading.dismiss();
             }
+            else dialogLoading.dismiss();
 
             String inizio=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[0])).substring(0,5);
             String fine=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[6])).substring(0,5);
@@ -622,6 +629,15 @@ public class InfoAulaActivity extends AppCompatActivity {
         String giorno=new SimpleDateFormat("E", Locale.ITALY).format(c.getTime());
         if(data.equals(os.getData())) return new Orario_Ufficiale(data,giorno,os.getApertura(),os.getChiusura());
         else return null;
+    }
+
+    private void dialogLoading(){
+        dialogLoading= new Dialog(InfoAulaActivity.this);
+        dialogLoading.setCancelable(true);
+        dialogLoading.setContentView(R.layout.dialog_loading);
+        dialogLoading.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialogLoading.getWindow().setDimAmount(0);
+
     }
 
 
