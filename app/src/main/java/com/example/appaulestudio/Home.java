@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Home extends AppCompatActivity{
@@ -58,6 +61,7 @@ public class Home extends AppCompatActivity{
     Dialog dialogLoading;
 
     Aula[] array_aule=null;
+    Aula aula_pref;
     ArrayList<Aula> aule_da_aggiornare=new ArrayList<Aula>();
     boolean from_login=true, start_app=false;
     int ready=-1;
@@ -155,6 +159,7 @@ public class Home extends AppCompatActivity{
                 startActivity(intent_to_map);
             }
         });
+        registerForContextMenu(elencoAule);
     }
 
     protected void onRestart() {
@@ -223,11 +228,13 @@ public class Home extends AppCompatActivity{
         array_aule = new Aula[aule.size()];
         array_aule = aule.toArray(array_aule);
 
-        adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule) {
+        ArrayList<Aula> aule_sorted=sortAule(array_aule);
+        adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule_sorted) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 Aula item = getItem(position);
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
+                ImageView img_pref=convertView.findViewById(R.id.img_pref);
                 nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
                 luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
                 postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
@@ -235,6 +242,7 @@ public class Home extends AppCompatActivity{
                 immagine_home = convertView.findViewById(R.id.row_image_home);
                 statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
+                if(isAulaPreferita(item)) img_pref.setVisibility(View.VISIBLE);
                 nomeAula_home.setText(item.getNome());
                 luogoAula_home.setText(item.getLuogo());
                 postiLiberi_home.setText("Posti totali: " + item.getPosti_totali());
@@ -391,12 +399,13 @@ public class Home extends AppCompatActivity{
                 mostraOffline();
             } else {
                 ready=0;
-                Arrays.sort(array_aula);
-                adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, array_aula) {
+                ArrayList<Aula> aule_sorted=sortAule(array_aula);
+                adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule_sorted) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Aula item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
+                        ImageView img_pref=convertView.findViewById(R.id.img_pref);
                         nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
                         luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
                         postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
@@ -404,6 +413,7 @@ public class Home extends AppCompatActivity{
                         immagine_home = convertView.findViewById(R.id.row_image_home);
                         statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
+                        if(isAulaPreferita(item)) img_pref.setVisibility(View.VISIBLE);
                         nomeAula_home.setText(item.getNome());
                         luogoAula_home.setText(item.getLuogo());
                         if (item.isAperta())
@@ -534,6 +544,62 @@ public class Home extends AppCompatActivity{
             startActivity(Intent.createChooser(email, "Scegli e-mail client..."));
         }
         return true;
+    }
+
+    //CONTEXT MENU
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ListView list=(ListView) v;
+        aula_pref=(Aula) list.getItemAtPosition(info.position);
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        boolean is_pref=settings.getBoolean(aula_pref.getIdAula(),false);
+        if(!is_pref) menu.add(Menu.FIRST,1,Menu.FIRST,"Aggiungi a preferiti");
+        else menu.add(Menu.FIRST,2,Menu.FIRST+1,"Rimuovi da preferiti");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if(item.getItemId()==1){
+            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(aula_pref.getIdAula(),true);
+            editor.commit();
+            MyToast.makeText(getApplicationContext(), "Aula aggiunta ai preferiti",true).show();
+        }
+        if(item.getItemId()==2){
+            SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(aula_pref.getIdAula(),false);
+            editor.commit();
+            MyToast.makeText(getApplicationContext(), "Aula rimossa dai preferiti",true).show();
+        }
+        ll_offline.setVisibility(View.GONE);
+        dialogLoading.show();
+        new listaAule().execute();
+        return true;
+    }
+
+    public boolean isAulaPreferita(Aula a){
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        boolean is_pref=settings.getBoolean(a.getIdAula(),false);
+        return is_pref;
+    }
+
+    public ArrayList<Aula> sortAule(Aula[] array_aula){
+        SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
+        List<Aula> aulas=Arrays.asList(array_aula);
+        ArrayList<Aula> aulas_linked = new ArrayList<Aula>();
+        for(Aula a:aulas){
+            if(!settings.getBoolean(a.getIdAula(),false)) aulas_linked.add(a);
+        }
+        Collections.sort(aulas_linked);
+        for(Aula as:aulas){
+            if(settings.getBoolean(as.getIdAula(),false)){
+                aulas_linked.add(0,as);
+            }
+        }
+        return aulas_linked;
     }
 
 }

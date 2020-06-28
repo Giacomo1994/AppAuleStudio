@@ -187,6 +187,15 @@ public class Aula implements Parcelable, Comparable<Aula> {
     };
 
     @Override
+    public boolean equals(Object other){
+        if (other == null) return false;
+        if (other == this) return true;
+        if (!(other instanceof Aula)) return false;
+        Aula altra_aula = (Aula)other;
+        return idAula.equals(altra_aula.getIdAula());
+    }
+
+    @Override
     public int compareTo(Aula o) {
         return nome.compareTo(o.getNome());
     }
