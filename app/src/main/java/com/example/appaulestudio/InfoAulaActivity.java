@@ -235,8 +235,6 @@ public class InfoAulaActivity extends AppCompatActivity {
         btnPrenotazioneGruppo.setVisibility(View.GONE);
         ll_offline.setVisibility(View.GONE);
         dialogLoading.show();
-        LinearLayout layout = findViewById(R.id.infAula_linear);
-        layout.removeAllViews();
         new mostra_orari().execute();
     }
 
@@ -475,8 +473,8 @@ public class InfoAulaActivity extends AppCompatActivity {
 
     //METODO --> STAMPA IN UI TABELLA ORARI
     private void stampa_orari(HashMap<Integer,Orario> orari_default,LinkedList<Orario_Speciale> orari_speciali){
-        //PREPARAZIONE
         try {
+            //unisco orari default ed orari speciali creando orari ufficiali, ordinati per data crescente
             if (orari_speciali == null) orari_speciali = new LinkedList<Orario_Speciale>();
             Calendar cal = null;
             Date date = null;
@@ -498,8 +496,6 @@ public class InfoAulaActivity extends AppCompatActivity {
                 daysOfWeekString[i] = df.format(date).toUpperCase();
                 daysOfWeekInt[i] = cal.get(Calendar.DAY_OF_WEEK);
             }
-
-            //LinkedList<String> arrayList=new LinkedList<String>();
             LinkedList<Orario_Ufficiale> orari_ufficiali = new LinkedList<Orario_Ufficiale>();
             for (int i = 0; i < 7; i++) {
                 String data = dateString[i]; //data
@@ -516,11 +512,10 @@ public class InfoAulaActivity extends AppCompatActivity {
                 }
                 orari_ufficiali.add(new Orario_Ufficiale(data, giorno, apertura, chiusura));
             }
-
             Collections.sort(orari_ufficiali);
             orari_giusti=orari_ufficiali;
 
-            //ultimo orario
+            //ultimo orario (ottavo giorno) --> non viene mostrato, ma passato all'activity di prenotazione gruppo
             orari_da_passare= new LinkedList<>(orari_ufficiali);
             Orario_Ufficiale uf=null;
             if(orari_speciali.size()==0){
@@ -542,10 +537,8 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
             orari_da_passare.addLast(uf);
 
-
-            if(connesso==true && checkAulaAperta()==true){
-                new check_posti().execute();
-            }
+            //se aula aperta scarico posti disponibili, se non è aperta non li scarico e nascondo il bottone della notifica
+            if(connesso==true && checkAulaAperta()==true) new check_posti().execute();
             else if(connesso==true && checkAulaAperta()==false){
                 btnPrenotazionePosto.setVisibility(View.VISIBLE);
                 if(aula.getGruppi()==0) btnPrenotazioneGruppo.setVisibility(View.VISIBLE);
@@ -555,21 +548,21 @@ public class InfoAulaActivity extends AppCompatActivity {
             }
             else dialogLoading.dismiss();
 
+            //stampo gli orari ufficiali aggiungendo le textview
             String inizio=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[0])).substring(0,5);
             String fine=new SimpleDateFormat("dd/MM/yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse(dateString[6])).substring(0,5);
             infoAula_output.setText("Orari da " + inizio + " a " + fine);
             LinearLayout layout = findViewById(R.id.infAula_linear);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             params.gravity = Gravity.CENTER_HORIZONTAL;
+            layout.removeAllViews();
             for (Orario_Ufficiale ouf : orari_ufficiali) {
                 TextView text = new TextView(InfoAulaActivity.this);
                 text.setGravity(Gravity.CENTER_HORIZONTAL);
                 text.setPadding(10, 0, 10, 0);
                 Spannable spannable = null;
-                if (ouf.getApertura() == null && ouf.getChiusura() == null)
-                    spannable = new SpannableStringBuilder(ouf.getGiorno() + "\n" + "Chiusa");
-                else
-                    spannable = new SpannableStringBuilder(ouf.getGiorno() + "\n" + ouf.getApertura().substring(0, 5) + "\n" + ouf.getChiusura().substring(0, 5));
+                if (ouf.getApertura() == null && ouf.getChiusura() == null) spannable = new SpannableStringBuilder(ouf.getGiorno() + "\n" + "Chiusa");
+                else spannable = new SpannableStringBuilder(ouf.getGiorno() + "\n" + ouf.getApertura().substring(0, 5) + "\n" + ouf.getChiusura().substring(0, 5));
                 spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 text.setText(spannable);
                 text.setLayoutParams(params);
