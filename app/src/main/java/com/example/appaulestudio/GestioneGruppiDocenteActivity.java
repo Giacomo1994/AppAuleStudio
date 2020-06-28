@@ -85,7 +85,6 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     TextView txtNomeComponente, txtCognomeComponente; CheckBox checkComponente;
     TextView nuovaScadenza;
     EditText oreDaAggiungere;
-    TextView oreResidueDailog,dataScadenzaDialog;
     Button btnOk, btnAnnulla, btnNuovaScadenza;
     int anno,mese,giorno;
     double oreUpdateNumerico; String dataUpdate, oreUpdate;
@@ -452,16 +451,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         listastudenti=gestisciGruppoDialog.findViewById(R.id.listaStudenti);
         oreDaAggiungere=gestisciGruppoDialog.findViewById(R.id.oreDaAggiungere);
         nuovaScadenza=gestisciGruppoDialog.findViewById(R.id.nuovaScadenza);
-        oreResidueDailog=gestisciGruppoDialog.findViewById(R.id.oreResidueDialog);
-        dataScadenzaDialog=gestisciGruppoDialog.findViewById(R.id.dataScadenzaDialog);
-        oreResidueDailog.setText("Ore disponibili residue: "+gruppoSelezionato.getOre_disponibili());
-        dataScadenzaDialog.setText("Scadenza: "+ gruppoSelezionato.getData_scadenza());
-        nuovaScadenza.setText("");
+        nuovaScadenza.setText(gruppoSelezionato.getData_scadenza());
         btnOk=gestisciGruppoDialog.findViewById(R.id.btnOK);
         btnAnnulla=gestisciGruppoDialog.findViewById(R.id.btnAnnulla);
         btnNuovaScadenza=gestisciGruppoDialog.findViewById(R.id.btnNuovaScadenza);
         nomeGruppoDialog.setText(gruppoSelezionato.getNome_gruppo());
-        if(componenti.length==0 || componenti==null) txt_componenti.setVisibility(View.GONE);
+        if(componenti.length==0) txt_componenti.setText("Non ci sono iscritti al gruppo");
         if(componenti!=null) {
             adapterComponenti = new ArrayAdapter<User>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_componenti, componenti) {
                 @NonNull
@@ -754,7 +749,10 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                 return;
             }
             if (array_gruppi.length==0) {
-                //MyToast.makeText(getApplicationContext(), "Non ci sono gruppi disponibili", false).show();
+                MyToast.makeText(getApplicationContext(), "Non ci sono gruppi disponibili", false).show();
+                listaAttivi.setAdapter(null);
+                listaInScadenza.setAdapter(null);
+                listaScaduti.setAdapter(null);
                 return;
             }
             gruppi=array_gruppi;
@@ -808,15 +806,13 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(User[] array_componenti) {
             super.onPostExecute(array_componenti);
+            componenti=array_componenti;
             if (array_componenti == null) {
-                componenti=array_componenti;
                 MyToast.makeText(getApplicationContext(), "Impossibile contattare il server\nVerifica la connessione per aggiornare il gruppo",false).show();
-                //creaDialogGruppo();
                 return;
             }
-            componenti=array_componenti;
             array_dinamico=componenti;
-            if(componenti!=null) creaDialogGruppo();
+            if(array_componenti!=null) creaDialogGruppo();
         }
     }
 
