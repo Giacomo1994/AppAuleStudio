@@ -41,12 +41,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:layout_marginEnd="10dp" />
 
             <ImageView
                 android:id="@+id/img_pref"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
                 android:contentDescription="@string/icon"
                 android:visibility="invisible"
                 app:srcCompat="@drawable/heart" />
