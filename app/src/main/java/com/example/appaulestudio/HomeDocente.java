@@ -83,7 +83,7 @@ public class HomeDocente extends AppCompatActivity {
                     if(fatto==true && millisUntilFinished<28000){
                         ll_start.setVisibility(View.GONE);
                         getSupportActionBar().show();
-                        if(risultato==0 || risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
+                        if(risultato==0) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
                         else if(risultato==1) MyToast.makeText(getApplicationContext(), "Non hai in carico nessun insegnamento",false).show();
                         else if(risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e aggiornare il numero dei gruppi",false).show();
                         cancel();
