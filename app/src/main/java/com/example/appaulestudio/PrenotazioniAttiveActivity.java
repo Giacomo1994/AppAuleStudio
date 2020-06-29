@@ -504,7 +504,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
                     if(database.isAllarmeGiaInserito(p.getId_prenotazione())==false){
                         String orario_alarm=create_alarm(p,true,false);
                         database.insertAlarm(p.getId_prenotazione(),orario_alarm);
-                        MyToast.makeText(getApplicationContext(),"Allarme inserito",true).show();
+                        //MyToast.makeText(getApplicationContext(),"Allarme inserito",true).show();
                     }
                 }
                 lista_prenotazioni.add(p);
