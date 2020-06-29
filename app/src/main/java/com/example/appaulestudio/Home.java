@@ -63,7 +63,7 @@ public class Home extends AppCompatActivity{
     Aula[] array_aule=null;
     Aula aula_pref;
     ArrayList<Aula> aule_da_aggiornare=new ArrayList<Aula>();
-    boolean from_login=true, start_app=false;
+    boolean from_login=true, start_app=false, update_uni_scaricato=false;
     int ready=-1;
 
     Intent intent;
@@ -167,7 +167,7 @@ public class Home extends AppCompatActivity{
         ll_offline.setVisibility(View.GONE);
         dialogLoading.show();
         new listaAule().execute();
-        if(from_login==false) new check_last_update_universita().execute();
+        if(from_login==false && update_uni_scaricato==false) new check_last_update_universita().execute();
     }
 
     @SuppressLint("WrongConstant")
@@ -324,8 +324,7 @@ public class Home extends AppCompatActivity{
         protected void onPostExecute(Universita universita) {
             if(universita==null) return;
             else {
-                //new aggiornaSQLITE().execute();
-                //if(from_login==false) new aggiornaPreferenzeUniversita().execute();
+                update_uni_scaricato=true;
                 SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("latitudine", ""+universita.getLatitudine());
@@ -391,13 +390,12 @@ public class Home extends AppCompatActivity{
         @Override
         protected void onPostExecute(Aula[] array_aula) {
             dialogLoading.dismiss();
+            ready=0;
             array_aule=array_aula;
             if (array_aula == null) {
                 ll_offline.setVisibility(View.VISIBLE);
-                ready=1;
                 mostraOffline();
             } else {
-                ready=0;
                 ArrayList<Aula> aule_sorted=sortAule(array_aula);
                 adapter = new ArrayAdapter<Aula>(Home.this, R.layout.row_layout_home, aule_sorted) {
                     @Override
@@ -525,7 +523,7 @@ public class Home extends AppCompatActivity{
             ll_offline.setVisibility(View.GONE);
             dialogLoading.show();
             new listaAule().execute();
-            if(from_login==false) new check_last_update_universita().execute();
+            if(from_login==false && update_uni_scaricato==false) new check_last_update_universita().execute();
         }
         if(item.getItemId() == 3){
             Intent i = new Intent(this, GroupActivity.class);
