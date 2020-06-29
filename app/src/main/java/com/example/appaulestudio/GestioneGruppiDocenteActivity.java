@@ -451,10 +451,12 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         listastudenti=gestisciGruppoDialog.findViewById(R.id.listaStudenti);
         oreDaAggiungere=gestisciGruppoDialog.findViewById(R.id.oreDaAggiungere);
         nuovaScadenza=gestisciGruppoDialog.findViewById(R.id.nuovaScadenza);
-        nuovaScadenza.setText(gruppoSelezionato.getData_scadenza());
         btnOk=gestisciGruppoDialog.findViewById(R.id.btnOK);
         btnAnnulla=gestisciGruppoDialog.findViewById(R.id.btnAnnulla);
         btnNuovaScadenza=gestisciGruppoDialog.findViewById(R.id.btnNuovaScadenza);
+
+        nuovaScadenza.setText(gruppoSelezionato.getData_scadenza());
+        nuovaScadenza.setVisibility(View.INVISIBLE);
         nomeGruppoDialog.setText(gruppoSelezionato.getNome_gruppo());
         if(componenti.length==0) txt_componenti.setText("Non ci sono iscritti al gruppo");
         if(componenti!=null) {
@@ -586,6 +588,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                         giornoStringa="0"+giorno;
                     }
                     nuovaScadenza.setText(anno+"-"+meseStringa+"-"+giornoStringa);
+                    nuovaScadenza.setVisibility(View.VISIBLE);
                 }
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 

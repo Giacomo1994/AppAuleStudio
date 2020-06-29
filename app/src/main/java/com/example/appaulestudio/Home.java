@@ -234,7 +234,6 @@ public class Home extends AppCompatActivity{
             public View getView(int position, View convertView, ViewGroup parent) {
                 Aula item = getItem(position);
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
-                ImageView img_pref=convertView.findViewById(R.id.img_pref);
                 nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
                 luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
                 postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
@@ -242,12 +241,11 @@ public class Home extends AppCompatActivity{
                 immagine_home = convertView.findViewById(R.id.row_image_home);
                 statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
-                if(isAulaPreferita(item)) img_pref.setVisibility(View.VISIBLE);
                 nomeAula_home.setText(item.getNome());
                 luogoAula_home.setText(item.getLuogo());
                 postiLiberi_home.setText("Posti totali: " + item.getPosti_totali());
 
-                //per gruppi o no
+                //immagine
                 if (item.getGruppi() == 0) {
                     flagGruppi_home.setText("Disponibile per i gruppi");
                     immagine_home.setImageResource(R.drawable.group);
@@ -255,6 +253,7 @@ public class Home extends AppCompatActivity{
                     flagGruppi_home.setText("Non è disponibile per i gruppi");
                     immagine_home.setImageResource(R.drawable.singolo);
                 }
+                if(isAulaPreferita(item)) immagine_home.setImageResource(R.drawable.heart);
                 //orario
                 Calendar calendar = Calendar.getInstance();
                 int today = calendar.get(Calendar.DAY_OF_WEEK);
@@ -405,7 +404,7 @@ public class Home extends AppCompatActivity{
                     public View getView(int position, View convertView, ViewGroup parent) {
                         Aula item = getItem(position);
                         convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout_home, parent, false);
-                        ImageView img_pref=convertView.findViewById(R.id.img_pref);
+                        //ImageView img_pref=convertView.findViewById(R.id.img_pref);
                         nomeAula_home = convertView.findViewById(R.id.nomeAula_home);
                         luogoAula_home = convertView.findViewById(R.id.luogoAula_home);
                         postiLiberi_home = convertView.findViewById(R.id.postiLiberi_home);
@@ -413,14 +412,14 @@ public class Home extends AppCompatActivity{
                         immagine_home = convertView.findViewById(R.id.row_image_home);
                         statoAula_home = convertView.findViewById(R.id.statoAula_home);
 
-                        if(isAulaPreferita(item)) img_pref.setVisibility(View.VISIBLE);
+                        //if(isAulaPreferita(item)) img_pref.setVisibility(View.VISIBLE);
                         nomeAula_home.setText(item.getNome());
                         luogoAula_home.setText(item.getLuogo());
                         if (item.isAperta())
                             postiLiberi_home.setText("Posti liberi: " + item.getPosti_liberi() + " su " + item.getPosti_totali());
                         else postiLiberi_home.setText("Posti totali: " + item.getPosti_totali());
 
-                        //per gruppi o no
+                        //immagine
                         if (item.getGruppi() == 0) {
                             flagGruppi_home.setText("Disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.group);
@@ -428,6 +427,7 @@ public class Home extends AppCompatActivity{
                             flagGruppi_home.setText("Non è disponibile per i gruppi");
                             immagine_home.setImageResource(R.drawable.singolo);
                         }
+                        if(isAulaPreferita(item)) immagine_home.setImageResource(R.drawable.heart);
                         //chiusa-aperta
                         if (item.isAperta() == true) {
                             statoAula_home.setTextColor(Color.argb(255, 12, 138, 17));
