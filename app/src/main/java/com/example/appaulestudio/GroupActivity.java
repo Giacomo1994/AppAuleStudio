@@ -52,13 +52,13 @@ public class GroupActivity extends AppCompatActivity {
     static final String URL_GRUPPI="http://pmsc9.altervista.org/progetto/richiedi_gruppi_from_iscrizione.php";
     static final String URL_COMPONENTI="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     String strUniversita, strMatricola, strNome, strCognome,strCodiceGruppo, strNomeUniversita;
-    boolean offline=false;
+    boolean offline=false, aggiornaSQLITE=true;
     Gruppo g;
     SqliteManager database;
     ListView gruppiPerStudente;
     LinearLayout ll_offline;
     Button bnt_iscriviti;
-    boolean gruppiAggiornati=false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +74,7 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
+                i.putExtra("gruppi",true);
                 startActivityForResult(i,10);
             }
         });
@@ -209,7 +210,7 @@ public class GroupActivity extends AppCompatActivity {
                 ll_offline.setVisibility(View.VISIBLE);
                 bnt_iscriviti.setVisibility(View.GONE);
                 ArrayList<Gruppo> arrayList_gruppo=database.selectGruppi();
-                if(arrayList_gruppo==null || arrayList_gruppo.size()==0) MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
+                if(arrayList_gruppo==null || arrayList_gruppo.size()==0) gruppiPerStudente.setAdapter(null);
                 else{
                     ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, arrayList_gruppo ){
                         @Override
@@ -229,10 +230,15 @@ public class GroupActivity extends AppCompatActivity {
                 return;
             }
             //online
+            offline=false;
+            ll_offline.setVisibility(View.GONE);
+            bnt_iscriviti.setVisibility(View.VISIBLE);
             if(array_gruppo.length==0){
-                MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
                 database.updateGruppi(array_gruppo);
                 gruppiPerStudente.setAdapter(null);
+                Intent i = new Intent(GroupActivity.this, IscrizioneActivity.class);
+                i.putExtra("gruppi",false);
+                startActivityForResult(i,10);
                 return;
             }
             ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
@@ -249,10 +255,14 @@ public class GroupActivity extends AppCompatActivity {
                 }
             };
             gruppiPerStudente.setAdapter(adapter);
-            if(gruppiAggiornati==false){
-                database.updateGruppi(array_gruppo);
-                gruppiAggiornati=true;
+
+            if(aggiornaSQLITE) database.updateGruppi(array_gruppo);
+            else{
+                MyToast.makeText(getApplicationContext(), "Non aggiorno", false).show();
+                aggiornaSQLITE=true;
             }
+
+
         }
     }
 
@@ -416,6 +426,7 @@ public class GroupActivity extends AppCompatActivity {
             }
             else{
                 database.deleteGruppo(g);
+                aggiornaSQLITE=false;
                 new listaGruppi().execute();
                 MyToast.makeText(getApplicationContext(), result,true).show();            }
         }
@@ -433,6 +444,7 @@ public class GroupActivity extends AppCompatActivity {
             String cognomeProf=data.getStringExtra("cognomeProf");
             String scadenza=data.getStringExtra("scadenza");
             database.insertGruppo(new Gruppo(codiceGruppo,nomeGruppo,nomeCorso,nomeProf,cognomeProf,scadenza));
+            aggiornaSQLITE=false;
             new listaGruppi().execute();
         }
     }
@@ -476,10 +488,6 @@ public class GroupActivity extends AppCompatActivity {
             startActivity(i);
         }
         if (item.getItemId() == 2) {
-            offline=false;
-            gruppiAggiornati=false;
-            ll_offline.setVisibility(View.GONE);
-            bnt_iscriviti.setVisibility(View.VISIBLE);
             new listaGruppi().execute();
         }
         if(item.getItemId() == 4){

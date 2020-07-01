@@ -126,8 +126,8 @@
     <string name="row_pren_attive_4">Gruppo:</string>
     <string name="row_pren_attive_5">Stato:</string>
 
-    <string name="header_login">LOGIN</string>
-    <string name="header_registrazione">REGISTRAZIONE</string>
+    <string name="header_login">Login</string>
+    <string name="header_registrazione">Registrazione</string>
     <string name="header_home_studente">Home</string>
     <string name="header_mappe">Mappa Aule</string>
     <string name="header_infoaula">Informazioni Aula</string>
