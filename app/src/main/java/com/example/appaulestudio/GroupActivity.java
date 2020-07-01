@@ -257,12 +257,7 @@ public class GroupActivity extends AppCompatActivity {
             gruppiPerStudente.setAdapter(adapter);
 
             if(aggiornaSQLITE) database.updateGruppi(array_gruppo);
-            else{
-                MyToast.makeText(getApplicationContext(), "Non aggiorno", false).show();
-                aggiornaSQLITE=true;
-            }
-
-
+            else aggiornaSQLITE=true;
         }
     }
 
