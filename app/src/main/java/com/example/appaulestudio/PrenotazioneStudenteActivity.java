@@ -182,7 +182,7 @@ public class PrenotazioneStudenteActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Prenotazione");
+        txt_actionbar.setText(getString(R.string.header_prensingolo));
         final Dialog d = new Dialog(PrenotazioneStudenteActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

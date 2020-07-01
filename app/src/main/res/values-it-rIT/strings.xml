@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">StudyAround</string>
-
     <string name="icon">icon</string>
     <string name="warning_img">img_warning</string>
     <string name="warning_text">Impossibile contattare il server!\n I dati potrebbero non essere aggiornati!</string>

@@ -104,7 +104,7 @@ public class GroupActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("I miei gruppi");
+        txt_actionbar.setText(getString(R.string.header_group));
         final Dialog d = new Dialog(GroupActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -231,6 +231,8 @@ public class GroupActivity extends AppCompatActivity {
             //online
             if(array_gruppo.length==0){
                 MyToast.makeText(getApplicationContext(), "Non ci sono iscrizioni", false).show();
+                database.updateGruppi(array_gruppo);
+                gruppiPerStudente.setAdapter(null);
                 return;
             }
             ArrayAdapter<Gruppo> adapter = new ArrayAdapter<Gruppo>(GroupActivity.this, R.layout.row_layout_group_activity, array_gruppo ){
@@ -475,6 +477,7 @@ public class GroupActivity extends AppCompatActivity {
         }
         if (item.getItemId() == 2) {
             offline=false;
+            gruppiAggiornati=false;
             ll_offline.setVisibility(View.GONE);
             bnt_iscriviti.setVisibility(View.VISIBLE);
             new listaGruppi().execute();

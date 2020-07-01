@@ -89,7 +89,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Iscrizione a gruppo");
+        txt_actionbar.setText(getString(R.string.header_iscrizione));
         final Dialog d = new Dialog(IscrizioneActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

@@ -175,7 +175,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Mappa Aule");
+        txt_actionbar.setText(getString(R.string.header_mappe));
         final Dialog d = new Dialog(MapActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

@@ -219,7 +219,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Prenotazione gruppo");
+        txt_actionbar.setText(getString(R.string.header_prengruppo));
         final Dialog d = new Dialog(PrenotazioneGruppoActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

@@ -254,7 +254,7 @@ public class CreaCodici extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Crea nuovi gruppi");
+        txt_actionbar.setText(getString(R.string.header_creagruppi));
         final Dialog d = new Dialog(CreaCodici.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

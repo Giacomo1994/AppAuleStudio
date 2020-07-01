@@ -206,7 +206,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Le mie prenotazioni");
+        txt_actionbar.setText(getString(R.string.header_prenattive));
         final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -792,6 +792,16 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         String strTarget=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(cal_allarme.getTime());
         return strTarget;
     }
+    public void cancel_alarm(Prenotazione prenotazione){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        intent.setAction("StudyAround");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
+        alarmManager.cancel(pendingIntent);
+    }
+
+
+
 
     private String create_alarm_singolo(int id_prenotazione, String orario_prenotazione){
         //cancel_alarm(id_prenotazione);
@@ -818,13 +828,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         return strOra;
     }
 
-    public void cancel_alarm(Prenotazione prenotazione){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        intent.setAction("StudyAround");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
-        alarmManager.cancel(pendingIntent);
-    }
+
 
 
     //////QR SCANNER
@@ -918,7 +922,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         if(p.getIn_corso().equals("in_corso")){
             if(p.getStato()==1 || p.getStato()==2){
                 menu.add(Menu.FIRST, 0, Menu.FIRST,"Entra in aula");
-                menu.add(Menu.FIRST, 10, Menu.FIRST+1,"Sono già in aula");
+                if(p.getStato()==1) menu.add(Menu.FIRST, 10, Menu.FIRST+1,"Sono già in aula");
                 menu.add(Menu.FIRST, 1, Menu.FIRST+1,"Termina prenotazione");
             }
             if(p.getStato()==0){

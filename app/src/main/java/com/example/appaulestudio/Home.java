@@ -179,7 +179,7 @@ public class Home extends AppCompatActivity{
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Home");
+        txt_actionbar.setText(getString(R.string.header_home_studente));
         final Dialog d = new Dialog(Home.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -510,10 +510,10 @@ public class Home extends AppCompatActivity{
     //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+2, "Gestione Gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+1, "Prenotazioni");
-        menu.add(Menu.FIRST, 5, Menu.FIRST+3, "Assistenza");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, getString(R.string.options_aggiorna));
+        menu.add(Menu.FIRST, 3, Menu.FIRST+2, getString(R.string.options_gruppi));
+        menu.add(Menu.FIRST, 4, Menu.FIRST+1, getString(R.string.options_prenotazioni));
+        menu.add(Menu.FIRST, 5, Menu.FIRST+3, getString(R.string.options_assistenza));
         return true;
     }
 

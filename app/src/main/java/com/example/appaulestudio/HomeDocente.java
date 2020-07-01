@@ -138,7 +138,7 @@ public class HomeDocente extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("I miei corsi");
+        txt_actionbar.setText(getString(R.string.header_home_docente));
         final Dialog d = new Dialog(HomeDocente.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -367,8 +367,8 @@ public class HomeDocente extends AppCompatActivity {
 //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
-        menu.add(Menu.FIRST, 5, Menu.FIRST+1, "Assistenza");
+        menu.add(Menu.FIRST, 1, Menu.FIRST, getString(R.string.options_aggiorna));
+        menu.add(Menu.FIRST, 5, Menu.FIRST+1, getString(R.string.options_assistenza));
         return true;
     }
 
