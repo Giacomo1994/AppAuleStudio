@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -24,16 +25,31 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_corso" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/dialog_legenda_2" />
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_a"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_2" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -45,16 +61,30 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_futura" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/dialog_legenda_3" />
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_b"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_3" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -66,31 +96,30 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:contentDescription="@string/icon"
             app:srcCompat="@drawable/layout_prenotazione_terminata" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/dialog_legenda_4" />
-    </LinearLayout>
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_c"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/button_legenda"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/button_layout"
-            android:text="@string/zxing_button_ok" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_legenda_4" />
+
+        </LinearLayout>
     </LinearLayout>
 
 

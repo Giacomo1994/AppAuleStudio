@@ -78,22 +78,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
-// PRENOTAZIONI MOSTRATE (si connessione)
-    //tutte le prenotazioni in corso e future
-    //tutte le prenotazioni terminate/scadute della giornata odierna
-    //no prenotazioni cancellate, no prenotazioni scadute nei giorni precedenti
-// PRENOTAZIONI MOSTRATE (no connessione)
-    // tutte le prenotazioni da oggi in poi
-    // no la prenotazioni da ieri in giù
-    // no le prenotazioni cancellate
-//QR SCANNER:
-    //1) Quando l'utente vuole entrare in aula deve sempre fotografarlo
-    //2) Quando l'utente vuole uscire dall'aula deve fotografarlo solo se vuole andare in pausa
-//TORNELLO: la richiesta di apertura tornello viene mandata quando
-    //1) Vuole entrare in aula
-    //2) Vuole fare pausa
-    //3) Termina prenotazione ed è dentro l'aula
-    //4) Vuole entrare ed uscire dall'aula e la sua prenotazione è terminata per recuperare gli oggetti (quindi non per stato=1)
+
 public class PrenotazioniAttiveActivity extends AppCompatActivity {
     static final String URL_PRENOTAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive.php";
     static final String URL_OPERAZIONI="http://pmsc9.altervista.org/progetto/prenotazioniAttive_gestionePrenotazione.php";
@@ -135,16 +120,9 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final Dialog d = new Dialog(PrenotazioniAttiveActivity.this);
-                d.setCancelable(false);
+                d.setCancelable(true);
                 d.setContentView(R.layout.dialog_legenda);
                 d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
-                Button btn=d.findViewById(R.id.button_legenda);
-                btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        d.dismiss();
-                    }
-                });
                 d.show();
             }
         };
@@ -799,8 +777,6 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, prenotazione.getId_prenotazione(), intent, 0);
         alarmManager.cancel(pendingIntent);
     }
-
-
 
 
     private String create_alarm_singolo(int id_prenotazione, String orario_prenotazione){

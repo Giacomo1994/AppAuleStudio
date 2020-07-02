@@ -93,9 +93,12 @@
     <string name="dialog_gestione_gruppo_4">ore</string>
     <string name="dialog_gestione_gruppo_5">ANNULLA</string>
     <string name="dialog_legenda_1">Legenda</string>
-    <string name="dialog_legenda_2">Prenotazione in corso</string>
-    <string name="dialog_legenda_3">Prenotazione futura</string>
-    <string name="dialog_legenda_4">Prenotazione terminata</string>
+    <string name="dialog_legenda_a">Prenotazione in corso</string>
+    <string name="dialog_legenda_b">Prenotazione futura</string>
+    <string name="dialog_legenda_c">Prenotazione terminata o scaduta</string>
+    <string name="dialog_legenda_2">Un posto nel tavolo è attualmente riservato a te.</string>
+    <string name="dialog_legenda_3">Un posto nel tavolo risulterà riservato a te a partire dall\'orario di inizio della prenotazione.</string>
+    <string name="dialog_legenda_4">Il tuo posto è stato liberato, ma puoi comunque entrare o uscire dall\'aula in caso di necessità.</string>
     <string name="dialog_mezzo_1">Seleziona mezzo di trasporto</string>
     <string name="dialog_mezzo_2">Inizia</string>
     <string name="dialog_qr">Vuoi procedere?</string>
