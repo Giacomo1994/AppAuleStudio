@@ -279,7 +279,6 @@ public class IscrizioneActivity extends AppCompatActivity {
             }
             else{
                 MyToast.makeText(getApplicationContext(),result,true).show();
-                Gruppo g=new Gruppo(codiceGruppo,nomeGruppo, nomeCorso,nomeProf,cognomeProf,scadenza);
                 intent.putExtra("codiceGruppo",codiceGruppo);
                 intent.putExtra("nomeGruppo",nomeGruppo);
                 intent.putExtra("nomeCorso",nomeCorso);
