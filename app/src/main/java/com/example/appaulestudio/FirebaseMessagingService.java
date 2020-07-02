@@ -85,7 +85,6 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             header=message.substring(0,interruzione);
             body=message.substring(interruzione+2);
         }
-        if(message.contains("una nuova prenotazione")) body+=". Premi sulla notifica per verificare la prenotazione!";
 
         //costruisco notifica
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "gcmchn")
