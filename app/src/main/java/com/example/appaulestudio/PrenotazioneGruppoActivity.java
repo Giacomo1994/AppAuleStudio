@@ -70,7 +70,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     static final String URL_COMPONENTI_DA_GRUPPO="http://pmsc9.altervista.org/progetto/componenti_gruppo.php";
     static final String URL_PRENOTAZIONI_FUTURE="http://pmsc9.altervista.org/progetto/prenotazioni_gruppi_future.php";
     static final String URL_PRENOTAZIONE_GRUPPI="http://pmsc9.altervista.org/progetto/prenotazione_gruppi_prenota.php";
-
+    GridView grigliaGruppi;
     TableLayout ll_form;
     LinearLayout ll_btn;
     SubsamplingScaleImageView piantaAula;
@@ -869,7 +869,37 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         });
         dialog_data.show();
     }
+
     private void dialogGruppo(){
+        final Dialog d = new Dialog(PrenotazioneGruppoActivity.this);
+        d.setTitle("Seleziona il gruppo con cui vuoi studiare");
+        d.setCancelable(false);
+        d.setContentView(R.layout.dialog_scegli_gruppo_griglia);
+        grigliaGruppi=d.findViewById(R.id.grigliaGruppi);
+
+        GridViewAdapter booksAdapter = new GridViewAdapter(PrenotazioneGruppoActivity.this, array_gruppo);
+        grigliaGruppi.setAdapter(booksAdapter);
+
+
+        d.show();
+        grigliaGruppi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //prendo il gruppo che lo studente seleziona
+
+                gruppo= new Gruppo(array_gruppo[i]);
+                gruppoSelezionato.setText(gruppo.getNome_gruppo());
+                txtOreResidueNumero.setText(oreToMinuti(gruppo.getOre_disponibili()));
+                d.dismiss();
+                new prendiUtenti().execute();
+
+
+
+            }
+        });
+
+    }
+    private void dialogGruppo1(){
         final Dialog dialog_gruppi = new Dialog(PrenotazioneGruppoActivity.this);
         dialog_gruppi.setCancelable(true);
         dialog_gruppi.setContentView(R.layout.dialog_scegli_gruppo);
