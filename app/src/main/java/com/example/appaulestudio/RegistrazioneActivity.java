@@ -159,7 +159,7 @@ public class RegistrazioneActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("REGISTRAZIONE");
+        txt_actionbar.setText(getString(R.string.header_registrazione));
         image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
     }
 
@@ -299,13 +299,17 @@ public class RegistrazioneActivity extends AppCompatActivity {
     //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 1, Menu.FIRST, getString(R.string.options_aggiorna));
+        menu.add(Menu.FIRST, 2, Menu.FIRST+1, getString(R.string.header_login));
         return true;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 1) {
             new riempiUniversita().execute();
+        }
+        if (item.getItemId() == 2) {
+            finish();
         }
         return true;
     }

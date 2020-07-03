@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar=view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("LOGIN");
+        txt_actionbar.setText(getString(R.string.header_login));
         image_actionbar.setImageDrawable(getResources().getDrawable(R.drawable.logo_size));
     }
 
@@ -541,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
                 URL url=new URL(URL_REFRESH_TOKEN);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setReadTimeout(1000);
-                urlConnection.setConnectTimeout(1500);
+                urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -589,12 +589,18 @@ public class MainActivity extends AppCompatActivity {
                     radioDocente.setChecked(true);
                     radioStudente.setChecked(false);
                 }
-                LinearLayout ll_output=findViewById(R.id.ll_log_output);
-                TextView output=findViewById(R.id.log_output);
-                TextView output_title=findViewById(R.id.log_title);
-                ll_output.setVisibility(View.VISIBLE);
-                output_title.setText("Registrazione avvenuta con successo!");
-                output.setText("Ti abbiamo inviato una e-mail per validare il tuo account. Clicca sul link presente nella e-mail prima di procedere con il login.");
+                final Dialog d = new Dialog(MainActivity.this);
+                d.setCancelable(false);
+                d.setContentView(R.layout.dialog_validazione);
+                d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
+                Button btn_val=d.findViewById(R.id.btn_dialog_val);
+                btn_val.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        d.dismiss();
+                    }
+                });
+                d.show();
             }
         }
     }
@@ -603,7 +609,7 @@ public class MainActivity extends AppCompatActivity {
     //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
+        menu.add(Menu.FIRST, 1, Menu.FIRST, getString(R.string.options_aggiorna));
         return true;
     }
     @Override

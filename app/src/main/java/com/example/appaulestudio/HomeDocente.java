@@ -83,7 +83,7 @@ public class HomeDocente extends AppCompatActivity {
                     if(fatto==true && millisUntilFinished<28000){
                         ll_start.setVisibility(View.GONE);
                         getSupportActionBar().show();
-                        if(risultato==0 || risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
+                        if(risultato==0) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e mostrare i corsi",false).show();
                         else if(risultato==1) MyToast.makeText(getApplicationContext(), "Non hai in carico nessun insegnamento",false).show();
                         else if(risultato==2) MyToast.makeText(getApplicationContext(), "Impossibile contattare il server e aggiornare il numero dei gruppi",false).show();
                         cancel();
@@ -138,7 +138,7 @@ public class HomeDocente extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("I miei corsi");
+        txt_actionbar.setText(getString(R.string.header_home_docente));
         final Dialog d = new Dialog(HomeDocente.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -367,8 +367,8 @@ public class HomeDocente extends AppCompatActivity {
 //OPTIONS MENU
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.FIRST, 1, Menu.FIRST, "Aggiorna");
-        menu.add(Menu.FIRST, 5, Menu.FIRST+1, "Assistenza");
+        menu.add(Menu.FIRST, 1, Menu.FIRST, getString(R.string.options_aggiorna));
+        menu.add(Menu.FIRST, 5, Menu.FIRST+1, getString(R.string.options_assistenza));
         return true;
     }
 

@@ -57,6 +57,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         output= findViewById(R.id.output);
 
         intent=getIntent();
+        if(intent.hasExtra("gruppi") && !intent.getBooleanExtra("gruppi",false)) MyToast.makeText(getApplicationContext(), "Non sei iscritto ad alcun gruppo!\nProcedi con l'iscrizione", false).show();
 
         SharedPreferences settings = getSharedPreferences("User_Preferences", Context.MODE_PRIVATE);
         strUniversita=settings.getString("universita", null);
@@ -89,7 +90,7 @@ public class IscrizioneActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Iscrizione a gruppo");
+        txt_actionbar.setText(getString(R.string.header_iscrizione));
         final Dialog d = new Dialog(IscrizioneActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -278,7 +279,6 @@ public class IscrizioneActivity extends AppCompatActivity {
             }
             else{
                 MyToast.makeText(getApplicationContext(),result,true).show();
-                Gruppo g=new Gruppo(codiceGruppo,nomeGruppo, nomeCorso,nomeProf,cognomeProf,scadenza);
                 intent.putExtra("codiceGruppo",codiceGruppo);
                 intent.putExtra("nomeGruppo",nomeGruppo);
                 intent.putExtra("nomeCorso",nomeCorso);
@@ -295,8 +295,6 @@ public class IscrizioneActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
-        menu.add(Menu.FIRST, 3, Menu.FIRST+3, "Gestione Gruppi");
-        menu.add(Menu.FIRST, 4, Menu.FIRST+2, "Prenotazioni");
         return true;
     }
 
@@ -307,20 +305,20 @@ public class IscrizioneActivity extends AppCompatActivity {
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
         }
-        if(item.getItemId() == 3){
-            Intent i = new Intent(this, GroupActivity.class);
-            startActivity(i);
-            finish();
-        }
-        if(item.getItemId() == 4){
-            Intent i = new Intent(this, PrenotazioniAttiveActivity.class);
-            startActivity(i);
-            finish();
-        }
         return true;
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(!intent.hasExtra("gruppi")) finish();
+        else if(intent.getBooleanExtra("gruppi",false)) finish();
+        else if(!intent.getBooleanExtra("gruppi",false)){
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+    }
 }
 
 

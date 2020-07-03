@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">StudyAround</string>
-
     <string name="icon">icon</string>
     <string name="warning_img">img_warning</string>
     <string name="warning_text">Impossibile contattare il server!\n I dati potrebbero non essere aggiornati!</string>
@@ -88,7 +88,7 @@
     <string name="dialog_dettagli_gruppo_4">Ore disponibili:</string>
     <string name="dialog_dettagli_gruppo_5">Componenti</string>
     <string name="dialog_gestione_gruppo_1">Componenti:</string>
-    <string name="dialog_gestione_gruppo_2">Data di scadenza:</string>
+    <string name="dialog_gestione_gruppo_2">Nuova data di scadenza:</string>
     <string name="dialog_gestione_gruppo_3">Ore da aggiungere:</string>
     <string name="dialog_gestione_gruppo_4">ore</string>
     <string name="dialog_gestione_gruppo_5">ANNULLA</string>
@@ -129,8 +129,8 @@
     <string name="row_pren_attive_4">Gruppo:</string>
     <string name="row_pren_attive_5">Stato:</string>
 
-    <string name="header_login">LOGIN</string>
-    <string name="header_registrazione">REGISTRAZIONE</string>
+    <string name="header_login">Login</string>
+    <string name="header_registrazione">Registrazione</string>
     <string name="header_home_studente">Home</string>
     <string name="header_mappe">Mappa Aule</string>
     <string name="header_infoaula">Informazioni Aula</string>

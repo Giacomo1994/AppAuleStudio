@@ -150,7 +150,6 @@
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
                     android:hint="@string/activity_registrazione_11"
-                    android:importantForAutofill="no"
                     android:inputType="textEmailAddress" />
 
             </TableRow>

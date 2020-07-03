@@ -215,7 +215,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("I miei gruppi");
+        txt_actionbar.setText(getString(R.string.header_gestiscicorsi));
         final Dialog d = new Dialog(GestioneGruppiDocenteActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);

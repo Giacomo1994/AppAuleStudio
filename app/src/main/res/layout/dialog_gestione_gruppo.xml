@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="5dp">
 
     <TextView
         android:id="@+id/nomeGruppo"
@@ -32,12 +32,6 @@
 
     </ListView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"/>
-
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,17 +45,17 @@
                 android:id="@+id/textView28"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
                 android:text="@string/dialog_gestione_gruppo_2" />
 
             <Button
                 android:id="@+id/btnNuovaScadenza"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginRight="10dp"
-                android:background="@android:drawable/ic_menu_month"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@android:drawable/ic_menu_month" />
 
             <TextView
                 android:id="@+id/nuovaScadenza"

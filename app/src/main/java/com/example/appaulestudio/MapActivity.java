@@ -175,7 +175,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         View view = getSupportActionBar().getCustomView();
         TextView txt_actionbar = view.findViewById(R.id.txt_actionbar);
         ImageView image_actionbar =view.findViewById(R.id.image_actionbar);
-        txt_actionbar.setText("Mappa Aule");
+        txt_actionbar.setText(getString(R.string.header_mappe));
         final Dialog d = new Dialog(MapActivity.this);
         d.setCancelable(true);
         d.setContentView(R.layout.dialog_user);
@@ -794,5 +794,29 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         verifyPermissions();
         new auleAperte().execute();
         new posti_aule().execute();
+    }
+
+    //OPTIONS MENU
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.FIRST, 1, Menu.FIRST+1, "Home");
+        menu.add(Menu.FIRST, 2, Menu.FIRST, "Aggiorna");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == 1) {
+            Intent i = new Intent(this, Home.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+        if (item.getItemId() == 2) {
+            getLocation();
+            verifyPermissions();
+            new auleAperte().execute();
+            new posti_aule().execute();
+        }
+        return true;
     }
 }
