@@ -128,7 +128,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         listaAttivi=findViewById(R.id.listaAttivi);
         listaInScadenza=findViewById(R.id.listaInScadenza);
         listaScaduti=findViewById(R.id.listaScaduti);
-
+        //quando accede all'inizio è nella lista di gruppi attivi
         layoutAttivi.setVisibility(frameLayout.VISIBLE);
         layoutInscadenza.setVisibility(frameLayout.GONE);
         layoutScaduti.setVisibility(frameLayout.GONE);
@@ -140,7 +140,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         registerForContextMenu(listaAttivi);
 
 
-        //passo da lista a mappa
+        //cambio layout
         btnInScadenza.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 btnInScadenza.setBackgroundResource(R.color.grigio_chiaro);
@@ -257,7 +257,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         });
     }
 
-//METODI GESTIONE GRUPPI
+//METODI GESTIONE GRUPPI smisto i gruppi in base alla data di scadenza
     public void smistaGruppi(Gruppo[] gruppi){
         int scaduti=0, inScadenza=0, attivi=0;
         Calendar c= Calendar.getInstance();
@@ -413,6 +413,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
             listaScaduti.setAdapter(adapterScaduti);
         }
 
+        //dettaglio dei gruppi
         listaAttivi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -456,9 +457,10 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         btnNuovaScadenza=gestisciGruppoDialog.findViewById(R.id.btnNuovaScadenza);
 
         nuovaScadenza.setText(gruppoSelezionato.getData_scadenza());
-        nuovaScadenza.setVisibility(View.INVISIBLE);
+        //nuovaScadenza.setVisibility(View.INVISIBLE);
         nomeGruppoDialog.setText(gruppoSelezionato.getNome_gruppo());
         if(componenti.length==0) txt_componenti.setText("Non ci sono iscritti al gruppo");
+        //se ci sono componenti riempio la lista
         if(componenti!=null) {
             adapterComponenti = new ArrayAdapter<User>(GestioneGruppiDocenteActivity.this, R.layout.row_layout_componenti, componenti) {
                 @NonNull
@@ -588,7 +590,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                         giornoStringa="0"+giorno;
                     }
                     nuovaScadenza.setText(anno+"-"+meseStringa+"-"+giornoStringa);
-                    nuovaScadenza.setVisibility(View.VISIBLE);
+                    //nuovaScadenza.setVisibility(View.VISIBLE);
                 }
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 

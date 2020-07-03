@@ -88,7 +88,7 @@
     <string name="dialog_dettagli_gruppo_4">Ore disponibili:</string>
     <string name="dialog_dettagli_gruppo_5">Componenti</string>
     <string name="dialog_gestione_gruppo_1">Componenti:</string>
-    <string name="dialog_gestione_gruppo_2">Nuova data di scadenza:</string>
+    <string name="dialog_gestione_gruppo_2">Data di scadenza:</string>
     <string name="dialog_gestione_gruppo_3">Ore da aggiungere:</string>
     <string name="dialog_gestione_gruppo_4">ore</string>
     <string name="dialog_gestione_gruppo_5">ANNULLA</string>

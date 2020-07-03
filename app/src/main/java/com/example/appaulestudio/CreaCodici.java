@@ -111,7 +111,7 @@ public class CreaCodici extends AppCompatActivity {
         creaCodici= findViewById(R.id.btnCreaCodici);
         img_info=findViewById(R.id.img_why);
 
-        //informazioni
+        //informazioni sul nome del gruppo che verrà creato
         img_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +133,7 @@ public class CreaCodici extends AppCompatActivity {
             }
         });
 
-        //calendario
+        //calendario per scegliere scadenza
         formatter= new SimpleDateFormat("yyyy-MM-dd");
         calendario.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
 
@@ -155,7 +155,7 @@ public class CreaCodici extends AppCompatActivity {
             }
         });
 
-        //pulsante
+        //listener del pulsante crea codici
         listener= new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -230,7 +230,7 @@ public class CreaCodici extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle bundle=intent.getBundleExtra("bundle_corsi");
         corsoArrayList=bundle.getParcelableArrayList("corsi");
-
+        //riempio la lista dei corsi del docente
         adapter= new ArrayAdapter<Corso>(CreaCodici.this, R.layout.simple_custom_list_item, corsoArrayList);
         materieDocente.setAdapter(adapter);
         materieDocente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
