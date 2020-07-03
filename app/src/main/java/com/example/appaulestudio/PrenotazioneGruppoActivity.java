@@ -352,7 +352,8 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         }
         else {
             Tavolo tAggiornato;
-            //guardo per ogni fascia oraria tranne l'ultima quante prenotazioni ci sono per ogni tavolo
+            //guardo per ogni fascia oraria quante prenotazioni ci sono per ogni tavolo
+            //size-2 perchè size-1 è ora chisura aula
             for(int i=0;i<=fasceOrarie.size()-2;i++){
                 String fascia=fasceOrarie.get(i);
                 for (Tavolo t : tavoli) {
@@ -734,6 +735,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
     public void definiscoOrari(){
         fasceOrarie=fasceOrarie();
     }
+
     private Calendar stringToCalendar(String dateString){
         try{
         Calendar calendar = Calendar.getInstance();
@@ -875,6 +877,7 @@ public class PrenotazioneGruppoActivity extends AppCompatActivity {
         d.setTitle("Seleziona il gruppo con cui vuoi studiare");
         d.setCancelable(false);
         d.setContentView(R.layout.dialog_scegli_gruppo_griglia);
+        d.getWindow().setBackgroundDrawableResource(R.drawable.forma_dialog);
         grigliaGruppi=d.findViewById(R.id.grigliaGruppi);
 
         GridViewAdapter booksAdapter = new GridViewAdapter(PrenotazioneGruppoActivity.this, array_gruppo);

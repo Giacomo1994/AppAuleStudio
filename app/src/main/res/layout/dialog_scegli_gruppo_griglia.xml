@@ -9,7 +9,7 @@
         android:id="@+id/scegliGruppo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/grigio_chiaro"
+        android:gravity="center"
         android:text="@string/dialog_scegligruppo"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
