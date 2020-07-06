@@ -416,6 +416,7 @@ public class CreaCodici extends AppCompatActivity {
             //aggiungo testo
             PdfWriter.getInstance(mDoc, new FileOutputStream(mFilePath));
             mDoc.open();
+            mDoc.add(new Paragraph(""));
             String mText=""+corso.getNomeCorso()+"\n";
             mText+="Scadenza gruppi: "+dataStringa+"\n"+"Numero di partecipanti per ogni gruppo: "+partecipanti+
                     "\nOre assegnate a ciascun gruppo: "+ore+"\n";
@@ -423,6 +424,7 @@ public class CreaCodici extends AppCompatActivity {
                 mText+=g.getNome_gruppo()+", "+g.getCodice_gruppo()+"\n";
             }
             //salvo pdf
+
             mDoc.add(new Paragraph(mText));
             mDoc.addAuthor("StudyAround");
             mDoc.close();
@@ -430,7 +432,8 @@ public class CreaCodici extends AppCompatActivity {
 
         }
         catch(Exception e){
-            MyToast.makeText(this, "Impossibile salavare pdf", false).show();
+            MyToast.makeText(this, "Impossibile salavare pdf "+e.getMessage(), false).show();
+
         }
         dialogPdf.cancel();
         finish();

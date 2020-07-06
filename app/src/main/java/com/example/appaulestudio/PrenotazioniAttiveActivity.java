@@ -579,6 +579,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
     }
 
     //////CALENDARIO
+    //richiesta permessi per sincronizzare dopo chiama get_account_from_calendar
     public void sincronizza() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) MyToast.makeText(getApplicationContext(),"Non puoi accedere al calendario! Hai negato il permesso!",false).show();
@@ -596,6 +597,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             else if(requestCode==2 ) MyToast.makeText(getApplicationContext(), "Non puoi accedere alla camera! Hai negato il permesso!", false).show();
     }
 
+    //dialog per scegliere tra i vari account del calendario
     public void dialog_pick_calendar(final ArrayList<CalendarAccount> lista_account) {
         if(lista_account==null || lista_account.size()==0){
             MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare: non hai nessun calendario!",false).show();
@@ -659,10 +661,12 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         dialog.show();
         return;
     }
-
+    //Uso CalendarContract.Calendars, classe Contract
+    //Uso tabelle .Calendars, .Events, .Reminders
     public ArrayList<CalendarAccount> get_account_from_calendar() {
         ArrayList<CalendarAccount> lista = new ArrayList<CalendarAccount>();
         try {
+            //recupero calendari disponibili tramite URI
             Cursor cursor = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, null, null, null, null);
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID));
@@ -680,6 +684,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
         return lista;
     }
 
+    //inserisco la prenotazione nel calendario selezionato
     public boolean write_event() {
         for (CalendarAccount c : array_list_account) {
             ContentResolver cr = getContentResolver();
@@ -701,6 +706,8 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             cal_end.setTime(date_fine);
 
             ContentValues values = new ContentValues();
+            //inserisco l'evento sfruttando l'id del calendario ove voglio inserirlo
+            //inserisco l'allarme
             values.put(CalendarContract.Events.DTSTART, cal_begin.getTimeInMillis());
             values.put(CalendarContract.Events.DTEND, cal_end.getTimeInMillis());
             values.put(CalendarContract.Events.TITLE, "StudyAround - Prenotazione");

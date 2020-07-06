@@ -63,6 +63,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class GestioneGruppiDocenteActivity extends AppCompatActivity {
     static final String URL_GRUPPI_DA_CORSO="http://pmsc9.altervista.org/progetto/gruppi_da_corso.php";
@@ -118,7 +119,7 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         titoloAttivi.setText(corso.getNomeCorso());
         titoloInScad.setText(corso.getNomeCorso());
         titoloScaduti.setText(corso.getNomeCorso());
-        output=findViewById(R.id.output);
+        //output=findViewById(R.id.output);
 
         new prendiGruppi().execute();
         frameLayout=findViewById(R.id.frameLayout);
@@ -263,29 +264,10 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
         Calendar c= Calendar.getInstance();
         Calendar c2=Calendar.getInstance();
         c2.add(Calendar.DAY_OF_MONTH, 14);
-        int an,me,gi;
-        int an2,me2,gi2;
 
-        an= c.get(Calendar.YEAR);
-        me= c.get(Calendar.MONTH)+1;
-        gi= c.get(Calendar.DAY_OF_MONTH);
-
-        an2= c2.get(Calendar.YEAR);
-        me2= c2.get(Calendar.MONTH)+1;
-        gi2= c2.get(Calendar.DAY_OF_MONTH);
-
-        if(me<=9) mes="0"+me;
-        else mes = me + "";
-        if(gi<=9)gio="0"+gi;
-        else  gio = gi + "";
-        String dataOggi=an+"-"+mes+"-"+gio;
-
-        if(me2<=9)mes2="0"+me2;
-        else mes2 = me2 + "";
-        if(gi2<=9) gio2="0"+gi2;
-        else gio2 = gi2 + "";
-        String dataFra2sett=an2+"-"+mes2+"-"+gio2;
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dataOggi = sdf.format(c.getTime());
+        String dataFra2sett = sdf.format(c2.getTime());
         //smisto i gruppi
         for(Gruppo g:gruppi) {
             if (g.getData_scadenza().compareTo(dataOggi) < 0) scaduti++;
