@@ -559,19 +559,9 @@ public class GestioneGruppiDocenteActivity extends AppCompatActivity {
                     Calendar newDate = Calendar.getInstance();
                     newDate.set(i, m, d);
 
-                    anno=newDate.get(Calendar.YEAR);
-                    mese=newDate.get(Calendar.MONTH)+1;
-                    giorno=newDate.get(Calendar.DAY_OF_MONTH);
-
-                    String meseStringa=""+mese;
-                    String giornoStringa=""+giorno;
-                    if(mese<=9){
-                        meseStringa="0"+mese;
-                    }
-                    if(giorno<=9){
-                        giornoStringa="0"+giorno;
-                    }
-                    nuovaScadenza.setText(anno+"-"+meseStringa+"-"+giornoStringa);
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    String dataSel = sdf.format(newDate.getTime());
+                    nuovaScadenza.setText(""+dataSel);
                     //nuovaScadenza.setVisibility(View.VISIBLE);
                 }
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));

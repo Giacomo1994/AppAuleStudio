@@ -603,6 +603,7 @@ public class PrenotazioniAttiveActivity extends AppCompatActivity {
             MyToast.makeText(getApplicationContext(), "Impossibile sincronizzare: non hai nessun calendario!",false).show();
             return;
         }
+
         final Dialog dialog = new Dialog(PrenotazioniAttiveActivity.this);
         dialog.setTitle("Seleziona account");
         dialog.setCancelable(false);

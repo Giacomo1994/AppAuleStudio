@@ -140,10 +140,11 @@ public class CreaCodici extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onSelectedDayChange(@NonNull CalendarView calendarView, int year, int month, int day) {
-                anno=year;
-                mese=month+1;
-                giorno=day;
-                dataStringa=""+anno+"-"+mese+"-"+giorno;
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, month, day);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                dataStringa = sdf.format(newDate.getTime());
                 try{
                     date=formatter.parse(dataStringa);
                     if(date.before(Calendar.getInstance().getTime())){
